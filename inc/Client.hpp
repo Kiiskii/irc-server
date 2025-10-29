@@ -9,16 +9,13 @@ class Channel;
 
 class Client
 {
-private:
+	public:
+	int auth_step = 0;
+	int clientfd = -1;
+	std::string user = "";
+	std::string nick = "";
+	// channelInfo *channel = nullptr;
 
-public:
-	Client() = default;
-	~Client() = default;
-	Client(int fd) {
-		clientfd = fd;
-	}
-
-	int32_t		clientfd = -1;
 	std::string	_clientNick;
 	std::string _userName;
 	std::string _hostName;
@@ -26,5 +23,4 @@ public:
 	Channel*	_atChannel = {0};
 
 	void updateClientInfo(std::string bufferStr);
-	
 };

@@ -1,6 +1,6 @@
 #include "Channel.hpp"
 
-Channel::Channel() : _channelName(""), _topic("")
+Channel::Channel() : _channelName("Empty"), _topic("Empty")
 {
 
 }
@@ -9,6 +9,12 @@ Channel::Channel() : _channelName(""), _topic("")
 Channel::Channel(std::string newChannel) : _channelName(newChannel)
 {
 
+}
+
+std::ostream& operator<<(std::ostream& os, const Channel& channel){
+	os << "channel name is: " << channel.getChannelName() 
+		<< ", its topic is: " << channel.getTopic();
+	return os;
 }
 
 std::string Channel::getChannelName() const
