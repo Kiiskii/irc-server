@@ -10,23 +10,6 @@ void Client::updateClientInfo(std::string bufferStr)
 	_serverName = "localhost";
 }
 
-
-// static void processJoinCmd(std::string buffer)
-// {
-// 	int chanCount = 0;
-
-// 	std::cout << "buffer :[" << buffer << "]" << std::endl;
-
-// 	std::regex regularJoin("(JOIN #)*");
-// 	if (std::regex_match(buffer.begin(), buffer.end(), regularJoin))
-// 	{
-// 		std::cout << buffer << std::endl;
-// 	}
-
-
-
-// }
-
 /* @def split string into tokens using delimiter */
 static std::vector<std::string> splitString(std::string buffer, char delimiter)
 {
@@ -133,7 +116,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 			// add a check whetherr the client is already on the channel, if not then add
 			this->_joinedChannels.push_back(channelPtr);
 			channelPtr->addUser(this);
-			
+
 			std::string joinMsg 
 				= this->_atChannel->channelMessage(JOIN_MSG, this->;
 			if (send(this->clientfd, joinMsg.c_str(), joinMsg.size(), 0) < 0)
