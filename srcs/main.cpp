@@ -118,51 +118,49 @@ int main(void)
 				}
 				if (evenBuffer.find("JOIN") != std::string::npos)
 				{
-					//we need to check if this channel alrdy exists
-					std::cout << "JOINING fd: " << server.clientInfo[clientIndex].clientfd << std::endl;
+					// std::cout << "JOINING fd: " << server.clientInfo[clientIndex].clientfd << std::endl;
 					evenBuffer = ft_trimString(evenBuffer); //trim whitespace
 					Client& currentClient = server.clientInfo[clientIndex];
-					currentClient.updateClientInfo(evenBuffer);
-
-					// JOIN #general
-					// bufferStr = trimStr(bufferStr);
-					std::string newChannel = evenBuffer.substr(evenBuffer.find('#') + 1, 
-						evenBuffer.length() - evenBuffer.find('#') - 1 );
-					std::cout << "channel name: " << newChannel << std::endl;
+					currentClient.updateClientInfo(evenBuffer); //testing with my user
+					currentClient.askToJoin(evenBuffer, server);
+					// // JOIN #general
+					// std::string newChannel = evenBuffer.substr(evenBuffer.find('#') + 1, 
+					// 	evenBuffer.length() - evenBuffer.find('#') - 1 );
+					// std::cout << "channel name: " << newChannel << std::endl;
 					
-					std::vector<Channel>::iterator newChannelIt 
-						= server.isChannelExisting(newChannel);
-					// decide to add channel or not, return ptr to client's channel
-					if (newChannelIt == server.channelInfo.end()) // not exist
-					{
-						server.channelInfo.push_back(Channel(newChannel));
-						currentClient._atChannel = &server.channelInfo.back();
-						currentClient._atChannel->setChanop(currentClient);
-					}
-					else
-						currentClient._atChannel = &(*newChannelIt);
+					// std::vector<Channel>::iterator newChannelIt 
+					// 	= server.isChannelExisting(newChannel);
+					// // decide to add channel or not, return ptr to client's channel
+					// if (newChannelIt == server.channelInfo.end()) // not exist
+					// {
+					// 	server.channelInfo.push_back(Channel(newChannel));
+					// 	currentClient._atChannel = &server.channelInfo.back();
+					// 	currentClient._atChannel->setChanop(currentClient);
+					// }
+					// else
+					// 	currentClient._atChannel = &(*newChannelIt);
 					
-					// server.printchannelInfo(); //print all the channel on server
-					std::string joinMsg 
-						= currentClient._atChannel->channelMessage(JOIN_MSG, currentClient);
-					if (send(currentClient.clientfd, joinMsg.c_str(), joinMsg.size(), 0) < 0)
-					{
-						std::cout << "joinmsg: failed to send";
-						close(currentClient.clientfd);
-						continue;
-					}
-					// @brief if no topic, do not send back the topic of channel
-					if (!currentClient._atChannel->getTopic().empty())
-					{
-						std::string topicmsg 
-							= currentClient._atChannel->channelMessage(CHANNEL_TOPIC_MSG, currentClient);
-						if (send(currentClient.clientfd, topicmsg.c_str(), topicmsg.size(), 0) < 0)
-						{
-							std::cout << "joinmsg: failed to send";
-							close(currentClient.clientfd);
-							continue;
-						}
-					}
+					// // server.printchannelInfo(); //print all the channel on server
+					// std::string joinMsg 
+					// 	= currentClient._atChannel->channelMessage(JOIN_MSG, currentClient);
+					// if (send(currentClient.clientfd, joinMsg.c_str(), joinMsg.size(), 0) < 0)
+					// {
+					// 	std::cout << "joinmsg: failed to send";
+					// 	close(currentClient.clientfd);
+					// 	continue;
+					// }
+					// // @brief if no topic, do not send back the topic of channel
+					// if (!currentClient._atChannel->getTopic().empty())
+					// {
+					// 	std::string topicmsg 
+					// 		= currentClient._atChannel->channelMessage(CHANNEL_TOPIC_MSG, currentClient);
+					// 	if (send(currentClient.clientfd, topicmsg.c_str(), topicmsg.size(), 0) < 0)
+					// 	{
+					// 		std::cout << "joinmsg: failed to send";
+					// 		close(currentClient.clientfd);
+					// 		continue;
+					// 	}
+					// }
 				}
 				if (evenBuffer.find("TOPIC ") != std::string::npos)
 				{

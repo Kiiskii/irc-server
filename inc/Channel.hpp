@@ -49,26 +49,37 @@ class Channel
 	private:
 		std::string			_channelName;
 		std::string			_topic;
-		Client*				_channelOperator;
+		Client*				_channelOperator; //previledge (chanop, voiced user)
+		std::vector<Client> _userList; //who in channel
+		std::string			_mode; //what mode
+		std::string			_key;
 		
 	public:
-		std::vector<Client> joinClient;
 
 		Channel();
 		~Channel() = default;
 		Channel(std::string newChannel);
 
-		std::string getChannelName() const;
-		std::string getTopic() const;
-		Client&		getChanop() const;
-		std::string	getUserList() const;
 
+		// getters
+		std::string 		getChannelName() const;
+		std::string 		getTopic() const;
+		Client&				getChanop() const;
+		std::vector<Client>	getUserList() const;
+		std::string			getKey() const;
+
+		// setters
 		void		setChannelName(std::string channelName);
 		void		setChanop(Client chanop);
 		void		setTopic(std::string newTopic);
+		void		addUser(Client* newClient);
+		void		setKey(std::string newKey);
 
+		// channel public method
 		std::string	channelMessage(channelMsg msg, Client currentClient);
+		void		handleJoinCmd(std::string buffer, Client& currentClient);
 		// unsigned int	checkTopicCmd(std::string buffer);
+
 		
 
 	

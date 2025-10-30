@@ -1,12 +1,13 @@
 #include "Channel.hpp"
 
-Channel::Channel() : _channelName("Empty"), _topic("Empty")
+// mode is set to +nt for now: n - no external message, t - topic restriction
+Channel::Channel() : _channelName("Empty"), _topic("Empty"), _mode("+nt")
 {
 
 }
 
 
-Channel::Channel(std::string newChannel) : _channelName(newChannel)
+Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("Empty"), _mode("+nt")
 {
 
 }
@@ -32,11 +33,15 @@ Client&	Channel::getChanop() const
 	return *_channelOperator;
 }
 
-std::string	Channel::getUserList() const
+std::vector<Client>	Channel::getUserList() const
 {
-	return "Total of 1" ;
+	return _userList;
 }
 
+std::string	Channel::getKey() const
+{
+	return _key;
+}
 
 void	Channel::setChanop(Client chanop)
 {
@@ -56,7 +61,17 @@ void Channel::setTopic(std::string buffer)
 	_topic = newTopic;
 }
 
-std::string Channel::channelMessage(channelMsg msg, Client currentClient)
+void Channel::setKey(std::string newKey)
+{
+	_key = newKey;
+}
+
+void Channel::addUser(Client* newClient)
+{
+	_userList.push_back(*newClient);
+}
+
+std::string Channel::channelMessage(channelMsg msg, Client currentClient, Channel curChannel)
 {
 	std::string chanop = ":" + currentClient._clientNick + "!" + currentClient._userName 
 		+ "@" + currentClient._hostName;
@@ -91,10 +106,10 @@ std::string Channel::channelMessage(channelMsg msg, Client currentClient)
 		+ currentClient._atChannel->getTopic() + "\r\n";
 		break;
 
-	case NAME_LIST_MSG:
-		returnMsg = ":" + currentClient._serverName + RPL_NAMREPLY  + "!" + 
-		currentClient._clientNick + "=#" + currentClient._atChannel->getChannelName() 
-		+ ":" + currentClient._atChannel->getUserList() +" \r\n";
+	// case NAME_LIST_MSG:
+	// 	returnMsg = ":" + currentClient._serverName + RPL_NAMREPLY  + "!" + 
+	// 	currentClient._clientNick + "=#" + currentClient._atChannel->getChannelName() 
+	// 	+ ":" + currentClient._atChannel->getUserList() +" \r\n";
 
 	default:
 		break;
@@ -102,3 +117,4 @@ std::string Channel::channelMessage(channelMsg msg, Client currentClient)
 	std::cout << "return mes: " << returnMsg << std::endl;
 	return returnMsg;
 }
+
