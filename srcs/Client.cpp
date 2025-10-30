@@ -95,7 +95,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 	// 		<< token.second << "}" << std::endl;
 	// }
 
-	if (validateChannelName(channelKeyMap))
+	if (validateChannelName(channelKeyMap)) // else what
 	{
 		for (auto chan : channelKeyMap)
 		{
@@ -118,23 +118,23 @@ void Client::askToJoin(std::string buffer, Server& server)
 			channelPtr->addUser(this);
 
 			std::string joinMsg 
-				= this->_atChannel->channelMessage(JOIN_MSG, this->;
+				= channelPtr->channelMessage(JOIN_MSG, this);
 			if (send(this->clientfd, joinMsg.c_str(), joinMsg.size(), 0) < 0)
 			{
 				std::cout << "joinmsg: failed to send";
 				close(this->clientfd);
-				continue;
+				// return; //??
 			}
 			// @brief if no topic, do not send back the topic of channel
-			if (!this->_atChannel->getTopic().empty())
+			if (!channelPtr->getTopic().empty())
 			{
 				std::string topicmsg 
-					= this->_atChannel->channelMessage(CHANNEL_TOPIC_MSG, this->;
+					= channelPtr->channelMessage(CHANNEL_TOPIC_MSG, this);
 				if (send(this->clientfd, topicmsg.c_str(), topicmsg.size(), 0) < 0)
 				{
 					std::cout << "joinmsg: failed to send";
 					close(this->clientfd);
-					continue;
+					// return;
 				}
 			}
 		}

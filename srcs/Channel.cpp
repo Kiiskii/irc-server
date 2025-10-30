@@ -71,39 +71,39 @@ void Channel::addUser(Client* newClient)
 	_userList.push_back(*newClient);
 }
 
-std::string Channel::channelMessage(channelMsg msg, Client currentClient, Channel curChannel)
+std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 {
-	std::string chanop = ":" + currentClient._clientNick + "!" + currentClient._userName 
-		+ "@" + currentClient._hostName;
+	std::string chanop = ":" + currentClient->_clientNick + "!" + currentClient->_userName 
+		+ "@" + currentClient->_hostName;
 	std::string returnMsg;
 	switch (msg)
 	{
 	case JOIN_MSG: 	
-		returnMsg = chanop + " JOIN #" + currentClient._atChannel->getChannelName() 
+		returnMsg = chanop + " JOIN #" + this->getChannelName() 
 		+" " + RPL_TOPIC + " \r\n";
 		break;
 	
 	case NO_TOPIC_MSG:
-		returnMsg = ":" + currentClient._serverName + " " + RPL_NOTOPIC + " " + 
-		currentClient._clientNick + " #" + currentClient._atChannel->getChannelName() 
+		returnMsg = ":" + currentClient->_serverName + " " + RPL_NOTOPIC + " " + 
+		currentClient->_clientNick + " #" + this->getChannelName() 
 		+ " :No topic is set\r\n";
 		break;
 	
 	case CHANNEL_TOPIC_MSG:
-		returnMsg = ":" + currentClient._serverName + " " + RPL_TOPIC + " " + 
-		currentClient._clientNick + " #" + currentClient._atChannel->getChannelName() 
-		+ " :" + currentClient._atChannel->getTopic() +" \r\n";
+		returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPIC + " " + 
+		currentClient->_clientNick + " #" + this->getChannelName() 
+		+ " :" + this->getTopic() +" \r\n";
 		break;
 	
 	case WHO_CHANGE_TOPIC:
-		returnMsg = ":" + currentClient._serverName + " " + RPL_TOPICWHOTIME + " " + 
-		currentClient._clientNick + " #" + currentClient._atChannel->getChannelName() 
-		+ " :" + currentClient._atChannel->getTopic() +" \r\n";
+		returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPICWHOTIME + " " + 
+		currentClient->_clientNick + " #" + this->getChannelName() 
+		+ " :" + this->getTopic() +" \r\n";
 		break;
 	
 	case CHANGE_TOPIC_MSG:
-		returnMsg = chanop + " TOPIC #" + currentClient._atChannel->getChannelName() +" :" 
-		+ currentClient._atChannel->getTopic() + "\r\n";
+		returnMsg = chanop + " TOPIC #" + this->getChannelName() +" :" 
+		+ this->getTopic() + "\r\n";
 		break;
 
 	// case NAME_LIST_MSG:

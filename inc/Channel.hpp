@@ -76,7 +76,7 @@ class Channel
 		void		setKey(std::string newKey);
 
 		// channel public method
-		std::string	channelMessage(channelMsg msg, Client currentClient);
+		std::string channelMessage(channelMsg msg, Client* currentClient);
 		void		handleJoinCmd(std::string buffer, Client& currentClient);
 		// unsigned int	checkTopicCmd(std::string buffer);
 
