@@ -9,47 +9,20 @@ std::string ft_trimString(std::string msg);
 int main(void)
 {
 	Server server;
-	server.details.sin_family = AF_INET;
-	server.details.sin_port = htons(6667);
-	server.details.sin_addr.s_addr = INADDR_ANY;
-	server.serverfd = socket(AF_INET, SOCK_STREAM, 0);
-	/*SO_REUSEADDR, allows a socket to bind to an address/port that is still in use. It also
-	allows multiple sockets to bind to the same port. So opt here is basically a toggle of whether
-	the socket reusing option is enabled or disabled*/
-	int opt = 1;
-	setsockopt(server.serverfd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
-	bind (server.serverfd, (struct sockaddr *)&server.details, sizeof(server.details));
-	if (listen(server.serverfd, 1) == 0)
-		std::cout << "We are listening" << std::endl;
-	int epollFd;
-	epollFd = epoll_create1(0);
-	server.event.events = EPOLLIN;
-	server.event.data.fd = server.serverfd;
-	epoll_ctl(epollFd, EPOLL_CTL_ADD, server.serverfd, &server.event);
+	server.setupSocket();
+	server.setupEpoll();
 	while (true)
 	{
-		int events = epoll_wait(epollFd, server.events, MAX_EVENTS, -1);
+		int events = epoll_wait(server.epollfd, server.events, MAX_EVENTS, -1);
 		for (int i = 0; i < events; ++i)
 		{
 			if (server.events[i].data.fd == server.serverfd)
 			{
-				//New client connection
-				Client newClient;
-				newClient.clientfd = accept4(server.serverfd, (struct sockaddr *) NULL, NULL, O_NONBLOCK);
-				std::cout << "New connection, fd: " << newClient.clientfd << std::endl; //debug msg
-				server.clientInfo.push_back(newClient);
-				fcntl(newClient.clientfd, F_SETFL, O_NONBLOCK);
-				std::string message = ":" + server.name + " 001 kokeilu :Welcome to the " + server.name + " Network, kokeilu\r\n";
-				const char *point;
-				point = message.c_str();
-//				send(newClient.clientfd, point, message.size(), 0);
-				struct epoll_event ev;
-				ev.events = EPOLLIN;
-				ev.data.fd = newClient.clientfd;
-				epoll_ctl(epollFd, EPOLL_CTL_ADD, newClient.clientfd, &ev);
+				server.handleNewClient();
 			}
 			else
 			{
+				//This could be connect with already existing client...
 				char buffer[1024] = {0};
 				int clientFd = server.events[i].data.fd;
 				int clientIndex = 0;
