@@ -6,7 +6,7 @@ HDRS_DIR = inc/
 HDRS = -I$(HDRS_DIR)
 
 NAME = IRC
-SRCS = srcs/main.cpp srcs/Server.cpp srcs/Channel.cpp srcs/Client.cpp
+SRCS = srcs/main.cpp srcs/Server.cpp srcs/Channel.cpp srcs/Client.cpp srcs/utils.cpp
 OBJS = $(patsubst srcs/%.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 
 GREEN = \033[32m

@@ -64,9 +64,7 @@ class Channel
 		~Channel() = default;
 		Channel(std::string newChannel);
 
-
 		// getters
-
 		std::string 		getChannelName() const;
 		std::string 		getTopic() const;
 		Client&				getChanop() const;
@@ -74,7 +72,6 @@ class Channel
 		std::string			getKey() const;
 
 		// setters
-
 		void		setChannelName(std::string channelName);
 		void		setChanop(Client chanop);
 		void		setTopic(std::string newTopic);
@@ -82,9 +79,8 @@ class Channel
 		void		setKey(std::string newKey);
 
 		// channel public method
-
-		bool		isClientOnChannel(const Client& client);
-		channelMsg	canClientJoinChannel(const Client& client, std::string clientKey);
+		bool		isClientOnChannel( Client& client);
+		channelMsg	canClientJoinChannel( Client& client, std::string clientKey);
 		void		sendJoinSuccessMsg( Client& client);
 		
 		std::string channelMessage(channelMsg msg,  Client* currentClient);

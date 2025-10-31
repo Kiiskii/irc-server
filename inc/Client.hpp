@@ -16,28 +16,24 @@ class Server;
 class Client
 {
 	private:
+		int						_clientfd = -1;
+		std::string				_clientNick;
+		std::string				_userName;
+		std::string				_hostName;
+		std::string				_serverName;
+		std::vector<Channel*>	_joinedChannels; 
 	
 	public:
 	
-	int auth_step = 0;
-	std::string user = "";
-	std::string nick = "";
-	// should move these to private soon
-	int					clientfd = -1;
-	std::string			_clientNick;
-	std::string			_userName;
-	std::string			_hostName;
-	std::string			_serverName;
-	std::vector<Channel*>	_joinedChannels; 
-	
+		int auth_step = 0;
 		
 		// getters
-		int			getClientFd();
-		std::string getNick();
-		std::string getUserName();
-		std::string getHostName();
-		std::string getServerName();
-		std::vector<Channel*> getJoinedChannels();
+		int						getClientFd();
+		std::string 			getNick();
+		std::string 			getUserName();
+		std::string 			getHostName();
+		std::string 			getServerName();
+		std::vector<Channel*> 	getJoinedChannels();
 
 		// setters
 		void		setClientFd(int num);
@@ -47,7 +43,7 @@ class Client
 		void		setServerName(std::string server);
 		void		addChannel(Channel* chan);
 
-
+		// other
 		void 	updateClientInfo(std::string bufferStr);
 		void	askToJoin(std::string buffer, Server& server);
 	

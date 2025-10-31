@@ -2,7 +2,7 @@
 
 int	Client::getClientFd()
 {
-	return clientfd;
+	return _clientfd;
 }
 
 std::string Client::getNick()
@@ -29,10 +29,9 @@ std::vector<Channel*> Client::getJoinedChannels()
 	return _joinedChannels;
 }
 
-// setters
 void Client::setClientFd(int num)
 {
-	clientfd = num;
+	_clientfd = num;
 }
 
 void Client::setNick(std::string nick)
@@ -187,10 +186,10 @@ void Client::askToJoin(std::string buffer, Server& server)
 			
 			std::string joinMsg 
 				= channelPtr->channelMessage(result, this);
-			if (send(this->clientfd, joinMsg.c_str(), joinMsg.size(), 0) < 0)
+			if (send(this->getClientFd(), joinMsg.c_str(), joinMsg.size(), 0) < 0)
 			{
 				std::cout << "joinmsg: failed to send";
-				close(this->clientfd);
+				close(this->getClientFd());
 				return; // ?? recheck this, should disconnect the client and flag to the main loop
 			}
 		}

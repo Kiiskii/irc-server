@@ -52,14 +52,14 @@ void Server::setupEpoll()
 void Server::handleNewClient()
 {
 	Client newClient;
-	newClient.clientfd = accept4(serverfd, (struct sockaddr *) NULL, NULL, O_NONBLOCK);
-	std::cout << "New connection, fd: " << newClient.clientfd << std::endl; //debug msg
+	newClient.setClientFd(accept4(serverfd, (struct sockaddr *) NULL, NULL, O_NONBLOCK));
+	std::cout << "New connection, fd: " << newClient.getClientFd() << std::endl; //debug msg
 	clientInfo.push_back(newClient);
-	fcntl(newClient.clientfd, F_SETFL, O_NONBLOCK);
+	fcntl(newClient.getClientFd(), F_SETFL, O_NONBLOCK);
 	struct epoll_event ev;
 	ev.events = EPOLLIN;
-	ev.data.fd = newClient.clientfd;
-	epoll_ctl(epollfd, EPOLL_CTL_ADD, newClient.clientfd, &ev);
+	ev.data.fd = newClient.getClientFd();
+	epoll_ctl(epollfd, EPOLL_CTL_ADD, newClient.getClientFd(), &ev);
 }
 void Server::handleClient()
 {

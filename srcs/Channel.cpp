@@ -74,11 +74,11 @@ void Channel::addUser(Client* newClient)
 /**
  * @brief Check whether the client is already on the channel 
  */
-bool Channel::isClientOnChannel(const Client& client)
+bool Channel::isClientOnChannel( Client& client)
 {
 	for (auto it : _userList)
 	{
-		if (client._clientNick == it._clientNick)
+		if (client.getNick() == it.getNick())
 			return true;
 	}
 	return false;
@@ -86,10 +86,10 @@ bool Channel::isClientOnChannel(const Client& client)
 /** @brief check if the channel key matches the key that client inputs, 
  * if channel requires a key
  */
-channelMsg Channel::canClientJoinChannel(const Client& client, std::string clientKey)
+channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
-	std::cout << "client has join " << client._joinedChannels.size() << " channels \n";
-	if (client._joinedChannels.size() >= MAX_CHANNELS_PER_CLIENT)
+	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
+	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
 		return TOO_MANY_CHANNELS;
 	if (this->isClientOnChannel(client))
 		return ALREADY_ON_CHAN;
@@ -123,9 +123,10 @@ void	Channel::sendJoinSuccessMsg( Client& client)
 
 std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 {
-	std::string chanop = ":" + currentClient->_clientNick + "!" + currentClient->_userName 
-		+ "@" + currentClient->_hostName;
+	std::string chanop = ":" + currentClient->getNick() + "!" 
+		+ currentClient->getUserName() + "@" + currentClient->getHostName();
 	std::string returnMsg;
+
 	switch (msg)
 	{
 	case JOIN_OK: 	
@@ -145,23 +146,23 @@ std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 		+" :Cannot join channel" + " \r\n";
 		break;
 	
-	case NO_TOPIC_MSG:
-		returnMsg = ":" + currentClient->_serverName + " " + RPL_NOTOPIC + " " + 
-		currentClient->_clientNick + " #" + this->getChannelName() 
-		+ " :No topic is set\r\n";
-		break;
+	// case NO_TOPIC_MSG:
+	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_NOTOPIC + " " + 
+	// 	currentClient->_clientNick + " #" + this->getChannelName() 
+	// 	+ " :No topic is set\r\n";
+	// 	break;
 	
-	case CHANNEL_TOPIC_MSG:
-		returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPIC + " " + 
-		currentClient->_clientNick + " #" + this->getChannelName() 
-		+ " :" + this->getTopic() +" \r\n";
-		break;
+	// case CHANNEL_TOPIC_MSG:
+	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPIC + " " + 
+	// 	currentClient->_clientNick + " #" + this->getChannelName() 
+	// 	+ " :" + this->getTopic() +" \r\n";
+	// 	break;
 	
-	case WHO_CHANGE_TOPIC:
-		returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPICWHOTIME + " " + 
-		currentClient->_clientNick + " #" + this->getChannelName() 
-		+ " :" + this->getTopic() +" \r\n";
-		break;
+	// case WHO_CHANGE_TOPIC:
+	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPICWHOTIME + " " + 
+	// 	currentClient->_clientNick + " #" + this->getChannelName() 
+	// 	+ " :" + this->getTopic() +" \r\n";
+	// 	break;
 	
 	case CHANGE_TOPIC_MSG:
 		returnMsg = chanop + " TOPIC #" + this->getChannelName() +" :" 
