@@ -26,6 +26,7 @@ class Channel;
 class Server
 {
 	public:
+	int epollfd = -1;
 	int serverfd = -1;
 	std::string pass = "mouse";
 	std::string name = "ft_irc";
@@ -36,7 +37,12 @@ class Server
 	struct epoll_event event;
 	struct epoll_event events[MAX_EVENTS];
 
-	
+
+	void setupSocket();
+	void setupEpoll();
+	void handleNewClient();
+	void handleClient();
+	void handleCommand(Client &client, std::string &line);
 	std::vector<Channel>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 
