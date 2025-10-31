@@ -8,21 +8,3 @@ std::string ft_trimString(std::string msg)
     return trailingTrim;
 }
 
-channelMsg checkTopicComd(std::string bufferStr, Client* currentClient, Channel* currentChan)
-{
-	(void)currentClient;
-    // std::cout << "enter check comd :" << bufferStr << std::endl;
-    // bufferStr = trimStr(bufferStr);
-    // std::cout << "buffer :" << bufferStr << std::endl;
-    if (bufferStr == "TOPIC" && currentChan->getTopic().empty())
-        return NO_TOPIC_MSG;
-    else if (bufferStr == "TOPIC" && !currentChan->getTopic().empty())
-        return CHANNEL_TOPIC_MSG;
-    else if (bufferStr.find(":") != std::string::npos)
-    {
-        currentChan->setTopic(bufferStr);
-        std::cout << "topic after set: " << currentChan->getTopic() << std::endl;
-        return CHANGE_TOPIC_MSG;
-    }
-    return NO_MSG;
-}

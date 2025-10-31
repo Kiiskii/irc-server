@@ -47,6 +47,7 @@ class Client
 		// other
 		void 	updateClientInfo(std::string bufferStr);
 		void	askToJoin(std::string buffer, Server& server);
+		void	askTopic(std::string buffer);
 	
 
 };

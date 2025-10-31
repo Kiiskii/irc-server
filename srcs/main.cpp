@@ -39,24 +39,14 @@ int main(int argc, char *argv[])
 				server.handleCommand(server, server.getClientInfo()[clientIndex], evenBuffer);
 				//need to also deal with a situation if password is "empty string"
 
-				// if (evenBuffer.find("TOPIC ") != std::string::npos)
-				// {
-				// 	Client& currentClient =  server.clientInfo[clientIndex];
-				// 	evenBuffer = ft_trimString(evenBuffer);
-				// 	std::cout << "topic comd: " << buffer << std::endl;
-				// 	// check command topic
-				// 	channelMsg cmd = checkTopicComd(buffer, currentClient);
-					
-				// 	// server.clientInfo[clientIndex]._atChannel->setTopic(buffer);
-				// 	std::string topicMsg = currentClient._atChannel->channelMessage(cmd, currentClient);
-				// 	std::cout << "topicmsg: " << topicMsg << std::endl;
-				// 	if (send(server.clientInfo[clientIndex].clientfd, topicMsg.c_str(), topicMsg.size(), 0) < 0)
-				// 	{
-				// 		std::cout << "setTopic: failed to send\r\n";
-				// 		close(server.clientInfo[clientIndex].clientfd);
-				// 		continue;
-				// 	}          
-				// }
+				if (evenBuffer.find("TOPIC") != std::string::npos)
+				{
+					Client& currentClient =  server.clientInfo[clientIndex];
+					evenBuffer = ft_trimString(evenBuffer);
+					std::cout << "topic comd: " << evenBuffer << std::endl;
+					// check command topic
+					currentClient.askTopic(evenBuffer);       
+				}
 			}
 		}
 	}

@@ -5,7 +5,7 @@ OBJS_DIR = obj
 HDRS_DIR = inc/
 HDRS = -I$(HDRS_DIR)
 
-NAME = IRC
+NAME = ircserv
 SRCS = srcs/main.cpp srcs/Server.cpp srcs/Channel.cpp srcs/Client.cpp srcs/utils.cpp
 OBJS = $(patsubst srcs/%.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 
