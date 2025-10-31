@@ -23,7 +23,6 @@ class Client
 	std::string nick = "";
 	// channelInfo *channel = nullptr;
 	
-	
 	void 	updateClientInfo(std::string bufferStr);
 	void	askToJoin(std::string buffer, Server& server);
 	

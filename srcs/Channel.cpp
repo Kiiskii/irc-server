@@ -1,6 +1,6 @@
 #include "Channel.hpp"
 
-// mode is set to +nt for now: n - no external message, t - topic restriction
+/// mode is set to +nt for now: n - no external message, t - topic restriction
 Channel::Channel() : _channelName("Empty"), _topic("Empty"), _mode("+nt")
 {
 
@@ -70,6 +70,20 @@ void Channel::addUser(Client* newClient)
 {
 	_userList.push_back(*newClient);
 }
+
+/**
+ * @brief Check whether the client is already on the channel 
+ */
+bool Channel::isClientOnChannel(Client client)
+{
+	for (auto it : _userList)
+	{
+		if (client._clientNick == it._clientNick)
+			return true;
+	}
+	return false;
+}
+
 
 std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 {

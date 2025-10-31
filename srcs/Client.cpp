@@ -1,6 +1,7 @@
 #include "Client.hpp"
 
-/* need to fix this one, currently fix value for channel testing */
+/**
+ * @brief need to fix this one, currently fix value for channel testing */
 void Client::updateClientInfo(std::string bufferStr)
 {
 	(void) bufferStr;
@@ -10,7 +11,7 @@ void Client::updateClientInfo(std::string bufferStr)
 	_serverName = "localhost";
 }
 
-/* @def split string into tokens using delimiter */
+/** @brief split string into tokens using delimiter */
 static std::vector<std::string> splitString(std::string buffer, char delimiter)
 {
 	std::cout << "buffer :[" << buffer << "]" << std::endl;
@@ -26,7 +27,7 @@ static std::vector<std::string> splitString(std::string buffer, char delimiter)
 	return tokens;
 }
 
-/* @def client sends [JOIN - <channels> - <keys>] format, mapping channel-key pair to std::map and return */
+/** @brief client sends [JOIN - <channels> - <keys>] format, mapping channel-key pair to std::map and return */
 static std::map<std::string, std::string> mappingChannelKey(std::string buffer)
 {
 	std::map<std::string, std::string>		channelKeyMap;
@@ -69,7 +70,7 @@ static std::map<std::string, std::string> mappingChannelKey(std::string buffer)
 	return channelKeyMap;
 }
 
-/* @brief handle only JOIN #general, I'm not sure about JOIN '&', '+' or '!'.
+/** @brief handle only JOIN #general, I'm not sure about JOIN '&', '+' or '!'.
 	length of channel name is up to 50 chars
 	shall not contain space, ascii 7 or comma 
 	case insensitive*/
@@ -105,6 +106,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 				= server.isChannelExisting(channelName);
 			Channel* channelPtr = nullptr;
 
+			// check if the channel exists
 			if (channelNameIt == server.channelInfo.end()) // not exist
 			{
 				server.channelInfo.push_back(Channel(channelName));
@@ -113,9 +115,12 @@ void Client::askToJoin(std::string buffer, Server& server)
 			}
 			else
 				channelPtr = &(*channelNameIt);
-			// add a check whetherr the client is already on the channel, if not then add
-			this->_joinedChannels.push_back(channelPtr);
-			channelPtr->addUser(this);
+
+			if (channelPtr->isClientOnChannel(*this) == false)
+			{
+				this->_joinedChannels.push_back(channelPtr);
+				channelPtr->addUser(this);
+			}
 
 			std::string joinMsg 
 				= channelPtr->channelMessage(JOIN_MSG, this);
