@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+/* @def check if the channel exists
+	@return ptr to channel if exist else return after the end of vector */
 std::vector<Channel>::iterator Server::isChannelExisting(std::string newChannel) 
 {
 	for (auto it = channelInfo.begin(); it != channelInfo.end(); ++it)

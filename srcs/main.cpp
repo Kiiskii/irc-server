@@ -3,7 +3,7 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
-channelMsg checkTopicComd(std::string bufferStr, Client& currentClient);
+channelMsg checkTopicComd(std::string bufferStr, Client* currentClient, Channel* currentChan);
 std::string ft_trimString(std::string msg);
 
 int main(void)
@@ -89,72 +89,33 @@ int main(void)
 					if (send(server.clientInfo[clientIndex].clientfd, "PONG :ft_irc\r\n", sizeof("PONG :ft_irc\r\n") - 1, 0) == -1)
 						std::cout << "Send failed" << std::endl;
 				}
+				
 				if (evenBuffer.find("JOIN") != std::string::npos)
 				{
-					//we need to check if this channel alrdy exists
-					std::cout << "JOINING fd: " << server.clientInfo[clientIndex].clientfd << std::endl;
 					evenBuffer = ft_trimString(evenBuffer); //trim whitespace
 					Client& currentClient = server.clientInfo[clientIndex];
-					currentClient.updateClientInfo(evenBuffer);
+					currentClient.updateClientInfo(evenBuffer); //testing with my username
+					currentClient.askToJoin(evenBuffer, server);
+				}
 
-					// JOIN #general
-					// bufferStr = trimStr(bufferStr);
-					std::string newChannel = evenBuffer.substr(evenBuffer.find('#') + 1, 
-						evenBuffer.length() - evenBuffer.find('#') - 1 );
-					std::cout << "channel name: " << newChannel << std::endl;
+				// if (evenBuffer.find("TOPIC ") != std::string::npos)
+				// {
+				// 	Client& currentClient =  server.clientInfo[clientIndex];
+				// 	evenBuffer = ft_trimString(evenBuffer);
+				// 	std::cout << "topic comd: " << buffer << std::endl;
+				// 	// check command topic
+				// 	channelMsg cmd = checkTopicComd(buffer, currentClient);
 					
-					std::vector<Channel>::iterator newChannelIt 
-						= server.isChannelExisting(newChannel);
-					// decide to add channel or not, return ptr to client's channel
-					if (newChannelIt == server.channelInfo.end()) // not exist
-					{
-						server.channelInfo.push_back(Channel(newChannel));
-						currentClient._atChannel = &server.channelInfo.back();
-						currentClient._atChannel->setChanop(currentClient);
-					}
-					else
-						currentClient._atChannel = &(*newChannelIt);
-					
-					// server.printchannelInfo(); //print all the channel on server
-					std::string joinMsg 
-						= currentClient._atChannel->channelMessage(JOIN_MSG, currentClient);
-					if (send(currentClient.clientfd, joinMsg.c_str(), joinMsg.size(), 0) < 0)
-					{
-						std::cout << "joinmsg: failed to send";
-						close(currentClient.clientfd);
-						continue;
-					}
-					// @brief if no topic, do not send back the topic of channel
-					if (!currentClient._atChannel->getTopic().empty())
-					{
-						std::string topicmsg 
-							= currentClient._atChannel->channelMessage(CHANNEL_TOPIC_MSG, currentClient);
-						if (send(currentClient.clientfd, topicmsg.c_str(), topicmsg.size(), 0) < 0)
-						{
-							std::cout << "joinmsg: failed to send";
-							close(currentClient.clientfd);
-							continue;
-						}
-					}
-				}
-				if (evenBuffer.find("TOPIC ") != std::string::npos)
-				{
-					Client& currentClient =  server.clientInfo[clientIndex];
-					evenBuffer = ft_trimString(evenBuffer);
-					std::cout << "topic comd: " << buffer << std::endl;
-					// check command topic
-					channelMsg cmd = checkTopicComd(buffer, currentClient);
-					
-					// server.clientInfo[clientIndex]._atChannel->setTopic(buffer);
-					std::string topicMsg = currentClient._atChannel->channelMessage(cmd, currentClient);
-					std::cout << "topicmsg: " << topicMsg << std::endl;
-					if (send(server.clientInfo[clientIndex].clientfd, topicMsg.c_str(), topicMsg.size(), 0) < 0)
-					{
-						std::cout << "setTopic: failed to send\r\n";
-						close(server.clientInfo[clientIndex].clientfd);
-						continue;
-					}          
-				}
+				// 	// server.clientInfo[clientIndex]._atChannel->setTopic(buffer);
+				// 	std::string topicMsg = currentClient._atChannel->channelMessage(cmd, currentClient);
+				// 	std::cout << "topicmsg: " << topicMsg << std::endl;
+				// 	if (send(server.clientInfo[clientIndex].clientfd, topicMsg.c_str(), topicMsg.size(), 0) < 0)
+				// 	{
+				// 		std::cout << "setTopic: failed to send\r\n";
+				// 		close(server.clientInfo[clientIndex].clientfd);
+				// 		continue;
+				// 	}          
+				// }
 			}
 		}
 	}
@@ -167,19 +128,20 @@ std::string ft_trimString(std::string msg)
     return trailingTrim;
 }
 
-channelMsg checkTopicComd(std::string bufferStr, Client& currentClient)
+channelMsg checkTopicComd(std::string bufferStr, Client* currentClient, Channel* currentChan)
 {
+	(void)currentClient;
     // std::cout << "enter check comd :" << bufferStr << std::endl;
     // bufferStr = trimStr(bufferStr);
     // std::cout << "buffer :" << bufferStr << std::endl;
-    if (bufferStr == "TOPIC" && currentClient._atChannel->getTopic().empty())
+    if (bufferStr == "TOPIC" && currentChan->getTopic().empty())
         return NO_TOPIC_MSG;
-    else if (bufferStr == "TOPIC" && !currentClient._atChannel->getTopic().empty())
+    else if (bufferStr == "TOPIC" && !currentChan->getTopic().empty())
         return CHANNEL_TOPIC_MSG;
     else if (bufferStr.find(":") != std::string::npos)
     {
-        currentClient._atChannel->setTopic(bufferStr);
-        std::cout << "topic after set: " << currentClient._atChannel->getTopic() << std::endl;
+        currentChan->setTopic(bufferStr);
+        std::cout << "topic after set: " << currentChan->getTopic() << std::endl;
         return CHANGE_TOPIC_MSG;
     }
     return NO_MSG;
