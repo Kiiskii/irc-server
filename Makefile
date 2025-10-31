@@ -1,5 +1,5 @@
 CXX = c++
-FLAGS = -Wall -Wextra -Werror -std=c++20
+FLAGS = -std=c++20
 
 OBJS_DIR = obj
 HDRS_DIR = inc/
