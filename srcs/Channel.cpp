@@ -1,13 +1,13 @@
 #include "Channel.hpp"
 
 /// mode is set to +nt for now: n - no external message, t - topic restriction
-Channel::Channel() : _channelName("Empty"), _topic("Empty"), _mode("+nt")
+Channel::Channel() : _channelName("Empty"), _topic(""), _chanKey(""), _mode("+nt")
 {
 
 }
 
 
-Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("Empty"), _mode("+nt")
+Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic(""), _chanKey(""),_mode("+nt")
 {
 
 }
@@ -40,7 +40,7 @@ std::vector<Client>	Channel::getUserList() const
 
 std::string	Channel::getKey() const
 {
-	return _key;
+	return _chanKey;
 }
 
 void	Channel::setChanop(Client chanop)
@@ -63,7 +63,7 @@ void Channel::setTopic(std::string buffer)
 
 void Channel::setKey(std::string newKey)
 {
-	_key = newKey;
+	_chanKey = newKey;
 }
 
 void Channel::addUser(Client* newClient)
@@ -74,7 +74,7 @@ void Channel::addUser(Client* newClient)
 /**
  * @brief Check whether the client is already on the channel 
  */
-bool Channel::isClientOnChannel(Client client)
+bool Channel::isClientOnChannel(const Client& client)
 {
 	for (auto it : _userList)
 	{
@@ -83,6 +83,21 @@ bool Channel::isClientOnChannel(Client client)
 	}
 	return false;
 }
+/** @brief check if the channel key matches the key that client inputs, 
+ * if channel requires a key
+ */
+channelMsg Channel::canClientJoinChannel(const Client& client, std::string clientKey)
+{
+	std::cout << "client has join " << client._joinedChannels.size() << " channels \n";
+	if (client._joinedChannels.size() >= MAX_CHANNELS_PER_CLIENT)
+		return TOO_MANY_CHANNELS;
+	if (this->isClientOnChannel(client))
+		return ALREADY_ON_CHAN;
+	if (!this->getKey().empty() && this->getKey() != clientKey) // recheck with mode later
+		return BAD_CHANNEL_KEY;
+	return JOIN_OK;
+}
+
 
 
 std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
@@ -92,9 +107,21 @@ std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 	std::string returnMsg;
 	switch (msg)
 	{
-	case JOIN_MSG: 	
+	case JOIN_OK: 	
 		returnMsg = chanop + " JOIN #" + this->getChannelName() 
 		+" " + RPL_TOPIC + " \r\n";
+		break;
+
+	case TOO_MANY_CHANNELS: 	
+		returnMsg = ":" + currentClient->getServerName() + " " + ERR_TOOMANYCHANNELS 
+		+ " " + currentClient->getNick() + " " + this->getChannelName() 
+		+" :You have joined too many channels" + " \r\n";
+		break;
+
+	case BAD_CHANNEL_KEY: 	
+		returnMsg = ":" + currentClient->getServerName() + " " + ERR_TOOMANYCHANNELS 
+		+ " " + currentClient->getNick() + " " + this->getChannelName() 
+		+" :Cannot join channel" + " \r\n";
 		break;
 	
 	case NO_TOPIC_MSG:

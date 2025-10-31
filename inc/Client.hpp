@@ -8,6 +8,7 @@
 
 #include "Channel.hpp"
 #include "Server.hpp"
+#include "macro.hpp"
 
 class Channel;
 class Server;
@@ -22,16 +23,34 @@ class Client
 	std::string user = "";
 	std::string nick = "";
 	// channelInfo *channel = nullptr;
-	
-	void 	updateClientInfo(std::string bufferStr);
-	void	askToJoin(std::string buffer, Server& server);
-	
+
+	// should move these to private soon
 	std::string			_clientNick;
 	std::string			_userName;
 	std::string			_hostName;
 	std::string			_serverName;
-	// Channel*			_atChannel;
 	std::vector<Channel*>	_joinedChannels; 
+	
+	// getters
+	int			getClientFd();
+	std::string getNick();
+	std::string getUserName();
+	std::string getHostName();
+	std::string getServerName();
+	std::vector<Channel*> getJoinedChannels();
+
+	// setters
+	void		setClientFd(int num);
+	void		setNick(std::string nick);
+	void		setUserName(std::string user);
+	void		setHostName(std::string host);
+	void		setServerName(std::string server);
+	void		addChannel(Channel* chan);
+
+
+	void 	updateClientInfo(std::string bufferStr);
+	void	askToJoin(std::string buffer, Server& server);
+	
 
 };
 

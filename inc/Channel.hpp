@@ -3,21 +3,24 @@
 #include <iostream>
 #include <vector>
 #include "Client.hpp"
+#include "macro.hpp"
 
-#define RPL_NOTOPIC "331"
-#define RPL_TOPIC "332"
-#define RPL_NAMREPLY "353"
-#define RPL_TOPICWHOTIME "333"
 
 enum	channelMsg
 {
 	NO_MSG,
-	JOIN_MSG,
 	NO_TOPIC_MSG,
 	CHANNEL_TOPIC_MSG,
 	WHO_CHANGE_TOPIC,
 	NAME_LIST_MSG,
-	CHANGE_TOPIC_MSG
+	CHANGE_TOPIC_MSG,
+	// JOIN MSG
+	JOIN_OK,
+	// NO_SUCH_CHANNEL, // may not need cause creating new channel anyway
+	TOO_MANY_CHANNELS,
+	BAD_CHANNEL_KEY,
+	INVITE_ONLY_CHAN,
+	ALREADY_ON_CHAN
 
 };
 
@@ -52,7 +55,7 @@ class Channel
 		Client*				_channelOperator; //previledge (chanop, voiced user)
 		std::vector<Client> _userList; //who in channel
 		std::string			_mode; //what mode
-		std::string			_key;
+		std::string			_chanKey;
 		
 	public:
 
@@ -80,7 +83,8 @@ class Channel
 
 		// channel public method
 
-		bool		isClientOnChannel(Client client);
+		bool		isClientOnChannel(const Client& client);
+		channelMsg		canClientJoinChannel(const Client& client, std::string clientKey);
 		
 		std::string channelMessage(channelMsg msg, Client* currentClient);
 		void		handleJoinCmd(std::string buffer, Client& currentClient);

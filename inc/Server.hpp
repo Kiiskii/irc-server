@@ -36,8 +36,7 @@ class Server
 	struct epoll_event event;
 	struct epoll_event events[MAX_EVENTS];
 
-
-
+	
 	std::vector<Channel>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 

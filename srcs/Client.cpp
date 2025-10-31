@@ -1,5 +1,65 @@
 #include "Client.hpp"
 
+int	Client::getClientFd()
+{
+	return clientfd;
+}
+
+std::string Client::getNick()
+{
+	return _clientNick;
+}
+
+std::string Client::getUserName()
+{
+	return _userName;
+}
+std::string Client::getHostName()
+{
+	return _hostName;
+}
+
+std::string Client::getServerName()
+{
+	return _serverName;
+}
+
+std::vector<Channel*> Client::getJoinedChannels()
+{
+	return _joinedChannels;
+}
+
+// setters
+void Client::setClientFd(int num)
+{
+	clientfd = num;
+}
+
+void Client::setNick(std::string nick)
+{
+	_clientNick = nick;
+}
+
+void Client::setUserName(std::string user)
+{
+	_userName = user;
+}
+
+void Client::setHostName(std::string host)
+{
+	_hostName = host;
+}
+
+void Client::setServerName(std::string server)
+{
+	_serverName = server;
+}
+
+void Client::addChannel(Channel* chan)
+{
+	_joinedChannels.push_back(chan);
+}
+
 /**
  * @brief need to fix this one, currently fix value for channel testing */
 void Client::updateClientInfo(std::string bufferStr)
@@ -101,6 +161,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 		for (auto chan : channelKeyMap)
 		{
 			std::string channelName = chan.first;
+			std::string clientKey = chan.second;
 			std::cout << "channel name: " << channelName << std::endl;
 			std::vector<Channel>::iterator channelNameIt 
 				= server.isChannelExisting(channelName);
@@ -116,21 +177,23 @@ void Client::askToJoin(std::string buffer, Server& server)
 			else
 				channelPtr = &(*channelNameIt);
 
-			if (channelPtr->isClientOnChannel(*this) == false)
+			channelMsg result = channelPtr->canClientJoinChannel(*this, clientKey);
+			if (result == JOIN_OK)
 			{
-				this->_joinedChannels.push_back(channelPtr);
+				this->addChannel(channelPtr);
 				channelPtr->addUser(this);
 			}
-
+			
 			std::string joinMsg 
-				= channelPtr->channelMessage(JOIN_MSG, this);
+				= channelPtr->channelMessage(result, this);
 			if (send(this->clientfd, joinMsg.c_str(), joinMsg.size(), 0) < 0)
 			{
 				std::cout << "joinmsg: failed to send";
 				close(this->clientfd);
-				// return; //??
+				return; // ?? recheck this, should disconnect the client and flag to the main loop
 			}
-			// @brief if no topic, do not send back the topic of channel
+			
+			// if no topic, do not send back the topic of channel
 			if (!channelPtr->getTopic().empty())
 			{
 				std::string topicmsg 
@@ -139,7 +202,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 				{
 					std::cout << "joinmsg: failed to send";
 					close(this->clientfd);
-					// return;
+					return;
 				}
 			}
 		}
