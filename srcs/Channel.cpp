@@ -1,13 +1,13 @@
 #include "Channel.hpp"
 
 /// mode is set to +nt for now: n - no external message, t - topic restriction
-Channel::Channel() : _channelName("Empty"), _topic(""), _chanKey(""), _mode("+nt")
+Channel::Channel() : _channelName("Empty"), _topic(""), _mode("+nt"), _chanKey("")
 {
 
 }
 
 
-Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic(""), _chanKey(""),_mode("+nt")
+Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic(""), _mode("+nt"), _chanKey("")
 {
 
 }
@@ -98,6 +98,27 @@ channelMsg Channel::canClientJoinChannel(const Client& client, std::string clien
 	return JOIN_OK;
 }
 
+/** 
+ * @brief if no topic set when client joins the channel, do not send back the topic.
+ * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
+ * currently joined the channel, including the current client( multiple RPL_NAMREPLY 
+ * and 1 RPL_ENDOFNAMES). 
+ */
+void	Channel::sendJoinSuccessMsg( Client& client)
+{
+
+	if (!this->getTopic().empty())
+	{
+		std::string topicmsg 
+			= this->channelMessage(CHANNEL_TOPIC_MSG, &client);
+		if (send((&client)->getClientFd(), topicmsg.c_str(), topicmsg.size(), 0) < 0)
+		{
+			std::cout << "joinmsg: failed to send";
+			close(client.getClientFd());
+			return;
+		}
+	}
+}
 
 
 std::string Channel::channelMessage(channelMsg msg, Client* currentClient)

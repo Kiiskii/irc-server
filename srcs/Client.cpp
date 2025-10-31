@@ -182,6 +182,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 			{
 				this->addChannel(channelPtr);
 				channelPtr->addUser(this);
+				channelPtr->sendJoinSuccessMsg(*this);
 			}
 			
 			std::string joinMsg 
@@ -191,19 +192,6 @@ void Client::askToJoin(std::string buffer, Server& server)
 				std::cout << "joinmsg: failed to send";
 				close(this->clientfd);
 				return; // ?? recheck this, should disconnect the client and flag to the main loop
-			}
-			
-			// if no topic, do not send back the topic of channel
-			if (!channelPtr->getTopic().empty())
-			{
-				std::string topicmsg 
-					= channelPtr->channelMessage(CHANNEL_TOPIC_MSG, this);
-				if (send(this->clientfd, topicmsg.c_str(), topicmsg.size(), 0) < 0)
-				{
-					std::cout << "joinmsg: failed to send";
-					close(this->clientfd);
-					return;
-				}
 			}
 		}
 	}

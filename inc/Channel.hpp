@@ -84,10 +84,11 @@ class Channel
 		// channel public method
 
 		bool		isClientOnChannel(const Client& client);
-		channelMsg		canClientJoinChannel(const Client& client, std::string clientKey);
+		channelMsg	canClientJoinChannel(const Client& client, std::string clientKey);
+		void		sendJoinSuccessMsg( Client& client);
 		
-		std::string channelMessage(channelMsg msg, Client* currentClient);
-		void		handleJoinCmd(std::string buffer, Client& currentClient);
+		std::string channelMessage(channelMsg msg,  Client* currentClient);
+		// void		handleJoinCmd(std::string buffer, Client& currentClient);
 		// unsigned int	checkTopicCmd(std::string buffer);
 
 		
