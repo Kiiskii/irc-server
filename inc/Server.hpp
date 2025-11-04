@@ -28,21 +28,21 @@ class Server
 	public:
 	int epollfd = -1;
 	int serverfd = -1;
-	std::string pass = "mouse";
+	std::string pass = "";
 	std::string name = "ft_irc";
 	std::vector<Client> clientInfo;
 	std::vector<Channel> channelInfo;
-	const int port = 6667;
+	int port = -1;
 	struct sockaddr_in details;
 	struct epoll_event event;
 	struct epoll_event events[MAX_EVENTS];
 
-
+	void setupServerDetails(Server &server, int argc, char *argv[]);
 	void setupSocket();
 	void setupEpoll();
 	void handleNewClient();
 	void handleClient();
-	void handleCommand(Client &client, std::string &line);
+	void handleCommand(Server &server, Client &client, std::string &line);
 	std::vector<Channel>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 

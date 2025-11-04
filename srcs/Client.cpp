@@ -61,6 +61,7 @@ void Client::addChannel(Channel* chan)
 
 /**
  * @brief need to fix this one, currently fix value for channel testing */
+//Do we need this?
 void Client::updateClientInfo(std::string bufferStr)
 {
 	(void) bufferStr;
