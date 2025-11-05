@@ -11,10 +11,10 @@ int main(int argc, char *argv[])
 	server.setupEpoll();
 	while (true)
 	{
-		int events = epoll_wait(server.epollfd, server.events, MAX_EVENTS, -1);
-		for (int i = 0; i < events; ++i)
+		int eventCount = epoll_wait(server.getEpollfd(), server.getEpollEvents(), MAX_EVENTS, -1);
+		for (int i = 0; i < eventCount; ++i)
 		{
-			if (server.events[i].data.fd == server.serverfd)
+			if (server.getEpollEvents()[i].data.fd == server.getServerfd())
 			{
 				server.handleNewClient();
 			}
@@ -22,21 +22,21 @@ int main(int argc, char *argv[])
 			{
 				//This could be connect with already existing client...
 				char buffer[1024] = {0};
-				int clientFd = server.events[i].data.fd;
+				int clientFd = server.getEpollEvents()[i].data.fd;
 				int clientIndex = 0;
-				for (size_t i = 0; i < server.clientInfo.size(); i++)
+				for (size_t i = 0; i < server.getClientInfo().size(); i++)
 				{
-					if (server.clientInfo[i].getClientFd() == clientFd)
+					if (server.getClientInfo()[i].getClientFd() == clientFd)
 					{
 						clientIndex = i;
 						break;
 					}
 				}
-				if (recv(server.clientInfo[clientIndex].getClientFd(), buffer, sizeof(buffer), 0) <= 0)
+				if (recv(server.getClientInfo()[clientIndex].getClientFd(), buffer, sizeof(buffer), 0) <= 0)
 					std::cout << "Did we encounter a problem" << std::endl;
 				std::cout << "Message that we received : [" << buffer << "]" << std::endl;
 				std::string evenBuffer(buffer);
-				server.handleCommand(server, server.clientInfo[clientIndex], evenBuffer);
+				server.handleCommand(server, server.getClientInfo()[clientIndex], evenBuffer);
 				//need to also deal with a situation if password is "empty string"
 
 				// if (evenBuffer.find("TOPIC ") != std::string::npos)
@@ -61,4 +61,3 @@ int main(int argc, char *argv[])
 		}
 	}
 }
-
