@@ -45,10 +45,10 @@ class Client
 		void		addChannel(Channel* chan);
 
 		// other
-		void 	updateClientInfo(std::string bufferStr);
-		void	askToJoin(std::string buffer, Server& server);
-		Channel* setActiveChannel(std::string buffer);
-		void	askTopic(std::string buffer);
+		void		updateClientInfo(std::string bufferStr);
+		void		askToJoin(std::string buffer, Server& server);
+		Channel*	setActiveChannel(std::string buffer);
+		void		askTopic(std::string buffer);
 
 	
 

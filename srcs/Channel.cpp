@@ -3,7 +3,7 @@
 /// mode is set to +nt for now: n - no external message, t - topic restriction
 Channel::Channel() : _channelName(""), _topic(""), _mode("+nt"), _chanKey("")
 {
-
+	
 }
 
 
