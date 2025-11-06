@@ -11,3 +11,10 @@
 #define ERR_BADCHANNELKEY "475"
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
+
+#define NEW_NICK(oldnick, user, host, newnick) ":" + oldnick + "!" + user + "@" + host + " NICK " + newnick + "\r\n"
+#define ERR_NONICKNAMEGIVEN(servername) ":" + servername + "431 :No nickname given\r\n"
+ // "<client> :Welcome to the <networkname> Network, <nick>[!<user>@<host>]"
+
+
+    // "<client> :No nickname given" (431)

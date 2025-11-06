@@ -4,17 +4,17 @@
 	@return ptr to channel if exist else return after the end of vector */
 std::vector<Channel>::iterator Server::isChannelExisting(std::string newChannel) 
 {
-	for (auto it = channelInfo.begin(); it != channelInfo.end(); ++it)
+	for (auto it = _channelInfo.begin(); it != _channelInfo.end(); ++it)
 	{
 		if ((*it).getChannelName() == newChannel)
 			return it;
 	}
-	return channelInfo.end();
+	return _channelInfo.end();
 }
 
 void Server::printChannelList() const
 {
-	for (auto i : channelInfo)
+	for (auto i : _channelInfo)
 	{
 		std::cout << i << std::endl;
 	}
@@ -30,36 +30,36 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 		exit (1);
 	}
 	//also need to validate password and port
-	port = std::stoi(argv[1]);
-	pass = argv[2];
-	std::cout << "Server's port is: " << port << " and password is : " << pass << std::endl;
+	_port = std::stoi(argv[1]);
+	_pass = argv[2];
+	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
 
 //one function for setting up the socket?
 //missing error checks
 void Server::setupSocket()
 {
-	details.sin_family = AF_INET;
-	details.sin_port = htons(port);
-	details.sin_addr.s_addr = INADDR_ANY;
-	serverfd = socket(AF_INET, SOCK_STREAM, 0);
+	_details.sin_family = AF_INET;
+	_details.sin_port = htons(_port);
+	_details.sin_addr.s_addr = INADDR_ANY;
+	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	/*SO_REUSEADDR, allows a socket to bind to an address/port that is still in use. It also
 	allows multiple sockets to bind to the same port. So opt here is basically a toggle of whether
 	the socket reusing option is enabled or disabled*/
 	int opt = 1;
-	setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
-	bind (serverfd, (struct sockaddr *)&details, sizeof(details));
-	if (listen(serverfd, 1) == 0)
+	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
+	bind (_serverFd, (struct sockaddr *)&_details, sizeof(_details));
+	if (listen(_serverFd, 1) == 0)
 		std::cout << "We are listening" << std::endl;
 }
 
 //errors missing
 void Server::setupEpoll()
 {
-	epollfd = epoll_create1(0);
-	event.events = EPOLLIN;
-	event.data.fd = serverfd;
-	epoll_ctl(epollfd, EPOLL_CTL_ADD, serverfd, &event);
+	_epollFd = epoll_create1(0);
+	_event.events = EPOLLIN;
+	_event.data.fd = _serverFd;
+	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event);
 }
 
 //Here we removed send because even though the client has connected, it doesnt mean they have registered
@@ -67,14 +67,14 @@ void Server::setupEpoll()
 void Server::handleNewClient()
 {
 	Client newClient;
-	newClient.setClientFd(accept4(serverfd, (struct sockaddr *) NULL, NULL, O_NONBLOCK));
+	newClient.setClientFd(accept4(_serverFd, (struct sockaddr *) NULL, NULL, O_NONBLOCK));
 	std::cout << "New connection, fd: " << newClient.getClientFd() << std::endl; //debug msg
-	clientInfo.push_back(newClient);
+	_clientInfo.push_back(newClient);
 	fcntl(newClient.getClientFd(), F_SETFL, O_NONBLOCK);
 	struct epoll_event ev;
 	ev.events = EPOLLIN;
 	ev.data.fd = newClient.getClientFd();
-	epoll_ctl(epollfd, EPOLL_CTL_ADD, newClient.getClientFd(), &ev);
+	epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient.getClientFd(), &ev);
 }
 void Server::handleClient()
 {
@@ -86,12 +86,12 @@ trigger the actual command function.*/
 void Server::handleCommand(Server &server, Client &client, std::string &line)
 {
 	std::cout << "This is the command: " << line << std::endl;
-	if (line.find("CAP") != std::string::npos)
-	{
-		std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
-		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-		return ;
-	}
+	// if (line.find("CAP") != std::string::npos)
+	// {
+	// 	std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
+	// 	send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+	// 	return ;
+	// }
 	if (line.find("PASS") != std::string::npos)
 	{
 		std::cout << "PASS FOR fd: " << client.getClientFd() << std::endl;
@@ -99,7 +99,7 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		int end = line.find("\r\n", start);
 		std::string password;
 		password = line.substr(start, end - start);
-		if (password.compare(server.pass) == 0)
+		if (password.compare(server._pass) == 0)
 		{
 			std::cout << "Password matched!" << std::endl;
 			client.auth_step++;
@@ -107,8 +107,13 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		else
 			std::cout << "DISASTER" << std::endl;
 	}
+
 	if (line.find("NICK") != std::string::npos)
 	{
+		//we also need to make sure the registration happens in order
+		//missing errors if nickname is empty, if contains wrong character or if no nick given? (we still need to check if the person doesnt even give NICK as the command but also if NICK is empty)
+		//but the if no NICK given check needs to be done elsewhere
+		std::string oldnick = client.getNick();
 		std::cout << "NICK FOR fd: " << client.getClientFd() << std::endl;
 		int start = line.find("NICK ") + 5;
 		int end = line.find("\r\n", start);
@@ -117,9 +122,22 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		client.setNick(nickname);
 		std::cout << "Nick set: " << client.getNick() << std::endl;
 		client.auth_step++;
+		//go over the flow for this one, we should not be sending the new nick message if its the first time updating valid nick
+		if (client.getNick().size() != 0 && line.find("NICK ") != std::string::npos) // if new nick given, we need to broadcast a message
+		{
+			std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
+			send(client.getClientFd(), message.c_str(), message.size(), 0);			
+		}
+		if (client.getNick().size() == 0)
+		{
+			std::string placeholderserv = "localhost";
+			std::string message = ERR_NONICKNAMEGIVEN(placeholderserv);
+			send(client.getClientFd(), message.c_str(), message.size(), 0);		
+		}
 	}
 	if (line.find("USER") != std::string::npos)
 	{
+		//nickname in use for someone on the server
 		std::cout << "USER FOR fd: " << client.getClientFd() << std::endl;
 		std::istringstream iss(line.substr(line.find("USER")));
 		std::string command, username, hostname, servername, realname; 
@@ -140,7 +158,7 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "User set: " << client.getUserName() << std::endl;*/
 		if (client.auth_step == 2)
 		{
-			std::string message = RPL_WELCOME(server.name, client.getNick());
+			std::string message = RPL_WELCOME(server._name, client.getNick());
 			send(client.getClientFd(), message.c_str(), message.size(), 0);
 			std::cout << "We got all the info!" << std::endl;
 		}
@@ -168,25 +186,25 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 
 int Server::getEpollfd() const
 {
-	return epollfd;
+	return _epollFd;
 }
 
 struct epoll_event* Server::getEpollEvents()
 {
-	return events;
+	return _events;
 }
 
 int Server::getServerfd() const
 {
-	return serverfd;
+	return _serverFd;
 }
 
 std::vector<Client>& Server::getClientInfo()
 {
-	return clientInfo;
+	return _clientInfo;
 }
 
 std::vector<Channel>& Server::getChannelInfo()
 {
-	return channelInfo;
+	return _channelInfo;
 }
