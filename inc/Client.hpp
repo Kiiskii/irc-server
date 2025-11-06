@@ -26,6 +26,7 @@ class Client
 	public:
 	
 		int auth_step = 0;
+		std::string recvBuffer;
 		
 		// getters
 		int						getClientFd();

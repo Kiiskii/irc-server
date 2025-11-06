@@ -61,6 +61,7 @@ void Client::addChannel(Channel* chan)
 
 /**
  * @brief need to fix this one, currently fix value for channel testing */
+//Do we need this?
 void Client::updateClientInfo(std::string bufferStr)
 {
 	(void) bufferStr;
@@ -167,10 +168,10 @@ void Client::askToJoin(std::string buffer, Server& server)
 			Channel* channelPtr = nullptr;
 
 			// check if the channel exists
-			if (channelNameIt == server.channelInfo.end()) // not exist
+			if (channelNameIt == server.getChannelInfo().end()) // not exist
 			{
-				server.channelInfo.push_back(Channel(channelName));
-				channelPtr = &server.channelInfo.back();
+				server.getChannelInfo().push_back(Channel(channelName));
+				channelPtr = &server.getChannelInfo().back();
 				// this->_atChannel->setChanop(this);
 			}
 			else

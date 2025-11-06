@@ -7,9 +7,11 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+#include <sstream>
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <sys/epoll.h>
+#include "macro.hpp"
 
 #include "Channel.hpp"
 #include "Client.hpp"
@@ -22,27 +24,34 @@
 class Client;
 class Channel;
 
-//What should be kept inside class etc...
 class Server
 {
-	public:
+	private:
 	int epollfd = -1;
 	int serverfd = -1;
-	std::string pass = "mouse";
+	std::string pass = "";
 	std::string name = "ft_irc";
 	std::vector<Client> clientInfo;
 	std::vector<Channel> channelInfo;
-	const int port = 6667;
+	int port = -1;
 	struct sockaddr_in details;
 	struct epoll_event event;
 	struct epoll_event events[MAX_EVENTS];
 
+	public:
+//getters
+	int getServerfd() const;
+	int getEpollfd() const;
+	struct epoll_event* getEpollEvents();
+	std::vector<Client>& getClientInfo();
+	std::vector<Channel>& getChannelInfo();
 
+	void setupServerDetails(Server &server, int argc, char *argv[]);
 	void setupSocket();
 	void setupEpoll();
 	void handleNewClient();
 	void handleClient();
-	void handleCommand(Client &client, std::string &line);
+	void handleCommand(Server &server, Client &client, std::string &line);
 	std::vector<Channel>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 
