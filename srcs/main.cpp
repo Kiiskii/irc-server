@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 				{
 					Client& currentClient =  server.clientInfo[clientIndex];
 					evenBuffer = ft_trimString(evenBuffer);
-					std::cout << "topic comd: " << evenBuffer << std::endl;
+					std::cout << "topic comd: [" << evenBuffer << "]" << std::endl;
 					// check command topic
 					currentClient.askTopic(evenBuffer);       
 				}

@@ -1,7 +1,7 @@
 #include "Channel.hpp"
 
 /// mode is set to +nt for now: n - no external message, t - topic restriction
-Channel::Channel() : _channelName("Empty"), _topic(""), _mode("+nt"), _chanKey("")
+Channel::Channel() : _channelName(""), _topic(""), _mode("+nt"), _chanKey("")
 {
 
 }
@@ -140,6 +140,7 @@ std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 		+" :You have joined too many channels" + " \r\n";
 		break;
 
+	// not test this yet, need key
 	case BAD_CHANNEL_KEY: 	
 		returnMsg = ":" + currentClient->getServerName() + " " + ERR_TOOMANYCHANNELS 
 		+ " " + currentClient->getNick() + " " + this->getChannelName() 
