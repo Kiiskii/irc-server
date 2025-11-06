@@ -59,6 +59,9 @@ class Client
 		void		setClientState(enum ClientState state);
 		void		addChannel(Channel* chan);
 
+		// message parsing
+		//bool parseMessage(std::string &line, ParsedMessage &out);
+
 		// other
 		// void		updateClientInfo(std::string bufferStr);
 		// JOIN
