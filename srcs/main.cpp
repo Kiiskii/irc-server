@@ -39,14 +39,7 @@ int main(int argc, char *argv[])
 				server.handleCommand(server, server.getClientInfo()[clientIndex], evenBuffer);
 				//need to also deal with a situation if password is "empty string"
 
-				if (evenBuffer.find("TOPIC") != std::string::npos)
-				{
-					Client& currentClient =  server.clientInfo[clientIndex];
-					evenBuffer = ft_trimString(evenBuffer);
-					std::cout << "topic comd: [" << evenBuffer << "]" << std::endl;
-					// check command topic
-					currentClient.askTopic(evenBuffer);       
-				}
+				
 			}
 		}
 	}

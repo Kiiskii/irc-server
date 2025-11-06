@@ -92,13 +92,6 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
 		return ;
 	}
-	std::cout << "This is the command: " << line << std::endl;
-	if (line.find("CAP") != std::string::npos)
-	{
-		std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
-		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-		return ;
-	}
 	if (line.find("PASS") != std::string::npos)
 	{
 		std::cout << "PASS FOR fd: " << client.getClientFd() << std::endl;
@@ -140,28 +133,13 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "Host set: " << client.getHostName() << std::endl;
 		std::cout << "Server set: " << client.getServerName() << std::endl;
 /*		int start = line.find("USER ") + 5;
-		std::istringstream iss(line.substr(line.find("USER")));
-		std::string command, username, hostname, servername, realname; 
-		iss >> command >> username >> hostname >> servername;
-
-		client.setUserName(username);
-		client.setHostName(hostname);
-		//shouldnt we set the server name for the actual server object?
-		client.setServerName(servername);
-		std::cout << "User set: " << client.getUserName() << std::endl;
-		std::cout << "Host set: " << client.getHostName() << std::endl;
-		std::cout << "Server set: " << client.getServerName() << std::endl;
-/*		int start = line.find("USER ") + 5;
 		int end = line.find(" ", start);
 		std::string username;
 		username = line.substr(start, end - start);
 		client.setUserName(username);
 		std::cout << "User set: " << client.getUserName() << std::endl;*/
-		std::cout << "User set: " << client.getUserName() << std::endl;*/
 		if (client.auth_step == 2)
 		{
-			std::string message = RPL_WELCOME(server.name, client.getNick());
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
 			std::string message = RPL_WELCOME(server.name, client.getNick());
 			send(client.getClientFd(), message.c_str(), message.size(), 0);
 			std::cout << "We got all the info!" << std::endl;
@@ -178,6 +156,13 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		line = ft_trimString(line); //trim whitespace
 //		client.updateClientInfo(line); //testing with my username
 		client.askToJoin(line, server);
+	}
+	if (line.find("TOPIC") != std::string::npos)
+	{
+		line = ft_trimString(line);
+		std::cout << "topic comd: [" << line << "]" << std::endl;
+		// check command topic
+		client.askTopic(line);       
 	}
 }
 
