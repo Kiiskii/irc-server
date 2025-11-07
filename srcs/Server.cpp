@@ -80,9 +80,10 @@ void Server::handleClient()
 {
 
 }
-/*Server should have centralized command handler function but this should then call to the specific command functions.
-I left this like it is because many of the command functions include parsing which we should preferably handle before we
-trigger the actual command function.*/
+
+//what happens if edgecase runs true, server stops or person can try again?
+//also need to make sure the registration process happens in order
+//also need a better way to track registration process
 void Server::handleCommand(Server &server, Client &client, std::string &line)
 {
 	std::cout << "This is the command: " << line << std::endl;
@@ -92,6 +93,7 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	// 	send(client.getClientFd(), reply.c_str(), reply.size(), 0);
 	// 	return ;
 	// }
+	//do we need some sort of registered boolean?
 	if (line.find("PASS") != std::string::npos)
 	{
 		std::cout << "PASS FOR fd: " << client.getClientFd() << std::endl;
@@ -99,18 +101,38 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		int end = line.find("\r\n", start);
 		std::string password;
 		password = line.substr(start, end - start);
+
+		if (client.getClientState() == GOT_USER || client.getClientState() == REGISTERED)
+		{
+			std::string message = ERR_ALREADYREGISTERED(client.getServerName(), client.getNick());
+			send(client.getClientFd(), message.c_str(), message.size(), 0);
+			return ;	
+		}
+		if (password.size() == 0)
+		{
+			std::string placeholderserv = "localhost";
+			std::string message = ERR_NEEDMOREPARAMS(placeholderserv, "PASS");
+			send(client.getClientFd(), message.c_str(), message.size(), 0);
+			return ;			
+		}
 		if (password.compare(server._pass) == 0)
 		{
 			std::cout << "Password matched!" << std::endl;
-			client.auth_step++;
+			client.setClientState(GOT_PASS);
 		}
 		else
-			std::cout << "DISASTER" << std::endl;
+		{
+			std::string placeholderserv = "localhost";
+			std::string message = ERR_PASSWDMISMATCH(placeholderserv);
+			send(client.getClientFd(), message.c_str(), message.size(), 0);					
+		}
 	}
-
-	if (line.find("NICK") != std::string::npos)
+	//[A-Za-z$$$${}\\|]
+	if (line.find("NICK ") != std::string::npos)
 	{
-		//we also need to make sure the registration happens in order
+		//so first one cannot have digits but the second one can...
+		std::regex pattern(R"(^[A-Za-z\[\]{}\\|][A-Za-z0-9\[\]{}\\|]*$)");
+
 		//missing errors if nickname is empty, if contains wrong character or if no nick given? (we still need to check if the person doesnt even give NICK as the command but also if NICK is empty)
 		//but the if no NICK given check needs to be done elsewhere
 		std::string oldnick = client.getNick();
@@ -119,30 +141,64 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		int end = line.find("\r\n", start);
 		std::string nickname;
 		nickname = line.substr(start, end - start);
+		if (nickname.size() == 0)
+		{
+			std::string placeholderserv = "localhost";
+			std::string message = ERR_NONICKNAMEGIVEN(placeholderserv);
+			send(client.getClientFd(), message.c_str(), message.size(), 0);
+			return ;			
+		}
+		if (std::regex_match(nickname, pattern) == false)
+		{
+			std::string placeholderserv = "localhost";
+			std::string message = ERR_ERRONEUSNICKNAME(placeholderserv, nickname);
+			send(client.getClientFd(), message.c_str(), message.size(), 0);	
+			return ;
+		}
+		for (size_t i = 0; i < server.getClientInfo().size(); i++)
+		{
+			if (server.getClientInfo()[i].getNick() == nickname)
+			{
+				std::string placeholderserv = "localhost";
+				std::string message = ERR_NICKNAMEINUSE(placeholderserv, nickname);
+				send(client.getClientFd(), message.c_str(), message.size(), 0);		
+				return ;
+			}
+		}
 		client.setNick(nickname);
 		std::cout << "Nick set: " << client.getNick() << std::endl;
-		client.auth_step++;
-		//go over the flow for this one, we should not be sending the new nick message if its the first time updating valid nick
-		if (client.getNick().size() != 0 && line.find("NICK ") != std::string::npos) // if new nick given, we need to broadcast a message
+		if (client.getClientState() == GOT_PASS)
+		{
+			client.setClientState(GOT_NICK);
+		}
+		if (client.getClientState() == REGISTERED) // if new nick given, we need to broadcast a message
 		{
 			std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
 			send(client.getClientFd(), message.c_str(), message.size(), 0);			
 		}
-		if (client.getNick().size() == 0)
-		{
-			std::string placeholderserv = "localhost";
-			std::string message = ERR_NONICKNAMEGIVEN(placeholderserv);
-			send(client.getClientFd(), message.c_str(), message.size(), 0);		
-		}
+
 	}
+	//max length..?
 	if (line.find("USER") != std::string::npos)
 	{
-		//nickname in use for someone on the server
 		std::cout << "USER FOR fd: " << client.getClientFd() << std::endl;
 		std::istringstream iss(line.substr(line.find("USER")));
 		std::string command, username, hostname, servername, realname; 
 		iss >> command >> username >> hostname >> servername;
 
+		if (username.size() == 0)
+		{
+			std::string placeholderserv = "localhost";
+			std::string message = ERR_NEEDMOREPARAMS(placeholderserv, "USER");
+			send(client.getClientFd(), message.c_str(), message.size(), 0);
+			return ;			
+		}
+		if (client.getClientState() == GOT_USER || client.getClientState() == REGISTERED)
+		{
+			std::string message = ERR_ALREADYREGISTERED(client.getServerName(), client.getNick());
+			send(client.getClientFd(), message.c_str(), message.size(), 0);
+			return ;	
+		}
 		client.setUserName(username);
 		client.setHostName(hostname);
 		//shouldnt we set the server name for the actual server object?
@@ -150,14 +206,11 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "User set: " << client.getUserName() << std::endl;
 		std::cout << "Host set: " << client.getHostName() << std::endl;
 		std::cout << "Server set: " << client.getServerName() << std::endl;
-/*		int start = line.find("USER ") + 5;
-		int end = line.find(" ", start);
-		std::string username;
-		username = line.substr(start, end - start);
-		client.setUserName(username);
-		std::cout << "User set: " << client.getUserName() << std::endl;*/
-		if (client.auth_step == 2)
+
+		if (client.getClientState() == GOT_NICK)
 		{
+//gotuser and registered are basically the same step, no?
+			client.setClientState(GOT_USER);
 			std::string message = RPL_WELCOME(server._name, client.getNick());
 			send(client.getClientFd(), message.c_str(), message.size(), 0);
 			std::cout << "We got all the info!" << std::endl;
