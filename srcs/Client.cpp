@@ -147,7 +147,6 @@ static bool validateChannelName(std::map<std::string, std::string> channelKeyMap
 
 void Client::askToJoin(std::string buffer, Server& server)
 {
-	(void)server;
 	std::map<std::string, std::string>		channelKeyMap = mappingChannelKey(buffer);
 	
 	// for (auto token : channelKeyMap)
@@ -163,25 +162,24 @@ void Client::askToJoin(std::string buffer, Server& server)
 			std::string channelName = chan.first;
 			std::string clientKey = chan.second;
 			std::cout << "channel name: " << channelName << std::endl;
-			std::vector<Channel>::iterator channelNameIt 
+			std::vector<Channel*>::iterator channelNameIt 
 				= server.isChannelExisting(channelName);
 			Channel* channelPtr = nullptr;
 
 			// check if the channel exists
 			if (channelNameIt == server.getChannelInfo().end()) // not exist
 			{
-				server.getChannelInfo().push_back(Channel(channelName));
-				channelPtr = &server.getChannelInfo().back();
+				server.getChannelInfo().push_back(new Channel(channelName));
+				channelPtr = server.getChannelInfo().back();
 				// this->_atChannel->setChanop(this);
 			}
 			else
-				channelPtr = &(*channelNameIt);
+				channelPtr = *channelNameIt;
 
 			channelMsg result = channelPtr->canClientJoinChannel(*this, clientKey);
 			if (result == JOIN_OK)
 			{
 				this->addChannel(channelPtr);
-				std::cout << "how many channel client joined: " << this->_joinedChannels.size() << std::endl;
 				channelPtr->addUser(this);
 				channelPtr->sendJoinSuccessMsg(*this);
 			}
@@ -190,6 +188,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 				= channelPtr->channelMessage(result, this);
 			if (send(this->getClientFd(), joinMsg.c_str(), joinMsg.size(), 0) < 0)
 			{
+	
 				std::cout << "joinmsg: failed to send";
 				close(this->getClientFd());
 				return; // ?? recheck this, should disconnect the client and flag to the main loop
@@ -199,7 +198,6 @@ void Client::askToJoin(std::string buffer, Server& server)
 
 	// server.printChannelList(); //print all the channel on server
 
-	
 }
 
 Channel* Client::setActiveChannel(std::string buffer)
@@ -211,14 +209,13 @@ Channel* Client::setActiveChannel(std::string buffer)
 	{
 		channelName = buffer.substr(buffer.find_first_of('#') + 1, 
 			buffer.find_first_of(':') - buffer.find_first_of('#') - 2);
-		std::cout << "channel Name : [" << channelName << "]" << std::endl;
-		std::cout << "channel size: " << this->_joinedChannels.size() << std::endl;
+		// std::cout << "channel size: " << this->_joinedChannels.size() << std::endl;
 		for (auto chan : this->_joinedChannels)
 		{
+			std::cout << "current channel name: " << chan->getChannelName() << std::endl;
 			if (chan->getChannelName() == channelName)
 			{
 				channelPtr = chan;
-				std::cout << "current channel name: " << channelPtr->getTopic() << std::endl;
 				return channelPtr;
 			}
 		}
@@ -246,14 +243,12 @@ void Client::askTopic(std::string buffer)
 	}
     else if (buffer.find(":") != std::string::npos)
     {
-        std::cout << "im here setting chan name: " << std::endl;
-
+        // std::cout << "im here setting chan name: " << std::endl;
         channelPtr->setTopic(buffer);
         std::cout << "topic after set: " << channelPtr->getTopic() << std::endl;
         result = CHANGE_TOPIC_MSG;
     }
 
-	// server.clientInfo[clientIndex]._atChannel->setTopic(buffer);
 	std::string topicMsg = channelPtr->channelMessage(result, this);
 	std::cout << "topicmsg: " << topicMsg << std::endl;
 	if (send(this->getClientFd(), topicMsg.c_str(), topicMsg.size(), 0) < 0)

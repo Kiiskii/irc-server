@@ -38,8 +38,6 @@ int main(int argc, char *argv[])
 				std::string evenBuffer(buffer);
 				server.handleCommand(server, server.getClientInfo()[clientIndex], evenBuffer);
 				//need to also deal with a situation if password is "empty string"
-
-				
 			}
 		}
 	}

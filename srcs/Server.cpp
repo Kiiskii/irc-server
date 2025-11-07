@@ -2,11 +2,11 @@
 #include "utils.hpp"
 /* @def check if the channel exists
 	@return ptr to channel if exist else return after the end of vector */
-std::vector<Channel>::iterator Server::isChannelExisting(std::string newChannel) 
+std::vector<Channel*>::iterator Server::isChannelExisting(std::string newChannel) 
 {
 	for (auto it = channelInfo.begin(); it != channelInfo.end(); ++it)
 	{
-		if ((*it).getChannelName() == newChannel)
+		if ((*it)->getChannelName() == newChannel)
 			return it;
 	}
 	return channelInfo.end();
@@ -86,12 +86,12 @@ trigger the actual command function.*/
 void Server::handleCommand(Server &server, Client &client, std::string &line)
 {
 	std::cout << "This is the command: " << line << std::endl;
-	if (line.find("CAP") != std::string::npos)
-	{
-		std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
-		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-		return ;
-	}
+	// if (line.find("CAP") != std::string::npos)
+	// {
+	// 	std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
+	// 	send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+	// 	return ;
+	// }
 	if (line.find("PASS") != std::string::npos)
 	{
 		std::cout << "PASS FOR fd: " << client.getClientFd() << std::endl;
@@ -154,7 +154,6 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	if (line.find("JOIN") != std::string::npos)
 	{
 		line = ft_trimString(line); //trim whitespace
-//		client.updateClientInfo(line); //testing with my username
 		client.askToJoin(line, server);
 	}
 	if (line.find("TOPIC") != std::string::npos)
@@ -186,7 +185,7 @@ std::vector<Client>& Server::getClientInfo()
 	return clientInfo;
 }
 
-std::vector<Channel>& Server::getChannelInfo()
+std::vector<Channel*>& Server::getChannelInfo()
 {
 	return channelInfo;
 }
