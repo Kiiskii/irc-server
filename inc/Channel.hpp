@@ -72,6 +72,7 @@ class Channel
 		Client&				getChanop() const;
 		std::vector<Client>	getUserList() const;
 		std::string			getChanKey() const;
+		std::map<char,std::string> getMode() const;
 
 		// setters
 		void		setChannelName(std::string channelName);
@@ -79,6 +80,7 @@ class Channel
 		void		setTopic(std::string newTopic);
 		void		addUser(Client* newClient);
 		void		setChanKey(std::string newKey);
+		void 		addMode(char key, std::string param);
 
 		// channel public method
 		bool		isClientOnChannel( Client& client);
@@ -88,6 +90,8 @@ class Channel
 		std::string channelMessage(channelMsg msg,  Client* currentClient);
 
 		// mode
+		void		setMode(std::string buffer);
+		void		executeMode();
 		void		handleInviteOnly(bool add, std::string& args);
 		void		handleTopicRestriction(bool add, std::string& args);
 		void		handleChannelKey(bool add, std::string& args);

@@ -7,21 +7,26 @@ Channel* Client::setActiveChannel(std::string buffer)
 	Channel* channelPtr = nullptr;
 	std::string	channelName;
 
-	if (buffer.find("#") != std::string::npos)
+	size_t hashPos = buffer.find("#");
+	if (hashPos == std::string::npos)
+		return nullptr;
+	
+	size_t chanEndPos = buffer.find(' ', hashPos);
+	if (chanEndPos == std::string::npos)
+		chanEndPos = buffer.length();
+
+	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
+	std::cout << "channelName: [" << channelName << "]" << std::endl;
+	for (auto chan : this->_joinedChannels)
 	{
-		channelName = buffer.substr(buffer.find_first_of('#') + 1, 
-			buffer.find_first_of(':') - buffer.find_first_of('#') - 2);
-		// std::cout << "channel size: " << this->_joinedChannels.size() << std::endl;
-		for (auto chan : this->_joinedChannels)
+		if (chan->getChannelName() == channelName)
 		{
-			if (chan->getChannelName() == channelName)
-			{
-				channelPtr = chan;
-				std::cout << "current channel name: " << chan->getChannelName() << std::endl;
-				return channelPtr;
-			}
+			channelPtr = chan;
+			// std::cout << "current channel name: " << chan->getChannelName() << std::endl;
+			return channelPtr;
 		}
 	}
+
 	return nullptr;
 }
 

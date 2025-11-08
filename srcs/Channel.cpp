@@ -66,10 +66,26 @@ void Channel::setTopic(std::string buffer)
 	_topic = newTopic;
 }
 
+
 void Channel::setChanKey(std::string newKey)
 {
 	this->_mode.insert({'k', newKey});
 }
+
+void Channel::addMode(char key, std::string param)
+{
+	_mode.insert({key, param});
+}
+
+std::map<char, std::string> Channel::getMode() const
+{
+	for (auto it : _mode)
+	{
+		std::cout << "key and param: [" << it.first << ", " << it.second << "]" << std::endl;
+	}
+	return _mode;
+}
+
 
 void Channel::addUser(Client* newClient)
 {
