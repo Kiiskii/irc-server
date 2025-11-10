@@ -15,6 +15,7 @@ static bool isValidModeCmd(std::string buffer)
 
 void Channel::setMode(std::string buffer)
 {
+	// mode start position
 	bool addMode = true;
 	bool haveArgs = true;
 	size_t modePos = buffer.find("+");
@@ -23,13 +24,17 @@ void Channel::setMode(std::string buffer)
 		addMode = false;
 		modePos = buffer.find("-");
 	}
+	if (modePos == std::string::npos)
+		return ;
+
+	// mode end position
 	size_t modeEndPos = buffer.find(' ', modePos);
 	if (modeEndPos == std::string::npos)
 	{
 		modeEndPos = buffer.length();
 		haveArgs = false;
 	}
-
+	// subtract the args string and split to vector
 	std::string modeStr = buffer.substr(modePos + 1, modeEndPos - modePos - 1);
 	std::string args;
 	std::vector<std::string> argsVec;
@@ -42,19 +47,19 @@ void Channel::setMode(std::string buffer)
 
 	// need to check whether the mode exist, if add then add, if remove then remove, else if need to change then change param 
 	// how to include the function pointer to here
-	for (size_t i = 0; i < modeStr.size(); ++i)
+	for (char mode : modeStr)
 	{
-		if (modeStr[i] == '+')
-			addMode = true;
-		else if (modeStr[i] == '-')
-			addMode = false;
-		else if (modeStr[i] == 'i' || modeStr[i] == 't' || modeStr[i] == 'o')
-			this->addMode(modeStr[i], "");
-		else
-		{
-			this->addMode(modeStr[i], argsVec.front());
-			argsVec.erase(argsVec.begin());
-		}
+		if (mode == '+') {addMode = true; continue;}	
+		if (mode == '-') {addMode = false; continue;}
+		// else if (modeStr[i] == 'i' || modeStr[i] == 't' || modeStr[i] == 'o')
+		// 	this->addMode(modeStr[i], "");
+		// else
+		// {
+		// 	this->addMode(modeStr[i], argsVec.front());
+		// 	argsVec.erase(argsVec.begin());
+		// }
+		this->_modeHandlers[mode];
+			
 	}
 	
 }
@@ -87,15 +92,7 @@ void	Client::changeMode(std::string buffer)
 			std::cout << "null ptr \n";
 			return;
 		}
-		std::map<char, void (Channel::*)(bool, std::string&)> modeHandlers = {
-				std::make_pair('i', &Channel::handleInviteOnly), // channel
-				std::make_pair('t', &Channel::handleTopicRestriction), // user
-				std::make_pair('k', &Channel::handleChannelKey), //channel
-				std::make_pair('o', &Channel::handleChannelOperator), // user
-				std::make_pair('l', &Channel::handleChannelLimit) // channel
-		};
 	}
-
 	channelPtr->setMode(buffer);
 	channelPtr->getMode();
 	channelPtr->executeMode();

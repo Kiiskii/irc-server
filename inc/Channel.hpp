@@ -57,6 +57,7 @@ class Channel
 		Client*				_channelOperator; //previledge (chanop, voiced user)
 		std::vector<Client> _userList; //who in channel
 		std::map<char, std::string>	_mode; //mode: itkol
+		std::map<char, void (Channel::*)(bool, std::string&)> _modeHandlers;
 		// std::string			_chanKey;
 		
 	public:
