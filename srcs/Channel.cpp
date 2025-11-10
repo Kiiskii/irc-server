@@ -1,13 +1,17 @@
 #include "Channel.hpp"
 
 /// mode is set to +nt for now: n - no external message, t - topic restriction
-Channel::Channel() : _channelName(""), _topic(""), _mode("+nt"), _chanKey("")
+Channel::Channel() : _channelName(""), _topic("")
 {
-
+	_modeHandlers['i'] = &Channel::handleInviteOnly;
+	_modeHandlers['t'] = &Channel::handleTopicRestriction; // user
+	_modeHandlers['k'] = &Channel::handleChannelKey; //channel
+	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
+	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
 
 
-Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic(""), _mode("+nt"), _chanKey("")
+Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 {
 
 }
@@ -38,9 +42,14 @@ std::vector<Client>	Channel::getUserList() const
 	return _userList;
 }
 
-std::string	Channel::getKey() const
+std::string	Channel::getChanKey() const
 {
-	return _chanKey;
+	std::string chanKey = "";
+
+	if (this->_mode.find('k') != this->_mode.end()) // k found
+		chanKey = (*this->_mode.find('k')).second;
+	std::cout << "channel key : [" << chanKey << "]\n"; 
+	return chanKey;
 }
 
 void	Channel::setChanop(Client chanop)
@@ -61,10 +70,26 @@ void Channel::setTopic(std::string buffer)
 	_topic = newTopic;
 }
 
-void Channel::setKey(std::string newKey)
+
+void Channel::setChanKey(std::string newKey)
 {
-	_chanKey = newKey;
+	this->_mode.insert({'k', newKey});
 }
+
+void Channel::addMode(char key, std::string param)
+{
+	_mode.insert({key, param});
+}
+
+std::map<char, std::string> Channel::getMode() const
+{
+	for (auto it : _mode)
+	{
+		std::cout << "key and param: [" << it.first << ", " << it.second << "]" << std::endl;
+	}
+	return _mode;
+}
+
 
 void Channel::addUser(Client* newClient)
 {
@@ -93,7 +118,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		return TOO_MANY_CHANNELS;
 	if (this->isClientOnChannel(client))
 		return ALREADY_ON_CHAN;
-	if (!this->getKey().empty() && this->getKey() != clientKey) // recheck with mode later
+	if (!this->getChanKey().empty() && this->getChanKey() != clientKey) // recheck with mode later
 		return BAD_CHANNEL_KEY;
 	return JOIN_OK;
 }
@@ -182,3 +207,23 @@ std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 	return returnMsg;
 }
 
+void Channel::handleInviteOnly(bool add, std::string& args)
+{
+
+}
+void	Channel::handleTopicRestriction(bool add, std::string& args)
+{
+
+}
+void	Channel::handleChannelKey(bool add, std::string& args)
+{
+
+}
+void	Channel::handleChannelOperator(bool add, std::string& args)
+{
+
+}
+void	Channel::handleChannelLimit(bool add, std::string& args)
+{
+
+}

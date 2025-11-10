@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <regex> //std::istringstream
+#include <functional>
 
 #include "Channel.hpp"
 #include "Server.hpp"
@@ -34,6 +35,7 @@ class Client
 		std::vector<Channel*>	_joinedChannels;
 		enum ClientState		_clientState = NONE;
 
+	
 	public:
 	
 //		int auth_step = 0;
@@ -58,11 +60,15 @@ class Client
 		void		addChannel(Channel* chan);
 
 		// other
-		void 	updateClientInfo(std::string bufferStr);
-		void	askToJoin(std::string buffer, Server& server);
-		Channel* setActiveChannel(std::string buffer);
-		void	askTopic(std::string buffer);
-
+		// void		updateClientInfo(std::string bufferStr);
+		// JOIN
+		void		askToJoin(std::string buffer, Server& server);
+		
+		// TOPIC
+		Channel*	setActiveChannel(std::string buffer);
+		void		askTopic(std::string buffer);
+		// MODE
+		void		changeMode(std::string buffer);	
 	
 
 };

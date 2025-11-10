@@ -32,19 +32,19 @@ class Server
 	std::string _pass = "";
 	std::string _name = "ft_irc";
 	std::vector<Client> _clientInfo;
-	std::vector<Channel> _channelInfo;
+	std::vector<Channel*> _channelInfo;
 	int _port = -1;
 	struct sockaddr_in _details;
 	struct epoll_event _event;
 	struct epoll_event _events[MAX_EVENTS];
 
-	public:
+public:
 //getters
 	int getServerfd() const;
 	int getEpollfd() const;
 	struct epoll_event* getEpollEvents();
 	std::vector<Client>& getClientInfo();
-	std::vector<Channel>& getChannelInfo();
+	std::vector<Channel*>& getChannelInfo();
 
 	void setupServerDetails(Server &server, int argc, char *argv[]);
 	void setupSocket();
@@ -52,7 +52,8 @@ class Server
 	void handleNewClient();
 	void handleClient();
 	void handleCommand(Server &server, Client &client, std::string &line);
-	std::vector<Channel>::iterator isChannelExisting(std::string newChannel);
+
+	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 
 };

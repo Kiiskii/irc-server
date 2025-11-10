@@ -2,11 +2,11 @@
 #include "utils.hpp"
 /* @def check if the channel exists
 	@return ptr to channel if exist else return after the end of vector */
-std::vector<Channel>::iterator Server::isChannelExisting(std::string newChannel) 
+std::vector<Channel*>::iterator Server::isChannelExisting(std::string newChannel) 
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end(); ++it)
 	{
-		if ((*it).getChannelName() == newChannel)
+		if ((*it)->getChannelName() == newChannel)
 			return it;
 	}
 	return _channelInfo.end();
@@ -225,7 +225,6 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	if (line.find("JOIN") != std::string::npos)
 	{
 		line = ft_trimString(line); //trim whitespace
-//		client.updateClientInfo(line); //testing with my username
 		client.askToJoin(line, server);
 	}
 	if (line.find("TOPIC") != std::string::npos)
@@ -234,6 +233,13 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "topic comd: [" << line << "]" << std::endl;
 		// check command topic
 		client.askTopic(line);       
+	}
+	if (line.find("MODE") != std::string::npos)
+	{
+		line = ft_trimString(line);
+		std::cout << "mode comd: [" << line << "]" << std::endl;
+		// check command topic
+		client.changeMode(line);       
 	}
 }
 
@@ -257,7 +263,7 @@ std::vector<Client>& Server::getClientInfo()
 	return _clientInfo;
 }
 
-std::vector<Channel>& Server::getChannelInfo()
+std::vector<Channel*>& Server::getChannelInfo()
 {
 	return _channelInfo;
 }
