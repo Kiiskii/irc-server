@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <regex> //std::istringstream
+#include <functional>
 
 #include "Channel.hpp"
 #include "Server.hpp"
@@ -21,7 +22,7 @@ class Client
 		std::string				_userName;
 		std::string				_hostName;
 		std::string				_serverName;
-		std::vector<Channel*>	_joinedChannels; 
+		std::vector<Channel*>	_joinedChannels;
 	
 	public:
 	
@@ -45,11 +46,15 @@ class Client
 		void		addChannel(Channel* chan);
 
 		// other
-		void		updateClientInfo(std::string bufferStr);
+		// void		updateClientInfo(std::string bufferStr);
+		// JOIN
 		void		askToJoin(std::string buffer, Server& server);
+		
+		// TOPIC
 		Channel*	setActiveChannel(std::string buffer);
 		void		askTopic(std::string buffer);
-
+		// MODE
+		void		changeMode(std::string buffer);	
 	
 
 };

@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
+
 #include "Client.hpp"
 #include "macro.hpp"
 
@@ -54,8 +56,9 @@ class Channel
 		std::string			_topic;
 		Client*				_channelOperator; //previledge (chanop, voiced user)
 		std::vector<Client> _userList; //who in channel
-		std::string			_mode; //what mode
-		std::string			_chanKey;
+		std::map<char, std::string>	_mode; //mode: itkol
+		std::map<char, void (Channel::*)(bool, std::string&)> _modeHandlers;
+		// std::string			_chanKey;
 		
 	public:
 
@@ -69,14 +72,16 @@ class Channel
 		std::string 		getTopic() const;
 		Client&				getChanop() const;
 		std::vector<Client>	getUserList() const;
-		std::string			getKey() const;
+		std::string			getChanKey() const;
+		std::map<char,std::string> getMode() const;
 
 		// setters
 		void		setChannelName(std::string channelName);
 		void		setChanop(Client chanop);
 		void		setTopic(std::string newTopic);
 		void		addUser(Client* newClient);
-		void		setKey(std::string newKey);
+		void		setChanKey(std::string newKey);
+		void 		addMode(char key, std::string param);
 
 		// channel public method
 		bool		isClientOnChannel( Client& client);
@@ -84,11 +89,15 @@ class Channel
 		void		sendJoinSuccessMsg( Client& client);
 		
 		std::string channelMessage(channelMsg msg,  Client* currentClient);
-		// void		handleJoinCmd(std::string buffer, Client& currentClient);
-		// unsigned int	checkTopicCmd(std::string buffer);
 
-		
-
+		// mode
+		void		setMode(std::string buffer);
+		void		executeMode();
+		void		handleInviteOnly(bool add, std::string& args);
+		void		handleTopicRestriction(bool add, std::string& args);
+		void		handleChannelKey(bool add, std::string& args);
+		void		handleChannelOperator(bool add, std::string& args);
+		void		handleChannelLimit(bool add, std::string& args);
 	
 };
 

@@ -8,3 +8,18 @@ std::string ft_trimString(std::string msg)
     return trailingTrim;
 }
 
+/** @brief split string into tokens using delimiter */
+std::vector<std::string> splitString(std::string buffer, char delimiter)
+{
+	std::cout << "buffer :[" << buffer << "]" << std::endl;
+
+	std::istringstream	tokenStream(buffer); //save buffer string to an istringstream obj
+	std::string			aToken;
+	std::vector<std::string> tokens;
+
+	while (std::getline(tokenStream, aToken, delimiter))
+	{
+		tokens.push_back(aToken);
+	}
+	return tokens;
+}

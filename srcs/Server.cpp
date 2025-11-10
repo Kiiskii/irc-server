@@ -86,12 +86,12 @@ trigger the actual command function.*/
 void Server::handleCommand(Server &server, Client &client, std::string &line)
 {
 	std::cout << "This is the command: " << line << std::endl;
-	// if (line.find("CAP") != std::string::npos)
-	// {
-	// 	std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
-	// 	send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-	// 	return ;
-	// }
+	if (line.find("CAP") != std::string::npos)
+	{
+		std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
+		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+		return ;
+	}
 	if (line.find("PASS") != std::string::npos)
 	{
 		std::cout << "PASS FOR fd: " << client.getClientFd() << std::endl;
@@ -162,6 +162,13 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "topic comd: [" << line << "]" << std::endl;
 		// check command topic
 		client.askTopic(line);       
+	}
+	if (line.find("MODE") != std::string::npos)
+	{
+		line = ft_trimString(line);
+		std::cout << "mode comd: [" << line << "]" << std::endl;
+		// check command topic
+		client.changeMode(line);       
 	}
 }
 
