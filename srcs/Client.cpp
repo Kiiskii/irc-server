@@ -29,6 +29,11 @@ std::vector<Channel*> Client::getJoinedChannels()
 	return _joinedChannels;
 }
 
+enum ClientState Client::getClientState()
+{
+	return _clientState;
+}
+
 void Client::setClientFd(int num)
 {
 	_clientfd = num;
@@ -52,6 +57,11 @@ void Client::setHostName(std::string host)
 void Client::setServerName(std::string server)
 {
 	_serverName = server;
+}
+
+void Client::setClientState(enum ClientState state)
+{
+	_clientState = state;
 }
 
 void Client::addChannel(Channel* chan)

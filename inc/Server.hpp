@@ -27,16 +27,16 @@ class Channel;
 class Server
 {
 	private:
-	int epollfd = -1;
-	int serverfd = -1;
-	std::string pass = "";
-	std::string name = "ft_irc";
-	std::vector<Client> clientInfo;
-	std::vector<Channel*> channelInfo;
-	int port = -1;
-	struct sockaddr_in details;
-	struct epoll_event event;
-	struct epoll_event events[MAX_EVENTS];
+	int _epollFd = -1;
+	int _serverFd = -1;
+	std::string _pass = "";
+	std::string _name = "ft_irc";
+	std::vector<Client> _clientInfo;
+	std::vector<Channel*> _channelInfo;
+	int _port = -1;
+	struct sockaddr_in _details;
+	struct epoll_event _event;
+	struct epoll_event _events[MAX_EVENTS];
 
 public:
 //getters
