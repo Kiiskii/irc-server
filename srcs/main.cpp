@@ -32,11 +32,14 @@ int main(int argc, char *argv[])
 						break;
 					}
 				}
+				server.getClientInfo()[clientIndex].recieve();
+				/*
 				if (recv(server.getClientInfo()[clientIndex].getClientFd(), buffer, sizeof(buffer), 0) <= 0)
 					std::cout << "Did we encounter a problem" << std::endl;
 				std::cout << "Message that we received : [" << buffer << "]" << std::endl;
 				std::string evenBuffer(buffer);
 				server.handleCommand(server, server.getClientInfo()[clientIndex], evenBuffer);
+				*/
 				//need to also deal with a situation if password is "empty string"
 			}
 		}

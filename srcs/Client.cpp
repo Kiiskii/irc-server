@@ -81,7 +81,6 @@ void Client::addChannel(Channel* chan)
 // 	_serverName = "localhost";
 // }
 
-
 /** @brief split string into tokens using delimiter */
 static std::vector<std::string> splitString(std::string buffer, char delimiter)
 {
@@ -179,10 +178,10 @@ void Client::askToJoin(std::string buffer, Server& server)
 			Channel* channelPtr = nullptr;
 
 			// check if the channel exists
-			if (channelNameIt == server.getChannelInfo().end()) // not exist
+			if (channelNameIt == server.channelInfo.end()) // not exist
 			{
-				server.getChannelInfo().push_back(Channel(channelName));
-				channelPtr = &server.getChannelInfo().back();
+				server.channelInfo.push_back(Channel(channelName));
+				channelPtr = &server.channelInfo.back();
 				// this->_atChannel->setChanop(this);
 			}
 			else
@@ -192,7 +191,6 @@ void Client::askToJoin(std::string buffer, Server& server)
 			if (result == JOIN_OK)
 			{
 				this->addChannel(channelPtr);
-				std::cout << "how many channel client joined: " << this->_joinedChannels.size() << std::endl;
 				channelPtr->addUser(this);
 				channelPtr->sendJoinSuccessMsg(*this);
 			}
@@ -213,77 +211,166 @@ void Client::askToJoin(std::string buffer, Server& server)
 	
 }
 
-Channel* Client::setActiveChannel(std::string buffer)
+void Client::recieve()
 {
-	Channel* channelPtr = nullptr;
-	std::string	channelName;
+	// Recieve data from the client
+	char buffer[512];
+	size_t bytes = 1;
+	
+	// DO WE USE MSG_DONTWAIT OR 0???
+	while (bytes > 0) {
+		bytes = recv(getClientFd(), buffer, sizeof(buffer), MSG_DONTWAIT);
 
-	if (buffer.find("#") != std::string::npos)
-	{
-		channelName = buffer.substr(buffer.find_first_of('#') + 1, 
-			buffer.find_first_of(':') - buffer.find_first_of('#') - 2);
-		std::cout << "channel Name : [" << channelName << "]" << std::endl;
-		std::cout << "channel size: " << this->_joinedChannels.size() << std::endl;
-		for (auto chan : this->_joinedChannels)
-		{
-			if (chan->getChannelName() == channelName)
-			{
-				channelPtr = chan;
-				std::cout << "current channel name: " << channelPtr->getTopic() << std::endl;
-				return channelPtr;
+		// Errorhandling
+		if (bytes < 0) {
+			std::cout << "Failed to recieve from client: " << getClientFd() << std::endl;
+		}
+		else if (bytes == 0) {
+			// disconnect client here?
+			std::cout << "Client disconnect" << std::endl;
+			break ;
+		}
+		// Buffer recieved data
+		else {
+			_input.append(buffer, bytes);
+
+			// Check if message if complete
+			while (true) {
+				size_t newline = _input.find("\r\n");
+				if (newline == _input.npos)
+					break ;
+				auto begin = _input.begin();
+				auto end = _input.begin() + newline;
+				parseMessage(std::string(begin, end));
+				_input.erase(0, newline + 2);
 			}
 		}
 	}
-	return nullptr;
 }
 
-void Client::askTopic(std::string buffer)
+bool Client::parseMessage(const std::string &line)
 {
-	Channel* channelPtr;
-	channelMsg result;
+	std::string msg;
 
-	std::cout << "channel size: " << this->_joinedChannels.size() << std::endl;
-	channelPtr = setActiveChannel(buffer);
-	// if not on any channel, return do nothing
-	if (channelPtr == nullptr)
-		return;
+	size_t i = 0;
+	const size_t n = line.size();
 
-	if (buffer == "TOPIC")
-	{
-		if (channelPtr && channelPtr->getTopic().empty())
-			result = NO_TOPIC_MSG;
-		else if (channelPtr && !channelPtr->getTopic().empty())
-			result = CHANNEL_TOPIC_MSG;
+	// skip leading spaces
+	i = line.find_first_not_of(' ', i);
+
+	// possibly deal with empty string?
+	// if (i == n) return false;
+
+	// command
+	size_t cmdStart = i;
+
+	i = line.find(' ', i);
+
+	// no command
+	if (cmdStart == i)
+		return false;
+
+	//out.command = line.substr(cmdStart, i - cmdStart);
+	msg = line.substr(cmdStart, i - cmdStart);
+
+	// do we want to normalize to uppercase here?
+	for (char &c : msg)
+		c = std::toupper(static_cast<unsigned char>(c));
+
+	// parameters
+	int j = 1;
+	while (i < n) {
+		// skip spaces before next parameter
+		i = line.find_first_not_of(' ', i);
+		if (i >= n)
+			break ;
+
+		if (line[i] == ':') {
+			// handle trailing after ':', trailing should always be last parameter?
+			++i;
+			std::string trailing = line.substr(i);
+			msg.append(trailing);
+			break ;
+		}
+		else {
+			// read middle param until space
+			size_t paramStart = i;
+
+			i = line.find(' ', i);
+			msg.append(line.substr(paramStart, i - paramStart));
+		}
+		++j;
 	}
-    else if (buffer.find(":") != std::string::npos)
-    {
-        std::cout << "im here setting chan name: " << std::endl;
+	return true;
+}
 
-        channelPtr->setTopic(buffer);
-        std::cout << "topic after set: " << channelPtr->getTopic() << std::endl;
-        result = CHANGE_TOPIC_MSG;
-    }
+/*
+#define PARTS_MAX 15
 
-	// server.clientInfo[clientIndex]._atChannel->setTopic(buffer);
-	std::string topicMsg = channelPtr->channelMessage(result, this);
-	std::cout << "topicmsg: " << topicMsg << std::endl;
-	if (send(this->getClientFd(), topicMsg.c_str(), topicMsg.size(), 0) < 0)
-	{
-		std::cout << "setTopic: failed to send\r\n";
-		close(this->getClientFd());
-		return;
-	}   
+bool parseMessage(std::string &line)
+{
+	char* msgArray[PARTS_MAX];
 
+	size_t i = 0;
+	const size_t n = line.size();
+
+	// skip leading spaces
+	i = line.first_not_of(' ', i);
+
+	// possibly deal with empty string?
+	// if (i == n) return false;
+
+	// command
+	size_t cmdStart = i;
+
+	i = line.find(' ', i);
+
+	// no command
+	if (cmdStart == i)
+		return false;
+
+	//out.command = line.substr(cmdStart, i - cmdStart);
+	argv[0] = line.substr(cmdStart, i - cmdStart);
+
+	// do we want to normalize to uppercase here?
+	for (char &c : argv[0])
+		c = std::toupper(static_cast<unsigned char>(c));
+
+	// parameters
+	int j = 1;
+	while (i < n) {
+		// skip spaces before next parameter
+		i = line.first_not_of(' ', i);
+		if (i >= n)
+			break ;
+
+		if (line[i] == ':') {
+			// handle trailing after ':', trailing should always be last parameter?
+			++i;
+			std::string trailing = line.substr(i);
+			argv[j] = trailing;
+			break ;
+		}
+		else {
+			// read middle param until space
+			size_t paramStart = i;
+
+			i = line.find(' ', i);
+			agrv[j] = line.substr(paramStart, i - paramStart);
+		}
+		++j;
+	}
+	return true;
+}
+*/
+
+/*
 struct ParsedMessage
 {
 	std::string prefix;
 	std::string command;
 	std::vector<std::string> params;
 };
-
-void Client::recieve()
-{
-}
 
 bool parseMessage(std::string &line, ParsedMessage &out)
 {
@@ -369,3 +456,4 @@ bool parseMessage(std::string &line, ParsedMessage &out)
 	}
 	return true;
 }
+*/
