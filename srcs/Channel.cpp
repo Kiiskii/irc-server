@@ -13,7 +13,11 @@ Channel::Channel() : _channelName(""), _topic("")
 
 Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 {
-
+	_modeHandlers['i'] = &Channel::handleInviteOnly;
+	_modeHandlers['t'] = &Channel::handleTopicRestriction; // user
+	_modeHandlers['k'] = &Channel::handleChannelKey; //channel
+	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
+	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
 
 std::ostream& operator<<(std::ostream& os, const Channel& channel){
@@ -80,6 +84,12 @@ void Channel::addMode(char key, std::string param)
 {
 	_mode.insert({key, param});
 }
+
+void Channel::removeMode(char key)
+{
+	_mode.erase(key);
+}
+
 
 std::map<char, std::string> Channel::getMode() const
 {
@@ -207,9 +217,30 @@ std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
 	return returnMsg;
 }
 
+/* @brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ??*/
 void Channel::handleInviteOnly(bool add, std::string& args)
 {
-
+	bool active = false;
+	for (auto m : _mode)
+	{
+		if (m.first == 'i')
+		{
+			active = true;
+			break;
+		}
+	}
+	if (add)
+	{
+		if (active)
+			return;
+		this->addMode('i', args);
+		return;
+	}
+	if (active)
+	{
+		this->removeMode('i');
+		return;
+	}
 }
 void	Channel::handleTopicRestriction(bool add, std::string& args)
 {
@@ -217,7 +248,32 @@ void	Channel::handleTopicRestriction(bool add, std::string& args)
 }
 void	Channel::handleChannelKey(bool add, std::string& args)
 {
-
+	bool active = false;
+	std::string key;
+	for (auto m : _mode)
+	{
+		if (m.first == 'k')
+		{
+			active = true;
+			key = m.second;
+			break;
+		}
+	}
+	if (add)
+	{
+		if (active && args == key)
+			return;
+		
+		this->removeMode('k');
+		this->addMode('k', args);
+		return;
+		
+	}
+	if (active)
+	{
+		this->removeMode('k');
+		return;
+	}
 }
 void	Channel::handleChannelOperator(bool add, std::string& args)
 {

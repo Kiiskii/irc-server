@@ -22,7 +22,8 @@ enum	channelMsg
 	TOO_MANY_CHANNELS,
 	BAD_CHANNEL_KEY,
 	INVITE_ONLY_CHAN,
-	ALREADY_ON_CHAN
+	ALREADY_ON_CHAN,
+	SET_KEY_OK
 
 };
 
@@ -82,6 +83,7 @@ class Channel
 		void		addUser(Client* newClient);
 		void		setChanKey(std::string newKey);
 		void 		addMode(char key, std::string param);
+		void		removeMode(char key);
 
 		// channel public method
 		bool		isClientOnChannel( Client& client);

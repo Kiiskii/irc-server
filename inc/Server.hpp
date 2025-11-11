@@ -39,6 +39,7 @@ class Server
 	struct epoll_event _events[MAX_EVENTS];
 
 public:
+	~Server();
 //getters
 	int getServerfd() const;
 	int getEpollfd() const;

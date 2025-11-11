@@ -4,7 +4,7 @@
 
 Channel* Client::setActiveChannel(std::string buffer)
 {
-	Channel* channelPtr = nullptr;
+	// Channel* channelPtr = nullptr;
 	std::string	channelName;
 
 	size_t hashPos = buffer.find("#");
@@ -19,11 +19,15 @@ Channel* Client::setActiveChannel(std::string buffer)
 	std::cout << "channelName: [" << channelName << "]" << std::endl;
 	for (auto chan : this->_joinedChannels)
 	{
-		if (chan->getChannelName() == channelName)
+		if (chan && chan->getChannelName() == channelName)
 		{
-			channelPtr = chan;
-			// std::cout << "current channel name: " << chan->getChannelName() << std::endl;
-			return channelPtr;
+			// channelPtr = chan;
+			std::cout << "current channel name: " << chan->getChannelName() << std::endl;
+			return chan;
+		}
+		else
+		{
+			std::cout << "there is no channel saved in _joinedChannel" << std::endl;
 		}
 	}
 

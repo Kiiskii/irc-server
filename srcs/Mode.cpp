@@ -35,33 +35,36 @@ void Channel::setMode(std::string buffer)
 		haveArgs = false;
 	}
 	// subtract the args string and split to vector
-	std::string modeStr = buffer.substr(modePos + 1, modeEndPos - modePos - 1);
+	std::string modeStr = buffer.substr(modePos, modeEndPos - modePos);
 	std::string args;
 	std::vector<std::string> argsVec;
 	if (haveArgs)
 	{
 		args = buffer.substr(modeEndPos + 1);
-		argsVec = splitString(args, ' ');
+		if (!args.empty())
+			argsVec = splitString(args, ' ');
 	}
-	// std::cout << "mode are: [" << modeStr << "]" << " and args [" << args << "]" << std::endl;
+	std::cout << "mode are: [" << modeStr << "]" << " and args [" << args << "]" << std::endl;
 
-	// need to check whether the mode exist, if add then add, if remove then remove, else if need to change then change param 
-	// how to include the function pointer to here
+	// this only handle the map of _mode, not yet what to response??
+	std::string param;
 	for (char mode : modeStr)
 	{
 		if (mode == '+') {addMode = true; continue;}	
 		if (mode == '-') {addMode = false; continue;}
-		// else if (modeStr[i] == 'i' || modeStr[i] == 't' || modeStr[i] == 'o')
-		// 	this->addMode(modeStr[i], "");
-		// else
-		// {
-		// 	this->addMode(modeStr[i], argsVec.front());
-		// 	argsVec.erase(argsVec.begin());
-		// }
-		this->_modeHandlers[mode];
-			
+		if (mode == 'i' || mode == 't' || mode == 'o')
+		{
+			param = "";
+		}
+		else if (mode == 'k' || mode == 'l')
+		{
+			param = argsVec.front();
+			argsVec.erase(argsVec.begin());
+			// this->addMode(mode, argsVec.front());
+		}
+		std::cout << "param :[" << param << "] \n";
+		(this->*(_modeHandlers[mode]))(addMode, param);
 	}
-	
 }
 
 void Channel::executeMode()
@@ -75,12 +78,15 @@ void Channel::executeMode()
 //mode: itkol
 void	Client::changeMode(std::string buffer)
 {
-	Channel* channelPtr;
+	Channel* channelPtr = nullptr;
 	channelMsg result;
 
 	// might validate the command here
 	if (isValidModeCmd(buffer) == false)
+	{
+		std::cout << "Invalid mode cmd" << std::endl;
 		return;
+	}
 
 	// need to divide handle channel and user separately??
 	if (buffer.find("#") != std::string::npos)
@@ -93,33 +99,31 @@ void	Client::changeMode(std::string buffer)
 			return;
 		}
 	}
+	else 
+	{
+		std::cout << "message doesn't have channel # \n";
+	}
+	// std::cout << "here ok \n";
+
 	channelPtr->setMode(buffer);
 	channelPtr->getMode();
-	channelPtr->executeMode();
+	// channelPtr->executeMode();
 
+	// not send back but broadcast to all user on channel
+	// std::string modeMsg = channelPtr->channelMessage(result, this);
+	// std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
 
-	// if (buffer == "TOPIC")
-	// {
-	// 	if (channelPtr && channelPtr->getTopic().empty())
-	// 		result = NO_TOPIC_MSG;
-	// 	else if (channelPtr && !channelPtr->getTopic().empty())
-	// 		result = CHANNEL_TOPIC_MSG;
-	// }
-    // else if (buffer.find(":") != std::string::npos)
-    // {
-    //     // std::cout << "im here setting chan name: " << std::endl;
-    //     channelPtr->setTopic(buffer);
-    //     std::cout << "topic after set: " << channelPtr->getTopic() << std::endl;
-    //     result = CHANGE_TOPIC_MSG;
-    // }
+	std::string modeMsg = ":" + this->getNick() + "!" 
+		+ this->getUserName() + "@" + this->getHostName() + " MODE #hi +k huhu\r\n";
+	for (auto user : channelPtr->getUserList())
+	{
+		if (send(user.getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
+		{
+			std::cout << "setMode: failed to send\r\n";
+			close(user.getClientFd());
+			return;
+		}
 
-	// std::string topicMsg = channelPtr->channelMessage(result, this);
-	// std::cout << "topicmsg: " << topicMsg << std::endl;
-	// if (send(this->getClientFd(), topicMsg.c_str(), topicMsg.size(), 0) < 0)
-	// {
-	// 	std::cout << "setTopic: failed to send\r\n";
-	// 	close(this->getClientFd());
-	// 	return;
-	// }
+	}
 }	
 	
