@@ -36,6 +36,7 @@ class Client
 		enum ClientState		_clientState = NONE;
 
 		std::string				_input;
+		std::string				_msg;
 	
 	public:
 	
@@ -61,8 +62,8 @@ class Client
 		void		addChannel(Channel* chan);
 
 		// message parsing
-		bool parseMessage(const std::string &line);
-		void recieve();
+		void recieve(Server &server, Client &c);
+		void parseMessage(Server &server, Client &c, const std::string &line);
 
 		// other
 		// void		updateClientInfo(std::string bufferStr);
