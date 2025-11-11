@@ -13,7 +13,7 @@ static bool isValidModeCmd(std::string buffer)
 	return false;
 }
 
-void Channel::setMode(std::string buffer)
+void Channel::setMode(std::string buffer, modeInfo& modeInformation)
 {
 	// mode start position
 	bool addMode = true;
@@ -63,7 +63,13 @@ void Channel::setMode(std::string buffer)
 			// this->addMode(mode, argsVec.front());
 		}
 		std::cout << "param :[" << param << "] \n";
-		(this->*(_modeHandlers[mode]))(addMode, param);
+		modeInformation.mode = mode;
+		if (addMode)
+			modeInformation.addMode = '+';
+		else
+			modeInformation.addMode = '-';
+		modeInformation.param = param;
+		modeInformation.msgEnum = (this->*(_modeHandlers[mode]))(addMode, param);
 	}
 }
 
@@ -72,13 +78,11 @@ void Channel::executeMode()
 
 }
 
-
-//  MODE #mama +k hihi
-// MODE #mama -o trang
 //mode: itkol
 void	Client::changeMode(std::string buffer)
 {
-	Channel* channelPtr = nullptr;
+	Channel*	channelPtr = nullptr;
+	modeInfo	modeInformation;
 	channelMsg result;
 
 	// might validate the command here
@@ -105,16 +109,14 @@ void	Client::changeMode(std::string buffer)
 	}
 	// std::cout << "here ok \n";
 
-	channelPtr->setMode(buffer);
+	channelPtr->setMode(buffer, modeInformation);
 	channelPtr->getMode();
 	// channelPtr->executeMode();
 
 	// not send back but broadcast to all user on channel
-	// std::string modeMsg = channelPtr->channelMessage(result, this);
-	// std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
-
-	std::string modeMsg = ":" + this->getNick() + "!" 
-		+ this->getUserName() + "@" + this->getHostName() + " MODE #hi +k huhu\r\n";
+	modeInformation.client = this;
+	std::string modeMsg = channelPtr->channelMessage(result, modeInformation);
+	std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
 	for (auto user : channelPtr->getUserList())
 	{
 		if (send(user.getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
@@ -123,7 +125,6 @@ void	Client::changeMode(std::string buffer)
 			close(user.getClientFd());
 			return;
 		}
-
 	}
 }	
 	

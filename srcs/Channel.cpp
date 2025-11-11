@@ -141,11 +141,13 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
  */
 void	Channel::sendJoinSuccessMsg( Client& client)
 {
+	joinInfo joinData;
+	joinData.client = &client;
 
 	if (!this->getTopic().empty())
 	{
 		std::string topicmsg 
-			= this->channelMessage(CHANNEL_TOPIC_MSG, &client);
+			= this->channelMessage(CHANNEL_TOPIC_MSG, joinData);
 		if (send((&client)->getClientFd(), topicmsg.c_str(), topicmsg.size(), 0) < 0)
 		{
 			std::cout << "joinmsg: failed to send";
@@ -155,70 +157,8 @@ void	Channel::sendJoinSuccessMsg( Client& client)
 	}
 }
 
-
-std::string Channel::channelMessage(channelMsg msg, Client* currentClient)
-{
-	std::string chanop = ":" + currentClient->getNick() + "!" 
-		+ currentClient->getUserName() + "@" + currentClient->getHostName();
-	std::string returnMsg;
-
-	switch (msg)
-	{
-	case JOIN_OK: 	
-		returnMsg = chanop + " JOIN #" + this->getChannelName() 
-		+" " + RPL_TOPIC + " \r\n";
-		break;
-
-	case TOO_MANY_CHANNELS: 	
-		returnMsg = ":" + currentClient->getServerName() + " " + ERR_TOOMANYCHANNELS 
-		+ " " + currentClient->getNick() + " " + this->getChannelName() 
-		+" :You have joined too many channels" + " \r\n";
-		break;
-
-	// not test this yet, need key
-	case BAD_CHANNEL_KEY: 	
-		returnMsg = ":" + currentClient->getServerName() + " " + ERR_TOOMANYCHANNELS 
-		+ " " + currentClient->getNick() + " " + this->getChannelName() 
-		+" :Cannot join channel" + " \r\n";
-		break;
-	
-	// case NO_TOPIC_MSG:
-	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_NOTOPIC + " " + 
-	// 	currentClient->_clientNick + " #" + this->getChannelName() 
-	// 	+ " :No topic is set\r\n";
-	// 	break;
-	
-	// case CHANNEL_TOPIC_MSG:
-	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPIC + " " + 
-	// 	currentClient->_clientNick + " #" + this->getChannelName() 
-	// 	+ " :" + this->getTopic() +" \r\n";
-	// 	break;
-	
-	// case WHO_CHANGE_TOPIC:
-	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPICWHOTIME + " " + 
-	// 	currentClient->_clientNick + " #" + this->getChannelName() 
-	// 	+ " :" + this->getTopic() +" \r\n";
-	// 	break;
-	
-	case CHANGE_TOPIC_MSG:
-		returnMsg = chanop + " TOPIC #" + this->getChannelName() +" :" 
-		+ this->getTopic() + "\r\n";
-		break;
-
-	// case NAME_LIST_MSG:
-	// 	returnMsg = ":" + currentClient._serverName + RPL_NAMREPLY  + "!" + 
-	// 	currentClient._clientNick + "=#" + currentClient._atChannel->getChannelName() 
-	// 	+ ":" + currentClient._atChannel->getUserList() +" \r\n";
-
-	default:
-		break;
-	}
-	std::cout << "return mes: " << returnMsg << std::endl;
-	return returnMsg;
-}
-
 /* @brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ??*/
-void Channel::handleInviteOnly(bool add, std::string& args)
+channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 {
 	bool active = false;
 	for (auto m : _mode)
@@ -232,21 +172,23 @@ void Channel::handleInviteOnly(bool add, std::string& args)
 	if (add)
 	{
 		if (active)
-			return;
+			return NO_MSG;
 		this->addMode('i', args);
-		return;
+		return SET_MODE_OK;
 	}
 	if (active)
 	{
 		this->removeMode('i');
-		return;
+		return SET_MODE_OK;
 	}
+	return NO_MSG;
 }
-void	Channel::handleTopicRestriction(bool add, std::string& args)
+channelMsg	Channel::handleTopicRestriction(bool add, std::string& args)
 {
+	return NO_MSG;
 
 }
-void	Channel::handleChannelKey(bool add, std::string& args)
+channelMsg	Channel::handleChannelKey(bool add, std::string& args)
 {
 	bool active = false;
 	std::string key;
@@ -262,24 +204,26 @@ void	Channel::handleChannelKey(bool add, std::string& args)
 	if (add)
 	{
 		if (active && args == key)
-			return;
+			return NO_MSG;
 		
 		this->removeMode('k');
 		this->addMode('k', args);
-		return;
+		return SET_MODE_OK;
 		
 	}
 	if (active)
 	{
 		this->removeMode('k');
-		return;
+		return SET_MODE_OK; //recheck, send an empty key or nothing
 	}
+	return NO_MSG;
 }
-void	Channel::handleChannelOperator(bool add, std::string& args)
+channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 {
-
+	return NO_MSG;
 }
-void	Channel::handleChannelLimit(bool add, std::string& args)
+channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 {
+	return NO_MSG;
 
 }

@@ -7,6 +7,7 @@
 #include "Client.hpp"
 #include "macro.hpp"
 
+class Client;
 
 enum	channelMsg
 {
@@ -23,11 +24,27 @@ enum	channelMsg
 	BAD_CHANNEL_KEY,
 	INVITE_ONLY_CHAN,
 	ALREADY_ON_CHAN,
-	SET_KEY_OK
+	SET_MODE_OK
 
 };
 
-class Client;
+struct joinInfo { Client* client;};
+
+struct topicInfo { 
+	Client* client;
+	std::string topic;
+};
+
+struct modeInfo { 
+	Client*		client;
+	char		mode;
+	char		addMode;
+	std::string	param;
+	channelMsg	msgEnum;
+};
+
+
+
 
 /*
 	@brief The channel is created implicitly when the first client joins it, 
@@ -58,7 +75,7 @@ class Channel
 		Client*				_channelOperator; //previledge (chanop, voiced user)
 		std::vector<Client> _userList; //who in channel
 		std::map<char, std::string>	_mode; //mode: itkol
-		std::map<char, void (Channel::*)(bool, std::string&)> _modeHandlers;
+		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
 		// std::string			_chanKey;
 		
 	public:
@@ -74,6 +91,7 @@ class Channel
 		Client&				getChanop() const;
 		std::vector<Client>	getUserList() const;
 		std::string			getChanKey() const;
+		// std::map<char,std::string> getMode() const;
 		std::map<char,std::string> getMode() const;
 
 		// setters
@@ -90,17 +108,22 @@ class Channel
 		channelMsg	canClientJoinChannel( Client& client, std::string clientKey);
 		void		sendJoinSuccessMsg( Client& client);
 		
-		std::string channelMessage(channelMsg msg,  Client* currentClient);
+		// template
+		template <typename T>
+		std::string channelMessage(channelMsg msg,  T& extraInfo);
 
 		// mode
-		void		setMode(std::string buffer);
-		void		executeMode();
-		void		handleInviteOnly(bool add, std::string& args);
-		void		handleTopicRestriction(bool add, std::string& args);
-		void		handleChannelKey(bool add, std::string& args);
-		void		handleChannelOperator(bool add, std::string& args);
-		void		handleChannelLimit(bool add, std::string& args);
+		void			setMode(std::string buffer, modeInfo& modeInformation);
+		void			executeMode();
+		channelMsg		handleInviteOnly(bool add, std::string& args);
+		channelMsg		handleTopicRestriction(bool add, std::string& args);
+		channelMsg		handleChannelKey(bool add, std::string& args);
+		channelMsg		handleChannelOperator(bool add, std::string& args);
+		channelMsg		handleChannelLimit(bool add, std::string& args);
 	
 };
 
 std::ostream& operator<<(std::ostream& os, const Channel& channel);
+
+#include "serverMsg.tpp"
+

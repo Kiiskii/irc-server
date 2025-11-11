@@ -60,7 +60,10 @@ void Client::askTopic(std::string buffer)
         result = CHANGE_TOPIC_MSG;
     }
 
-	std::string topicMsg = channelPtr->channelMessage(result, this);
+	topicInfo topicData;
+	topicData.client = this;
+
+	std::string topicMsg = channelPtr->channelMessage(result, topicData);
 	std::cout << "topicmsg: " << topicMsg << std::endl;
 	if (send(this->getClientFd(), topicMsg.c_str(), topicMsg.size(), 0) < 0)
 	{

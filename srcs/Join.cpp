@@ -98,9 +98,10 @@ void Client::askToJoin(std::string buffer, Server& server)
 				channelPtr->addUser(this);
 				channelPtr->sendJoinSuccessMsg(*this);
 			}
-			
+			joinInfo joinData;
+			joinData.client = this;
 			std::string joinMsg 
-				= channelPtr->channelMessage(result, this);
+				= channelPtr->channelMessage(result, joinData);
 			if (send(this->getClientFd(), joinMsg.c_str(), joinMsg.size(), 0) < 0)
 			{
 	
