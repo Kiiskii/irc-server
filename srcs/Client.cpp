@@ -14,6 +14,11 @@ std::string Client::getUserName()
 {
 	return _userName;
 }
+
+std::string	Client::getRealName()
+{
+	return _realName;
+}
 std::string Client::getHostName()
 {
 	return _hostName;
@@ -47,6 +52,11 @@ void Client::setNick(std::string nick)
 void Client::setUserName(std::string user)
 {
 	_userName = user;
+}
+
+void Client::setRealName(std::string name)
+{
+	_realName = name;
 }
 
 void Client::setHostName(std::string host)

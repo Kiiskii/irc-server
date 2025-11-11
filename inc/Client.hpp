@@ -18,9 +18,7 @@ class Server;
 enum ClientState
 {
  NONE,
- GOT_PASS,
- GOT_NICK,
- GOT_USER,
+ REGISTERING,
  REGISTERED
 };
 
@@ -28,8 +26,9 @@ class Client
 {
 	private:
 		int						_clientfd = -1;
-		std::string				_clientNick;
-		std::string				_userName;
+		std::string				_clientNick = "";
+		std::string				_userName = "";
+		std::string				_realName = "";
 		std::string				_hostName;
 		std::string				_serverName;
 		std::vector<Channel*>	_joinedChannels;
@@ -45,6 +44,7 @@ class Client
 		int						getClientFd();
 		std::string 			getNick();
 		std::string 			getUserName();
+		std::string				getRealName();
 		std::string 			getHostName();
 		std::string 			getServerName();
 		std::vector<Channel*> 	getJoinedChannels();
@@ -54,6 +54,7 @@ class Client
 		void		setClientFd(int num);
 		void		setNick(std::string nick);
 		void		setUserName(std::string user);
+		void		setRealName(std::string user);
 		void		setHostName(std::string host);
 		void		setServerName(std::string server);
 		void		setClientState(enum ClientState state);
