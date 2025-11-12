@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 			else
 			{
 				//This could be connect with already existing client...
-				char buffer[1024] = {0};
+				//char buffer[1024] = {0};
 				int clientFd = server.getEpollEvents()[i].data.fd;
 				int clientIndex = 0;
 				for (size_t i = 0; i < server.getClientInfo().size(); i++)
@@ -32,11 +32,22 @@ int main(int argc, char *argv[])
 						break;
 					}
 				}
-				if (recv(server.getClientInfo()[clientIndex].getClientFd(), buffer, sizeof(buffer), 0) <= 0)
-					std::cout << "Did we encounter a problem" << std::endl;
-				std::cout << "Message that we received : [" << buffer << "]" << std::endl;
-				std::string evenBuffer(buffer);
-				server.handleCommand(server, server.getClientInfo()[clientIndex], evenBuffer);
+				Client &c = server.getClientInfo()[clientIndex];
+
+				std::string msg;
+				c.recieve(server, c);
+
+				//std::cout << "Message recieved: [" << msg << "]:" << std::endl;
+				//server.handleCommand(server, c, msg);
+
+				//server.getClientInfo()[clientIndex].recieve();
+				//std::string msg;
+				//msg.server.getClientInfo()[clientIndex].recieve();
+				//if (recv(server.getClientInfo()[clientIndex].getClientFd(), buffer, sizeof(buffer), 0) <= 0)
+				//	std::cout << "Did we encounter a problem" << std::endl;
+				//std::cout << "Message that we received : [" << msg << "]" << std::endl;
+				//std::string evenBuffer(buffer);
+				//server.handleCommand(server, server.getClientInfo()[clientIndex], msg);
 				//need to also deal with a situation if password is "empty string"
 			}
 		}
