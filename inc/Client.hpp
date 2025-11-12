@@ -34,6 +34,7 @@ class Client
 		std::vector<Channel*>	_joinedChannels;
 		enum ClientState		_clientState = NONE;
 
+		std::string				_input;
 	
 	public:
 	
@@ -59,6 +60,10 @@ class Client
 		void		setServerName(std::string server);
 		void		setClientState(enum ClientState state);
 		void		addChannel(Channel* chan);
+
+		// message parsing
+		void recieve(Server &server, Client &c);
+		void parseMessage(Server &server, Client &c, const std::string &line);
 
 		// other
 		// void		updateClientInfo(std::string bufferStr);
