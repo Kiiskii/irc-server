@@ -3,8 +3,10 @@
 #include <iostream>
 #include <vector>
 #include <map>
-
-#include "Client.hpp"
+#include <tuple>
+#include <unistd.h>
+#include <sys/socket.h> 
+// #include "Client.hpp"
 #include "macro.hpp"
 
 class Client;
@@ -28,20 +30,23 @@ enum	channelMsg
 
 };
 
-struct joinInfo { Client* client;};
+// struct joinInfo { 
+// 	Client* client;
+	
+// };
 
-struct topicInfo { 
-	Client* client;
-	std::string topic;
-};
+// struct topicInfo { 
+// 	Client* client;
+// 	std::string topic;
+// };
 
-struct modeInfo { 
-	Client*		client;
-	char		mode;
-	char		addMode;
-	std::string	param;
-	channelMsg	msgEnum;
-};
+// struct modeInfo { 
+// 	Client*		client;
+// 	char		mode;
+// 	char		addMode;
+// 	std::string	param;
+// 	channelMsg	msgEnum;
+// };
 
 
 
@@ -70,10 +75,10 @@ struct modeInfo {
 class Channel
 {
 	private:
-		std::string			_channelName;
-		std::string			_topic;
-		Client*				_channelOperator; //previledge (chanop, voiced user)
-		std::vector<Client> _userList; //who in channel
+		std::string					_channelName;
+		std::string					_topic;
+		Client*						_channelOperator; //previledge(chanop,halfop,voiced??)
+		std::vector<Client> 		_userList; //who in channel
 		std::map<char, std::string>	_mode; //mode: itkol
 		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
 		// std::string			_chanKey;
@@ -109,11 +114,11 @@ class Channel
 		void		sendJoinSuccessMsg( Client& client);
 		
 		// template
-		template <typename T>
-		std::string channelMessage(channelMsg msg,  T& extraInfo);
+		template <typename ...args>
+		std::string channelMessage(channelMsg msg, args ...moreArgs);
 
 		// mode
-		void			setMode(std::string buffer, modeInfo& modeInformation);
+		void			setMode(std::string buffer, channelMsg& msgEnum, std::string& modeStatus, std::string& params);
 		void			executeMode();
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);
@@ -125,5 +130,4 @@ class Channel
 
 std::ostream& operator<<(std::ostream& os, const Channel& channel);
 
-#include "serverMsg.tpp"
-
+#include "Channel.tpp"

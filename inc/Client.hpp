@@ -7,8 +7,8 @@
 #include <regex> //std::istringstream
 #include <functional>
 
-#include "Channel.hpp"
-#include "Server.hpp"
+// #include "Channel.hpp"
+// #include "Server.hpp"
 #include "macro.hpp"
 
 class Channel;

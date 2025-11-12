@@ -141,13 +141,10 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
  */
 void	Channel::sendJoinSuccessMsg( Client& client)
 {
-	joinInfo joinData;
-	joinData.client = &client;
-
 	if (!this->getTopic().empty())
 	{
 		std::string topicmsg 
-			= this->channelMessage(CHANNEL_TOPIC_MSG, joinData);
+			= this->channelMessage(CHANNEL_TOPIC_MSG, &client);
 		if (send((&client)->getClientFd(), topicmsg.c_str(), topicmsg.size(), 0) < 0)
 		{
 			std::cout << "joinmsg: failed to send";

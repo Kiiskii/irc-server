@@ -11,8 +11,8 @@
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <sys/epoll.h>
-#include "macro.hpp"
 
+#include "macro.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
 

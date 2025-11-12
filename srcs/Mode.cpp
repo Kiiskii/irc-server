@@ -13,7 +13,7 @@ static bool isValidModeCmd(std::string buffer)
 	return false;
 }
 
-void Channel::setMode(std::string buffer, modeInfo& modeInformation)
+void Channel::setMode(std::string buffer, channelMsg& msgEnum, std::string& modeStatus, std::string& params)
 {
 	// mode start position
 	bool addMode = true;
@@ -47,29 +47,27 @@ void Channel::setMode(std::string buffer, modeInfo& modeInformation)
 	std::cout << "mode are: [" << modeStr << "]" << " and args [" << args << "]" << std::endl;
 
 	// this only handle the map of _mode, not yet what to response??
-	std::string param;
+	// std::string param;
 	for (char mode : modeStr)
 	{
 		if (mode == '+') {addMode = true; continue;}	
 		if (mode == '-') {addMode = false; continue;}
 		if (mode == 'i' || mode == 't' || mode == 'o')
 		{
-			param = "";
+			params = "";
 		}
 		else if (mode == 'k' || mode == 'l')
 		{
-			param = argsVec.front();
+			params = argsVec.front();
 			argsVec.erase(argsVec.begin());
 			// this->addMode(mode, argsVec.front());
 		}
-		std::cout << "param :[" << param << "] \n";
-		modeInformation.mode = mode;
+		std::cout << "param :[" << params << "] \n";
+		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (addMode)
-			modeInformation.addMode = '+';
+			modeStatus = std::string(1, '+') + mode;
 		else
-			modeInformation.addMode = '-';
-		modeInformation.param = param;
-		modeInformation.msgEnum = (this->*(_modeHandlers[mode]))(addMode, param);
+			modeStatus =  std::string(1, '-') + mode;
 	}
 }
 
@@ -82,8 +80,9 @@ void Channel::executeMode()
 void	Client::changeMode(std::string buffer)
 {
 	Channel*	channelPtr = nullptr;
-	modeInfo	modeInformation;
-	channelMsg result;
+	channelMsg	msgEnum;
+	// bool		addMode = true;
+	std::string	params = "";
 
 	// might validate the command here
 	if (isValidModeCmd(buffer) == false)
@@ -92,7 +91,7 @@ void	Client::changeMode(std::string buffer)
 		return;
 	}
 
-	// need to divide handle channel and user separately??
+	// need to divide handle channel and user separately?? now work on channel only
 	if (buffer.find("#") != std::string::npos)
 	{
 		channelPtr = setActiveChannel(buffer);
@@ -109,13 +108,17 @@ void	Client::changeMode(std::string buffer)
 	}
 	// std::cout << "here ok \n";
 
-	channelPtr->setMode(buffer, modeInformation);
+	std::string		mode;
+	channelPtr->setMode(buffer, msgEnum, mode, params);
 	channelPtr->getMode();
 	// channelPtr->executeMode();
 
 	// not send back but broadcast to all user on channel
-	modeInformation.client = this;
-	std::string modeMsg = channelPtr->channelMessage(result, modeInformation);
+	if (msgEnum == SET_MODE_OK)
+		std::cout << "mode: set_mode_ok\n";
+	std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
+
+	std::string modeMsg = channelPtr->channelMessage(msgEnum, this, mode, params);
 	std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
 	for (auto user : channelPtr->getUserList())
 	{
