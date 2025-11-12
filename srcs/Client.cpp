@@ -164,7 +164,7 @@ void Client::parseMessage(Server &server, Client &c, const std::string &line)
 
 		if (line[i] == ':') {
 			// handle trailing after ':', trailing should always be last parameter?
-			++i;
+			//++i;
 			std::string trailing = line.substr(i);
 			msg.append(trailing);
 			break ;
