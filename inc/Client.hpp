@@ -36,7 +36,6 @@ class Client
 		enum ClientState		_clientState = NONE;
 
 		std::string				_input;
-		std::string				_msg;
 	
 	public:
 	

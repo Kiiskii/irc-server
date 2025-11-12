@@ -102,7 +102,7 @@ void Client::recieve(Server &server, Client &c)
 			break ;
 		}
 		else if (bytes == 0) {
-			// disconnect client here?
+			// Client should be set as disconnected here
 			// Commented out to avoid message spam
 			//std::cout << "Client disconnect" << std::endl;
 			break ;

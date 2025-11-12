@@ -206,14 +206,12 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "User set: " << client.getUserName() << std::endl;
 		std::cout << "Host set: " << client.getHostName() << std::endl;
 		std::cout << "Server set: " << client.getServerName() << std::endl;
-		std::cout << "NICK" << client.getNick() << std::endl;
 
 		if (client.getClientState() == GOT_NICK)
 		{
 //gotuser and registered are basically the same step, no?
 			client.setClientState(GOT_USER);
 			std::string message = RPL_WELCOME(server._name, client.getNick());
-			std::cout << message << std::endl;
 			send(client.getClientFd(), message.c_str(), message.size(), 0);
 			std::cout << "We got all the info!" << std::endl;
 		}
