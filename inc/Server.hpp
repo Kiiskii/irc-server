@@ -55,6 +55,12 @@ public:
 	void handleCommand(Server &server, Client &client, std::string &line);
 	void attemptRegister(Client &client);
 
+/*Commands such as user, pass nick, might be best to create a separate place for commands*/
+	void pass(Server &server, Client &client, std::vector<std::string> tokens);
+	void nick(Server &server, Client &client, std::vector<std::string> tokens);
+	void user(Server &server, Client &client, std::vector<std::string> tokens);
+	void ping(Server &server, Client &client, std::vector<std::string> tokens);
+
 	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 
