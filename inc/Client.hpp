@@ -62,7 +62,7 @@ class Client
 		void		addChannel(Channel* chan);
 
 		// message parsing
-		void recieve(Server &server, Client &c);
+		void recieve(Server &server, Client &c, int clientIndex);
 		void parseMessage(Server &server, Client &c, const std::string &line);
 
 		// other

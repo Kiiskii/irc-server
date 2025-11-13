@@ -272,6 +272,8 @@ void Server::nick(Server &server, Client &client, std::vector<std::string> token
 - User name and real name might also have some naming rules and lengths
 - Need to check if either user name or real name is empty
 - Check the :, and whether we are capturing the entire real name because that can be separated by space
+
+- Do we need to show in which format this needs to be???
 */
 void Server::user(Server &server, Client &client, std::vector<std::string> tokens)
 {

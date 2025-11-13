@@ -92,7 +92,7 @@ void Client::addChannel(Channel* chan)
 // 	_serverName = "localhost";
 // }
 
-void Client::recieve(Server &server, Client &c)
+void Client::recieve(Server &server, Client &c, int clientIndex)
 {
 	// Recieve data from the client
 	char buffer[512];
@@ -103,7 +103,6 @@ void Client::recieve(Server &server, Client &c)
 	// DO WE USE MSG_DONTWAIT OR 0???
 	while (bytes > 0) {
 		bytes = recv(getClientFd(), buffer, sizeof(buffer), MSG_DONTWAIT);
-
 		// Errorhandling
 		if (bytes < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
@@ -112,9 +111,10 @@ void Client::recieve(Server &server, Client &c)
 			break ;
 		}
 		else if (bytes == 0) {
-			// Client should be set as disconnected here
-			// Commented out to avoid message spam
-			//std::cout << "Client disconnect" << std::endl;
+/*Cleaner way to handle this rather than sending in index*/
+			std::cout << "Client fd " << getClientFd() << " disconnected" << std::endl;
+			close(getClientFd());
+			server.getClientInfo().erase(server.getClientInfo().begin() + clientIndex);
 			break ;
 		}
 		// Buffer recieved data
