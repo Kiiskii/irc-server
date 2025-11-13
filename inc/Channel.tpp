@@ -6,25 +6,30 @@ template <typename ...args>
 std::string Channel::channelMessage(channelMsg msg, args ...moreArgs)
 {
 	auto		tupleArgs = std::make_tuple(moreArgs...);
-	std::cout << "Tuple size: " << sizeof...(moreArgs)<< std::endl;
-    // if constexpr (sizeof...(moreArgs) > 0) {
-    //     std::cout << "First element (Client*): " << std::get<0>(tupleArgs)->getNick() << std::endl;
-    // }
+	constexpr size_t		nArgs = sizeof...(moreArgs);
+	std::cout << "Tuple size: " << nArgs << std::endl;
 
-    // if constexpr (sizeof...(moreArgs) > 1) {
-    //     std::cout << "Second element (mode): " << std::get<1>(tupleArgs) << std::endl;
-    // }
+	std::string	returnMsg, chanop, mode, params, modeStr;
+	Client*		client;
+	if constexpr (nArgs > 0)
+	{
+		client = std::get<0>(tupleArgs);
+		chanop = ":" + client->getNick() + "!" 
+			+ client->getUserName() + "@" + client->getHostName();
+	}
+	// std::string mode, params;
+	// std::string modeStr = "";
+	if constexpr (nArgs > 1)
+	{
+		mode = std::get<1>(tupleArgs);
+		modeStr += mode; 
+	}
 
-    // if constexpr (sizeof...(moreArgs) > 2) {
-    //     std::cout << "Third element (params): " << std::get<2>(tupleArgs) << std::endl;
-    // }
-
-	Client*		client = std::get<0>(tupleArgs);
-	std::string	returnMsg;
-	std::string	chanop = ":" + client->getNick() + "!" 
-		+ client->getUserName() + "@" + client->getHostName();
-	std::string mode, params;
-	std::string modeStr = "";
+	if constexpr (nArgs > 2)
+	{
+		params = std::get<2>(tupleArgs);
+		modeStr += " " + params;
+	}
 
 	switch (msg)
 	{
@@ -40,18 +45,6 @@ std::string Channel::channelMessage(channelMsg msg, args ...moreArgs)
 		break;
 
 	case SET_MODE_OK:
-		if constexpr (sizeof...(moreArgs) > 1)
-		{
-			mode = std::get<1>(tupleArgs);
-			modeStr += mode; 
-		}
-		else 
-			std::cout << "no 2nd element\n";
-		if constexpr (sizeof...(moreArgs) > 2) 
-		{
-			params = std::get<2>(tupleArgs);
-			modeStr += " " + params;
-		}
 		returnMsg = chanop + " MODE #" + this->getChannelName() + " " + modeStr + " \r\n";
 		break;
 		
@@ -96,6 +89,6 @@ std::string Channel::channelMessage(channelMsg msg, args ...moreArgs)
 		returnMsg = "NO MESSAGE";
 		break;
 	}
-	std::cout << "return mes: " << returnMsg << std::endl;
+	// std::cout << "msg sent by server: " << returnMsg << std::endl;
 	return returnMsg;
 }

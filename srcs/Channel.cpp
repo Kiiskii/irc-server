@@ -95,7 +95,7 @@ std::map<char, std::string> Channel::getMode() const
 {
 	for (auto it : _mode)
 	{
-		std::cout << "key and param: [" << it.first << ", " << it.second << "]" << std::endl;
+		std::cout << "existing mode: key and param: [" << it.first << ", " << it.second << "]" << std::endl;
 	}
 	return _mode;
 }

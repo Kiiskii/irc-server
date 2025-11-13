@@ -22,7 +22,7 @@ Channel* Client::setActiveChannel(std::string buffer)
 		if (chan && chan->getChannelName() == channelName)
 		{
 			// channelPtr = chan;
-			std::cout << "current channel name: " << chan->getChannelName() << std::endl;
+			// std::cout << "current channel name: " << chan->getChannelName() << std::endl;
 			return chan;
 		}
 		else

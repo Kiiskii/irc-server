@@ -3,7 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <tuple>
+// #include <tuple>
+#include <utility>
 #include <unistd.h>
 #include <sys/socket.h> 
 // #include "Client.hpp"
@@ -119,7 +120,6 @@ class Channel
 
 		// mode
 		void			setMode(std::string buffer, channelMsg& msgEnum, std::string& modeStatus, std::string& params);
-		void			executeMode();
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);
 		channelMsg		handleChannelKey(bool add, std::string& args);

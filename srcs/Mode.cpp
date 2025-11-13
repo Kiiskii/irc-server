@@ -6,7 +6,7 @@
 // MODE <#channel> [+/-modestring] [mode arguments]
 static bool isValidModeCmd(std::string buffer)
 {
-	std::regex modeRegex("^MODE\\s+#[a-zA-Z_0-9]+\\s+[+-][a-zA-Z]+(?:\\s+[a-zA-Z_0-9]+)?$");
+	std::regex modeRegex("^MODE\\s+#[a-zA-Z_0-9]+\\s+([+-][a-zA-Z]+)+(\\s+[a-zA-Z_0-9]+)*$");
 	if (std::regex_match(buffer, modeRegex))
 		return true;
 	std::cout << "DOES NOT match regex pattern for mode\n";
@@ -62,18 +62,31 @@ void Channel::setMode(std::string buffer, channelMsg& msgEnum, std::string& mode
 			argsVec.erase(argsVec.begin());
 			// this->addMode(mode, argsVec.front());
 		}
-		std::cout << "param :[" << params << "] \n";
+		// std::cout << "param :[" << params << "] \n";
+
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (addMode)
 			modeStatus = std::string(1, '+') + mode;
 		else
 			modeStatus =  std::string(1, '-') + mode;
+	
+		// not send back but broadcast to all user on channel
+		if (msgEnum == SET_MODE_OK)
+			std::cout << "mode: set_mode_ok\n";
+		std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
+
+		std::string modeMsg = this->channelMessage(msgEnum, this, mode, params);
+		std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
+		for (auto user : this->getUserList())
+		{
+			if (send(user.getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
+			{
+				std::cout << "setMode: failed to send\r\n";
+				close(user.getClientFd());
+				return;
+			}
+		}
 	}
-}
-
-void Channel::executeMode()
-{
-
 }
 
 //mode: itkol
@@ -113,21 +126,21 @@ void	Client::changeMode(std::string buffer)
 	channelPtr->getMode();
 	// channelPtr->executeMode();
 
-	// not send back but broadcast to all user on channel
-	if (msgEnum == SET_MODE_OK)
-		std::cout << "mode: set_mode_ok\n";
-	std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
+	// // not send back but broadcast to all user on channel
+	// if (msgEnum == SET_MODE_OK)
+	// 	std::cout << "mode: set_mode_ok\n";
+	// std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
 
-	std::string modeMsg = channelPtr->channelMessage(msgEnum, this, mode, params);
-	std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
-	for (auto user : channelPtr->getUserList())
-	{
-		if (send(user.getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
-		{
-			std::cout << "setMode: failed to send\r\n";
-			close(user.getClientFd());
-			return;
-		}
-	}
+	// std::string modeMsg = channelPtr->channelMessage(msgEnum, this, mode, params);
+	// std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
+	// for (auto user : channelPtr->getUserList())
+	// {
+	// 	if (send(user.getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
+	// 	{
+	// 		std::cout << "setMode: failed to send\r\n";
+	// 		close(user.getClientFd());
+	// 		return;
+	// 	}
+	// }
 }	
 	

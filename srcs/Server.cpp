@@ -96,12 +96,12 @@ void Server::handleClient()
 void Server::handleCommand(Server &server, Client &client, std::string &line)
 {
 	std::cout << "This is the command: " << line << std::endl;
-	// if (line.find("CAP") != std::string::npos)
-	// {
-	// 	std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
-	// 	send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-	// 	return ;
-	// }
+	if (line.find("CAP") != std::string::npos)
+	{
+		std::string reply = ":" + server._name + " CAP * LS :multi-prefix\r\n";
+		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+		return ;
+	}
 	//do we need some sort of registered boolean?
 	if (line.find("PASS") != std::string::npos)
 	{
