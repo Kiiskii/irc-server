@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
-// #include <tuple>
+#include <unordered_set>
 #include <utility>
 #include <unistd.h>
 #include <sys/socket.h> 
@@ -43,8 +43,8 @@ enum	channelMsg
 
 // struct modeInfo { 
 // 	Client*		client;
-// 	char		mode;
 // 	char		addMode;
+// 	char		mode;
 // 	std::string	param;
 // 	channelMsg	msgEnum;
 // };
@@ -78,8 +78,10 @@ class Channel
 	private:
 		std::string					_channelName;
 		std::string					_topic;
-		Client*						_channelOperator; //previledge(chanop,halfop,voiced??)
-		std::vector<Client> 		_userList; //who in channel
+		std::unordered_set<Client*>	_ops; //previledge(chanop,halfop,voiced??)
+		std::unordered_set<Client*>	_halfOps; // set allows uniqueness
+		std::unordered_set<Client*>	_voices;
+		std::vector<Client*> 		_userList; //who in channel
 		std::map<char, std::string>	_mode; //mode: itkol
 		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
 		// std::string			_chanKey;
@@ -94,17 +96,18 @@ class Channel
 		// getters
 		std::string 		getChannelName() const;
 		std::string 		getTopic() const;
-		Client&				getChanop() const;
-		std::vector<Client>	getUserList() const;
+		std::unordered_set<Client*>	getChanop() const;
+		std::vector<Client*>		getUserList() const;
 		std::string			getChanKey() const;
 		// std::map<char,std::string> getMode() const;
 		std::map<char,std::string> getMode() const;
 
 		// setters
 		void		setChannelName(std::string channelName);
-		void		setChanop(Client chanop);
+		void		addChanop(Client* chanop);
 		void		setTopic(std::string newTopic);
 		void		addUser(Client* newClient);
+		void		removeUser(Client* user);
 		void		setChanKey(std::string newKey);
 		void 		addMode(char key, std::string param);
 		void		removeMode(char key);
@@ -119,6 +122,7 @@ class Channel
 		std::string channelMessage(channelMsg msg, args ...moreArgs);
 
 		// mode
+		void			setMode(std::string buffer, Client* client);
 		void			setMode(std::string buffer, channelMsg& msgEnum, std::string& modeStatus, std::string& params);
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);

@@ -13,11 +13,11 @@ static bool isValidModeCmd(std::string buffer)
 	return false;
 }
 
-void Channel::setMode(std::string buffer, channelMsg& msgEnum, std::string& modeStatus, std::string& params)
+static void extractModeAndParams(std::string buffer, std::string& modeStr, 
+	std::string& args)
 {
 	// mode start position
-	bool addMode = true;
-	bool haveArgs = true;
+	bool addMode = true, haveArgs = true;
 	size_t modePos = buffer.find("+");
 	if ( modePos == std::string::npos)
 	{
@@ -34,20 +34,31 @@ void Channel::setMode(std::string buffer, channelMsg& msgEnum, std::string& mode
 		modeEndPos = buffer.length();
 		haveArgs = false;
 	}
-	// subtract the args string and split to vector
-	std::string modeStr = buffer.substr(modePos, modeEndPos - modePos);
-	std::string args;
-	std::vector<std::string> argsVec;
+	// all modes are extracted into modeStr
+	modeStr = buffer.substr(modePos, modeEndPos - modePos);
+
+	// extrat the args string
 	if (haveArgs)
-	{
 		args = buffer.substr(modeEndPos + 1);
-		if (!args.empty())
-			argsVec = splitString(args, ' ');
-	}
+	
+}
+
+void Channel::setMode(std::string buffer, Client* client)
+{
+	std::string					modeStr, args;
+	std::vector<std::string>	argsVec;
+
+	extractModeAndParams(buffer, modeStr, args);
 	std::cout << "mode are: [" << modeStr << "]" << " and args [" << args << "]" << std::endl;
 
+	if (!args.empty())
+			argsVec = splitString(args, ' ');
+	
 	// this only handle the map of _mode, not yet what to response??
-	// std::string param;
+	std::string params, modeStatus;
+	bool		addMode = true;
+	channelMsg	msgEnum;
+
 	for (char mode : modeStr)
 	{
 		if (mode == '+') {addMode = true; continue;}	
@@ -60,9 +71,7 @@ void Channel::setMode(std::string buffer, channelMsg& msgEnum, std::string& mode
 		{
 			params = argsVec.front();
 			argsVec.erase(argsVec.begin());
-			// this->addMode(mode, argsVec.front());
 		}
-		// std::cout << "param :[" << params << "] \n";
 
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (addMode)
@@ -71,20 +80,21 @@ void Channel::setMode(std::string buffer, channelMsg& msgEnum, std::string& mode
 			modeStatus =  std::string(1, '-') + mode;
 	
 		// not send back but broadcast to all user on channel
+		// if cannot set a mode, what to do here?
 		if (msgEnum == SET_MODE_OK)
 			std::cout << "mode: set_mode_ok\n";
 		std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
 
-		std::string modeMsg = this->channelMessage(msgEnum, this, mode, params);
-		std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
-		for (auto user : this->getUserList())
+	}
+	std::string modeMsg = this->channelMessage(msgEnum, client, modeStr, args);
+	std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
+	for (auto user : this->getUserList())
+	{
+		if (send(user->getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
 		{
-			if (send(user.getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
-			{
-				std::cout << "setMode: failed to send\r\n";
-				close(user.getClientFd());
-				return;
-			}
+			std::cout << "setMode: failed to send\r\n";
+			close(user->getClientFd());
+			return;
 		}
 	}
 }
@@ -104,7 +114,7 @@ void	Client::changeMode(std::string buffer)
 		return;
 	}
 
-	// need to divide handle channel and user separately?? now work on channel only
+	// ONLY work on channel mode, so always have channel??
 	if (buffer.find("#") != std::string::npos)
 	{
 		channelPtr = setActiveChannel(buffer);
@@ -122,7 +132,8 @@ void	Client::changeMode(std::string buffer)
 	// std::cout << "here ok \n";
 
 	std::string		mode;
-	channelPtr->setMode(buffer, msgEnum, mode, params);
+	// channelPtr->setMode(buffer, msgEnum, mode, params);
+	channelPtr->setMode(buffer, this);
 	channelPtr->getMode();
 	// channelPtr->executeMode();
 

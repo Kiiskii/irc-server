@@ -86,7 +86,6 @@ void Client::askToJoin(std::string buffer, Server& server)
 			{
 				server.getChannelInfo().push_back(new Channel(channelName));
 				channelPtr = server.getChannelInfo().back();
-				// this->_atChannel->setChanop(this);
 			}
 			else
 				channelPtr = *channelNameIt;
@@ -96,6 +95,8 @@ void Client::askToJoin(std::string buffer, Server& server)
 			{
 				this->addChannel(channelPtr);
 				channelPtr->addUser(this);
+				if (channelPtr->getUserList().size() == 1)
+					channelPtr->addChanop(this); // there is only 1 user ->ops
 				channelPtr->sendJoinSuccessMsg(*this);
 			}
 			std::string joinMsg 

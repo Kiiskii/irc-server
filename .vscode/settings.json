@@ -59,6 +59,8 @@
 		"variant": "cpp",
 		"bitset": "cpp",
 		"regex": "cpp",
-		"fstream": "cpp"
+		"fstream": "cpp",
+		"set": "cpp",
+		"unordered_set": "cpp"
 	}
 }

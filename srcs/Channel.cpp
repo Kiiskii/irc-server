@@ -36,12 +36,12 @@ std::string Channel::getTopic() const
 	return _topic;
 }
 
-Client&	Channel::getChanop() const
+std::unordered_set<Client*>	Channel::getChanop() const
 {
-	return *_channelOperator;
+	return _ops;
 }
 
-std::vector<Client>	Channel::getUserList() const
+std::vector<Client*>	Channel::getUserList() const
 {
 	return _userList;
 }
@@ -56,9 +56,9 @@ std::string	Channel::getChanKey() const
 	return chanKey;
 }
 
-void	Channel::setChanop(Client chanop)
+void Channel::addChanop(Client* chanop)
 {
-	_channelOperator = &chanop;
+	_ops.insert(chanop);
 }
 
 void Channel::setChannelName(std::string channelName)
@@ -103,7 +103,7 @@ std::map<char, std::string> Channel::getMode() const
 
 void Channel::addUser(Client* newClient)
 {
-	_userList.push_back(*newClient);
+	_userList.push_back(newClient);
 }
 
 /**
@@ -113,7 +113,7 @@ bool Channel::isClientOnChannel( Client& client)
 {
 	for (auto it : _userList)
 	{
-		if (client.getNick() == it.getNick())
+		if (client.getNick() == it->getNick())
 			return true;
 	}
 	return false;
