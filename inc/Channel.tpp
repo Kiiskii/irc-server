@@ -21,6 +21,7 @@ static std::string makeNumericReply(std::string prefix, int code, std::string ta
 template <typename ...args>
 void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 {
+	// this part is mainly for mode, considering split up or ??
 	auto		tupleArgs = std::make_tuple(moreArgs...);
 	constexpr size_t		nArgs = sizeof...(moreArgs);
 	std::cout << "Tuple size: " << nArgs << std::endl;
@@ -48,13 +49,27 @@ void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 	case JOIN_OK:
 		this->sendJoinSuccessMsg(client);
 		break;
+	
+	case ALREADY_ON_CHAN:
+		this->sendTopicAndNames(client);
+		break;
 
-	// case TOO_MANY_CHANNELS: 	
-	// 	returnMsg = ":" + client->getServerName() + " " + ERR_TOOMANYCHANNELS 
-	// 	+ " " + client->getNick() + " " + this->getChannelName() 
-	// 	+" :You have joined too many channels" + " \r\n";
-	// 	break;
+	case TOO_MANY_CHANNELS:
+	{
+		std::string manyChannelsMsg = makeNumericReply(client->getServerName(), 
+		ERR_TOOMANYCHANNELS, client->getNick(), {"#" + this->getChannelName()}, "You have joined too many channels");
+		this->sendMsg(client, manyChannelsMsg);
+		break;
+	}
+	
+	case BAD_CHANNEL_KEY: //not test this yet
+	{
+		std::string badKeyMsg = makeNumericReply(client->getServerName(), ERR_BADCHANNELKEY, client->getNick(), {"#" + this->getChannelName()}, "Cannot join channel (+k)");
+		this->sendMsg(client, badKeyMsg);
+		break;
+	}
 
+	
 	// case SET_MODE_OK:
 	// 	returnMsg = chanop + " MODE #" + this->getChannelName() + " " + modeStr + " \r\n";
 	// 	break;
@@ -65,11 +80,6 @@ void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 	// 	break;
 
 	// // NOT TEST YET
-	// case BAD_CHANNEL_KEY: 	
-	// 	returnMsg = ":" + client->getServerName() + " " 
-	// 	+ ERR_BADCHANNELKEY	+ " #" + this->getChannelName() 
-	// 	+" :Cannot join channel " + "\r\n";
-	// 	break;
 	
 
 

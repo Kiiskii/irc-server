@@ -17,6 +17,9 @@ enum	channelMsg
 {
 	NO_MSG,
 	JOIN_OK,
+	TOO_MANY_CHANNELS,
+	ALREADY_ON_CHAN,
+	BAD_CHANNEL_KEY,
 
 
 	NO_TOPIC_MSG,
@@ -26,10 +29,7 @@ enum	channelMsg
 	CHANGE_TOPIC_MSG,
 	// JOIN MSG
 	// NO_SUCH_CHANNEL, // may not need cause creating new channel anyway
-	TOO_MANY_CHANNELS,
-	BAD_CHANNEL_KEY,
 	INVITE_ONLY_CHAN,
-	ALREADY_ON_CHAN,
 	SET_MODE_OK,
 	ENDOFNAMES_MSG
 
@@ -125,6 +125,7 @@ class Channel
 		channelMsg	canClientJoinChannel( Client& client, 
 						std::string clientKey);
 		void		sendMsg(Client* client, std::string& msg);
+		void		sendTopicAndNames(Client* client);
 		void		sendJoinSuccessMsg( Client* client);
 		
 		

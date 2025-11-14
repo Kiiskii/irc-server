@@ -137,78 +137,42 @@ void Channel::addUser(Client* newClient)
 }
 
 /**
- * @brief Check whether the client is already on the channel 
+ * @brief Check whether the client is already on the channel, if already then open the window
  */
 bool Channel::isClientOnChannel( Client& client)
 {
-	for (auto it : _userList)
+	for (auto chan : client.getJoinedChannels())
 	{
-		if (client.getNick() == it->getNick())
+		if (this->getChannelName() == (*chan).getChannelName())
 			return true;
 	}
+	
+	// for (auto it : _userList)
+	// {
+	// 	if (client.getNick() == it->getNick())
+	// 		return true;
+	// }
 	return false;
 }
-/** @brief check if the channel key matches the key that client inputs, 
- * if channel requires a key
- */
+
+/** @brief check if the channel key matches the key that client inputs */
 channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
 	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
-	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
-		return TOO_MANY_CHANNELS;
 	if (this->isClientOnChannel(client))
 		return ALREADY_ON_CHAN;
-	if (!this->getChanKey().empty() && this->getChanKey() != clientKey) // recheck with mode later
+	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
+		return TOO_MANY_CHANNELS;
+	if (!this->getChanKey().empty() && this->getChanKey() != clientKey)
 		return BAD_CHANNEL_KEY;
 	return JOIN_OK;
 }
 
-/**
- * @brief send message to the joining member, does it go to all members??
- */
-void	Channel::sendMsg(Client* client, std::string& msg)
-{
-	if (send(client->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
-	{
-		std::cout << "joinmsg: failed to send";
-		close(client->getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
-		return;
-	}
-}
-// /**
-//  * @brief send message to all member on channels and the joining member itself
-//  */
-// void	Channel::broadcastMsg(Client& client, std::string& msg)
-// {
-// 	for (auto it : client.getServerName())
-// 	if (send((&client)->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
-// 	{
-// 		std::cout << "joinmsg: failed to send";
-// 		close(client.getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
-// 		return;
-// 	}
-// }
-
-
-
-/** 
- * @brief if no topic set when client joins the channel, do not send back the topic.
- * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
- * currently joined the channel, including the current client( multiple RPL_NAMREPLY 
- * and 1 RPL_ENDOFNAMES). 
- */
-void	Channel::sendJoinSuccessMsg( Client* client)
+void	Channel::sendTopicAndNames(Client* client)
 {
 	std::string	server = client->getServerName(),
 				nick = client->getNick(),
-				chanName = this->getChannelName(),
-				user = client->makeUser();
-
-	// send JOIN msg
-	std::string joinMsg = user + " JOIN #" + chanName 
-			+" " + std::to_string(RPL_TOPIC) + " \r\n";
-	this->sendMsg(client, joinMsg);
-
+				chanName = this->getChannelName();
 	// send topic / no_topic
 	if (this->getTopic().empty())
 	{
@@ -237,10 +201,50 @@ void	Channel::sendJoinSuccessMsg( Client* client)
 	RPL_ENDOFNAMES,	nick, {"#" + chanName},
 	"End of /NAMES list.");
 	this->sendMsg(client, endOfNamesMsg);
-	
-
 }
 
+/** 
+ * @brief if no topic set when client joins the channel, do not send back the topic.
+ * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
+ * currently joined the channel, including the current client( multiple RPL_NAMREPLY 
+ * and 1 RPL_ENDOFNAMES). 
+ */
+void	Channel::sendJoinSuccessMsg( Client* client)
+{
+	std::string	user = client->makeUser();
+
+	// send JOIN msg
+	std::string joinMsg = user + " JOIN #" + this->getChannelName() 
+			+ " " + std::to_string(RPL_TOPIC) + " \r\n";
+	this->sendMsg(client, joinMsg);
+	this->sendTopicAndNames(client);
+}
+
+/**
+ * @brief send message to the joining member, does it go to all members??
+ */
+void	Channel::sendMsg(Client* client, std::string& msg)
+{
+	if (send(client->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
+	{
+		std::cout << "joinmsg: failed to send";
+		close(client->getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
+		return;
+	}
+}
+// /**
+//  * @brief send message to all member on channels and the joining member itself
+//  */
+// void	Channel::broadcastMsg(Client& client, std::string& msg)
+// {
+// 	for (auto it : client.getServerName())
+// 	if (send((&client)->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
+// 	{
+// 		std::cout << "joinmsg: failed to send";
+// 		close(client.getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
+// 		return;
+// 	}
+// }
 
 
 /**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ?? */
