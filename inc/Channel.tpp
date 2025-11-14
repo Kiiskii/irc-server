@@ -80,16 +80,18 @@ void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 		this->sendMsg(client, returnMsg);
 		break;
 	}
-	
-	// case SET_MODE_OK:
-	// 	returnMsg = chanop + " MODE #" + this->getChannelName() + " " + modeStr + " \r\n";
-	// 	break;
+
+	case SET_MODE_OK:
+	{
+		std::string	modeMsg = client->makeUser() + " MODE #" + 
+			this->getChannelName() + " " + modeStr + " \r\n";
+		this->sendMsg(client, modeMsg);
+		break;
+	}
 
 	default:
 		std::string s = "NO MESSAGE";
 		this->sendMsg(client, s);
 		break;
 	}
-	// std::cout << "msg sent by server: " << returnMsg << std::endl;
-	
 }

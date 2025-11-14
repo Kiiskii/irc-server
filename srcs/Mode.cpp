@@ -87,16 +87,6 @@ void Channel::setMode(std::string buffer, Client* client)
 
 	}
 	this->channelMessage(msgEnum, client, modeStr, args);
-	// std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
-	// for (auto user : this->getUserList())
-	// {
-	// 	if (send(user->getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
-	// 	{
-	// 		std::cout << "setMode: failed to send\r\n";
-	// 		close(user->getClientFd());
-	// 		return;
-	// 	}
-	// }
 }
 
 //mode: itkol
@@ -119,39 +109,23 @@ void	Client::changeMode(std::string buffer)
 	{
 		channelPtr = setActiveChannel(buffer);
 		// if not on any channel, return do nothing
-		if (channelPtr == nullptr)
-		{
-			std::cout << "null ptr \n";
-			return;
+		if (channelPtr == nullptr) {
+			std::cout << "null ptr \n";	return;
 		}
 	}
-	else 
-	{
+	else {
 		std::cout << "message doesn't have channel # \n";
 	}
 	// std::cout << "here ok \n";
 
 	std::string		mode;
-	// channelPtr->setMode(buffer, msgEnum, mode, params);
 	channelPtr->setMode(buffer, this);
 	channelPtr->getMode();
-	// channelPtr->executeMode();
+	
 
 	// // not send back but broadcast to all user on channel
 	// if (msgEnum == SET_MODE_OK)
 	// 	std::cout << "mode: set_mode_ok\n";
 	// std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
-
-	// std::string modeMsg = channelPtr->channelMessage(msgEnum, this, mode, params);
-	// std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
-	// for (auto user : channelPtr->getUserList())
-	// {
-	// 	if (send(user.getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
-	// 	{
-	// 		std::cout << "setMode: failed to send\r\n";
-	// 		close(user.getClientFd());
-	// 		return;
-	// 	}
-	// }
 }	
 	

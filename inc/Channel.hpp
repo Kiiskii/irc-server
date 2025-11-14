@@ -21,9 +21,9 @@ enum	channelMsg
 	ALREADY_ON_CHAN,
 	BAD_CHANNEL_KEY,
 	CHANGE_TOPIC_MSG,
+	SET_MODE_OK,
 	//below not use
 	INVITE_ONLY_CHAN,
-	SET_MODE_OK,
 };
 
 /*
@@ -84,7 +84,7 @@ class Channel
 		void		addChanop(Client* chanop);
 		void		setTopic(std::string newTopic, Client* client);
 		void		addUser(Client* newClient);
-		void		removeUser(Client* user);
+		// void		removeUser(Client* user);
 		void		setChanKey(std::string newKey);
 		void 		addMode(char key, std::string param);
 		void		removeMode(char key);
