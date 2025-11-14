@@ -30,7 +30,7 @@ class Server
 	int _epollFd = -1;
 	int _serverFd = -1;
 	std::string _pass = "";
-	std::string _name = "ft_irc";
+	std::string _name = "";
 	std::vector<Client> _clientInfo;
 	std::vector<Channel*> _channelInfo;
 	int _port = -1;
@@ -42,6 +42,7 @@ public:
 //getters
 	int getServerfd() const;
 	int getEpollfd() const;
+	std::string& getServerName();
 	struct epoll_event* getEpollEvents();
 	std::vector<Client>& getClientInfo();
 	std::vector<Channel*>& getChannelInfo();
@@ -52,6 +53,13 @@ public:
 	void handleNewClient();
 	void handleClient();
 	void handleCommand(Server &server, Client &client, std::string &line);
+	void attemptRegister(Client &client);
+
+/*Commands such as user, pass nick, might be best to create a separate place for commands*/
+	void pass(Server &server, Client &client, std::vector<std::string> tokens);
+	void nick(Server &server, Client &client, std::vector<std::string> tokens);
+	void user(Server &server, Client &client, std::vector<std::string> tokens);
+	void ping(Server &server, Client &client, std::vector<std::string> tokens);
 
 	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;

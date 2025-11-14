@@ -21,7 +21,6 @@ void Server::printChannelList() const
 }
 
 //missing the error checks
-//also what if port is not set, or password is not set?
 void Server::setupServerDetails(Server &server, int argc, char *argv[])
 {
 	if (argc != 3)
@@ -29,7 +28,10 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 		std::cout << "Argument count wrong" << std::endl;
 		exit (1);
 	}
-	//also need to validate password and port
+	//also need to validate password and port (also set rules for the password, max length??)
+	//need to remove ./ from the server name, could just have ircserv as the default name
+	_name = argv[0];
+	_name.erase(0, _name.find_last_of("/") + 1);
 	_port = std::stoi(argv[1]);
 	_pass = argv[2];
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
@@ -64,10 +66,22 @@ void Server::setupEpoll()
 
 //Here we removed send because even though the client has connected, it doesnt mean they have registered
 //Error messages...
+/*Handling a new client
+- struct sockaddr_in clientAddrress holds the client's IP address and port.
+- Calling accept fills the struct with the info (previously this was marked as NULL but then we wouldn't have stored IP anywhere)
+- More importantly, accept4 accepts a new connection and returns a new socket fd.
+- Now the struct contains the IPv4 address and inet_ntoa converts it into a string. (previously it was in binary)
+- Then we make the client socket non blocking, which means the program wont pause waiting for data from this socket.
+(means recv() wont pause the program waiting for data. If no data available, it will just return with EAGAIN)
+- Epoll is like event manager, it contains a list of sockets that we want to "track", if they communicate*/
 void Server::handleNewClient()
 {
 	Client newClient;
-	newClient.setClientFd(accept4(_serverFd, (struct sockaddr *) NULL, NULL, O_NONBLOCK));
+	struct sockaddr_in clientAddress;
+	socklen_t addressLength = sizeof(clientAddress);
+	newClient.setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
+	char *clientIP = inet_ntoa(clientAddress.sin_addr);
+	newClient.setHostName(clientIP);
 	std::cout << "New connection, fd: " << newClient.getClientFd() << std::endl; //debug msg
 	_clientInfo.push_back(newClient);
 	fcntl(newClient.getClientFd(), F_SETFL, O_NONBLOCK);
@@ -81,146 +95,63 @@ void Server::handleClient()
 
 }
 
-//what happens if edgecase runs true, server stops or person can try again?
-//also need to make sure the registration process happens in order
-//also need a better way to track registration process
+void Server::attemptRegister(Client &client)
+{
+//wonder if we can give the alrdy registered feedback here
+	if (client.getClientState() != REGISTERING)
+		return;
+	if (client.getNick().empty() || client.getUserName().empty())
+		return;
+	client.setClientState(REGISTERED);
+	std::string message = RPL_WELCOME(_name, client.getNick());
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	std::cout << "User set: " << client.getUserName() << std::endl;
+	std::cout << "Real name set: " << client.getRealName() << std::endl;
+	std::cout << "Host set: " << client.getHostName() << std::endl;
+	std::cout << "Server set: " << getServerName() << std::endl;
+	std::cout << "We got all the info!" << std::endl;
+}
+
+/*
+- When exactly do we return and when should we disconnect?
+- Right now you can give PASS, NICK and USER in any order but we may want to change it to PASS first, then NICK/USER in any order
+- Also right now I'm not handling any disconnections at all
+*/
 void Server::handleCommand(Server &server, Client &client, std::string &line)
 {
-	std::cout << "This is the command: " << line << std::endl;
-	// if (line.find("CAP") != std::string::npos)
-	// {
-	// 	std::string reply = ":" + server.name + " CAP * LS :multi-prefix\r\n";
-	// 	send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-	// 	return ;
-	// }
-	//do we need some sort of registered boolean?
-	if (line.find("PASS") != std::string::npos)
+	/*Attempting to use stringstream to iterate over the string and then use a vector that contains the tokens*/
+	std::istringstream stream(line);
+	std::string command;
+	stream >> command; //handling the command separately
+	std::vector<std::string> tokens; //this will contain all the command arguments
+	std::string token;
+	while (stream >> token)
 	{
-		std::cout << "PASS FOR fd: " << client.getClientFd() << std::endl;
-		int start = line.find("PASS ") + 5;
-		int end = line.find("\r\n", start);
-		std::string password;
-		password = line.substr(start, end - start);
-
-		if (client.getClientState() == GOT_USER || client.getClientState() == REGISTERED)
-		{
-			std::string message = ERR_ALREADYREGISTERED(client.getServerName(), client.getNick());
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
-			return ;	
-		}
-		if (password.size() == 0)
-		{
-			std::string placeholderserv = "localhost";
-			std::string message = ERR_NEEDMOREPARAMS(placeholderserv, "PASS");
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
-			return ;			
-		}
-		if (password.compare(server._pass) == 0)
-		{
-			std::cout << "Password matched!" << std::endl;
-			client.setClientState(GOT_PASS);
-		}
-		else
-		{
-			std::string placeholderserv = "localhost";
-			std::string message = ERR_PASSWDMISMATCH(placeholderserv);
-			send(client.getClientFd(), message.c_str(), message.size(), 0);					
-		}
+		tokens.push_back(token);
 	}
-	//[A-Za-z$$$${}\\|]
-	if (line.find("NICK ") != std::string::npos)
+	std::cout << "Fd is: " << client.getClientFd() << " and cmd and args: " << line << std::endl;
+	//still look into this...
+	if (command == "CAP")
 	{
-		//so first one cannot have digits but the second one can...
-		std::regex pattern(R"(^[A-Za-z\[\]{}\\|][A-Za-z0-9\[\]{}\\|]*$)");
-
-		//missing errors if nickname is empty, if contains wrong character or if no nick given? (we still need to check if the person doesnt even give NICK as the command but also if NICK is empty)
-		//but the if no NICK given check needs to be done elsewhere
-		std::string oldnick = client.getNick();
-		std::cout << "NICK FOR fd: " << client.getClientFd() << std::endl;
-		int start = line.find("NICK ") + 5;
-		int end = line.find("\r\n", start);
-		std::string nickname;
-		nickname = line.substr(start, end - start);
-		if (nickname.size() == 0)
-		{
-			std::string placeholderserv = "localhost";
-			std::string message = ERR_NONICKNAMEGIVEN(placeholderserv);
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
-			return ;			
-		}
-		if (std::regex_match(nickname, pattern) == false)
-		{
-			std::string placeholderserv = "localhost";
-			std::string message = ERR_ERRONEUSNICKNAME(placeholderserv, nickname);
-			send(client.getClientFd(), message.c_str(), message.size(), 0);	
-			return ;
-		}
-		for (size_t i = 0; i < server.getClientInfo().size(); i++)
-		{
-			if (server.getClientInfo()[i].getNick() == nickname)
-			{
-				std::string placeholderserv = "localhost";
-				std::string message = ERR_NICKNAMEINUSE(placeholderserv, nickname);
-				send(client.getClientFd(), message.c_str(), message.size(), 0);		
-				return ;
-			}
-		}
-		client.setNick(nickname);
-		std::cout << "Nick set: " << client.getNick() << std::endl;
-		if (client.getClientState() == GOT_PASS)
-		{
-			client.setClientState(GOT_NICK);
-		}
-		if (client.getClientState() == REGISTERED) // if new nick given, we need to broadcast a message
-		{
-			std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
-			send(client.getClientFd(), message.c_str(), message.size(), 0);			
-		}
-
+	 	std::string reply = ":" + server._name + " CAP * LS :multi-prefix\r\n";
+	 	send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+	 	return ;
 	}
-	//max length..?
-	if (line.find("USER") != std::string::npos)
+	if (command == "PASS")
 	{
-		std::cout << "USER FOR fd: " << client.getClientFd() << std::endl;
-		std::istringstream iss(line.substr(line.find("USER")));
-		std::string command, username, hostname, servername, realname; 
-		iss >> command >> username >> hostname >> servername;
-
-		if (username.size() == 0)
-		{
-			std::string placeholderserv = "localhost";
-			std::string message = ERR_NEEDMOREPARAMS(placeholderserv, "USER");
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
-			return ;			
-		}
-		if (client.getClientState() == GOT_USER || client.getClientState() == REGISTERED)
-		{
-			std::string message = ERR_ALREADYREGISTERED(client.getServerName(), client.getNick());
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
-			return ;	
-		}
-		client.setUserName(username);
-		client.setHostName(hostname);
-		//shouldnt we set the server name for the actual server object?
-		client.setServerName(servername);
-		std::cout << "User set: " << client.getUserName() << std::endl;
-		std::cout << "Host set: " << client.getHostName() << std::endl;
-		std::cout << "Server set: " << client.getServerName() << std::endl;
-
-		if (client.getClientState() == GOT_NICK)
-		{
-//gotuser and registered are basically the same step, no?
-			client.setClientState(GOT_USER);
-			std::string message = RPL_WELCOME(server._name, client.getNick());
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
-			std::cout << "We got all the info!" << std::endl;
-		}
+		pass(server, client, tokens);
 	}
-	if (line.find("PING") != std::string::npos)
+	if (command == "NICK")
 	{
-		std::cout << "PINGING fd: " << client.getClientFd() << std::endl;
-		if (send(client.getClientFd(), "PONG :ft_irc\r\n", sizeof("PONG :ft_irc\r\n") - 1, 0) == -1)
-			std::cout << "Send failed" << std::endl;
+		nick(server, client, tokens);
+	}
+	if (command == "USER")
+	{
+		user(server, client, tokens);
+	}
+	if (command == "PING")
+	{
+		ping(server, client, tokens);
 	}
 	if (line.find("JOIN") != std::string::npos)
 	{
@@ -248,6 +179,11 @@ int Server::getEpollfd() const
 	return _epollFd;
 }
 
+std::string& Server::getServerName()
+{
+	return _name;
+}
+
 struct epoll_event* Server::getEpollEvents()
 {
 	return _events;
@@ -266,4 +202,115 @@ std::vector<Client>& Server::getClientInfo()
 std::vector<Channel*>& Server::getChannelInfo()
 {
 	return _channelInfo;
+}
+
+void Server::pass(Server &server, Client &client, std::vector<std::string> tokens)
+{
+	if (client.getClientState() == REGISTERED)
+	{
+		std::string message = ERR_ALREADYREGISTERED(client.getServerName(), client.getNick());
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		return ;	
+	}
+	if (tokens.size() == 0)
+	{
+		std::string message = ERR_NEEDMOREPARAMS(getServerName(), "PASS");
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		return ;			
+	}
+	if (tokens[0].compare(server._pass) == 0)
+	{
+		std::cout << "Password matched!" << std::endl;
+		client.setClientState(REGISTERING);
+		attemptRegister(client);
+	}
+	else
+	{
+		std::string message = ERR_PASSWDMISMATCH(getServerName());
+		send(client.getClientFd(), message.c_str(), message.size(), 0);					
+	}	
+}
+
+/*Nickname rules, characters and length*/
+void Server::nick(Server &server, Client &client, std::vector<std::string> tokens)
+{
+	//so first one cannot have digits but the second one can...
+	std::regex pattern(R"(^[A-Za-z\[\]{}\\|][A-Za-z0-9\[\]{}\\|]*$)");
+	std::string oldnick = client.getNick();
+	if (tokens.size() == 0)
+	{
+		std::string message = ERR_NONICKNAMEGIVEN(getServerName());
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		return ;			
+	}
+	if (std::regex_match(tokens[0], pattern) == false)
+	{
+		std::string message = ERR_ERRONEUSNICKNAME(getServerName(), tokens[0]);
+		send(client.getClientFd(), message.c_str(), message.size(), 0);	
+		return ;
+	}
+	for (size_t i = 0; i < server.getClientInfo().size(); i++)
+	{
+		if (server.getClientInfo()[i].getNick() == tokens[0])
+		{
+			std::string message = ERR_NICKNAMEINUSE(getServerName(), tokens[0]);
+			send(client.getClientFd(), message.c_str(), message.size(), 0);
+			return ;
+		}
+	}
+	client.setNick(tokens[0]);
+	attemptRegister(client);
+	if (client.getClientState() == REGISTERED) // if new nick given, we need to broadcast a message
+	{
+		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
+		send(client.getClientFd(), message.c_str(), message.size(), 0);			
+	}
+}
+
+/*
+- Can we remove servername from Client, maybe have a pointer to server if name is needed? So then setservername could be removed from this function
+- User name and real name might also have some naming rules and lengths
+- Need to check if either user name or real name is empty
+- Check the :, and whether we are capturing the entire real name because that can be separated by space
+
+- Do we need to show in which format this needs to be???
+*/
+void Server::user(Server &server, Client &client, std::vector<std::string> tokens)
+{
+	if (tokens.size() < 4)
+	{
+		std::string message = ERR_NEEDMOREPARAMS(getServerName(), "USER");
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		return ;			
+	}
+	if (client.getClientState() == REGISTERED)
+	{
+		std::string message = ERR_ALREADYREGISTERED(getServerName(), client.getNick());
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		return ;	
+	}
+	client.setUserName(tokens[0]);
+	std::string realname = "";
+	//cleaner way to do this..?
+	if (tokens[3].find(":") != std::string::npos)
+	{
+		tokens[3].erase(0, tokens[3].find(":") + 1);		
+	}
+	for (int i = 3; i < tokens.size(); i++)
+	{
+		realname = realname + tokens[i];
+		if (i != tokens.size() - 1)
+		{
+			realname = realname + " ";
+		}
+	}
+	client.setRealName(tokens[3]);
+	client.setServerName(getServerName());
+	attemptRegister(client);
+}
+
+void Server::ping(Server &server, Client &client, std::vector<std::string> tokens)
+{
+		std::string message = RPL_PONG(tokens[0]);
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
 }
