@@ -7,8 +7,8 @@
 #include <regex> //std::istringstream
 #include <functional>
 
-#include "Channel.hpp"
-#include "Server.hpp"
+// #include "Channel.hpp"
+// #include "Server.hpp"
 #include "macro.hpp"
 
 class Channel;
@@ -67,12 +67,15 @@ class Client
 
 		// other
 		// void		updateClientInfo(std::string bufferStr);
+		bool		isOps(Channel* channel);
 		// JOIN
+		std::string makeUser();
 		void		askToJoin(std::string buffer, Server& server);
 		
 		// TOPIC
 		Channel*	setActiveChannel(std::string buffer);
 		void		askTopic(std::string buffer);
+
 		// MODE
 		void		changeMode(std::string buffer);	
 	

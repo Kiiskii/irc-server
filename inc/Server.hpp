@@ -11,8 +11,8 @@
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <sys/epoll.h>
-#include "macro.hpp"
 
+#include "macro.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
 
@@ -39,6 +39,7 @@ class Server
 	struct epoll_event _events[MAX_EVENTS];
 
 public:
+	~Server();
 //getters
 	int getServerfd() const;
 	int getEpollfd() const;

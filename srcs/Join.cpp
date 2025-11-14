@@ -62,13 +62,7 @@ static bool validateChannelName(std::map<std::string, std::string> channelKeyMap
 
 void Client::askToJoin(std::string buffer, Server& server)
 {
-	std::map<std::string, std::string>		channelKeyMap = mappingChannelKey(buffer);
-	
-	// for (auto token : channelKeyMap)
-	// {
-	// 	std::cout <<  "channel name - key pair: {" << token.first << ", " 
-	// 		<< token.second << "}" << std::endl;
-	// }
+	std::map<std::string,std::string> channelKeyMap = mappingChannelKey(buffer);
 
 	if (validateChannelName(channelKeyMap)) // else what
 	{
@@ -76,7 +70,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 		{
 			std::string channelName = chan.first;
 			std::string clientKey = chan.second;
-			std::cout << "channel name: " << channelName << std::endl;
+			// std::cout << "channel name: " << channelName << std::endl;
 			std::vector<Channel*>::iterator channelNameIt 
 				= server.isChannelExisting(channelName);
 			Channel* channelPtr = nullptr;
@@ -86,7 +80,6 @@ void Client::askToJoin(std::string buffer, Server& server)
 			{
 				server.getChannelInfo().push_back(new Channel(channelName));
 				channelPtr = server.getChannelInfo().back();
-				// this->_atChannel->setChanop(this);
 			}
 			else
 				channelPtr = *channelNameIt;
@@ -96,18 +89,10 @@ void Client::askToJoin(std::string buffer, Server& server)
 			{
 				this->addChannel(channelPtr);
 				channelPtr->addUser(this);
-				channelPtr->sendJoinSuccessMsg(*this);
+				if (channelPtr->getUserList().size() == 1)
+					channelPtr->addChanop(this); // there is only 1 user ->ops
 			}
-			
-			std::string joinMsg 
-				= channelPtr->channelMessage(result, this);
-			if (send(this->getClientFd(), joinMsg.c_str(), joinMsg.size(), 0) < 0)
-			{
-	
-				std::cout << "joinmsg: failed to send";
-				close(this->getClientFd());
-				return; // ?? recheck this, should disconnect the client and flag to the main loop
-			}
+			channelPtr->channelMessage(result, this);
 		}
 	}
 	// server.printChannelList(); //print all the channel on server

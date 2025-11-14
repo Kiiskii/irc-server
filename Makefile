@@ -6,7 +6,8 @@ HDRS_DIR = inc/
 HDRS = -I$(HDRS_DIR)
 
 NAME = ircserv
-SRCS = srcs/main.cpp srcs/Server.cpp srcs/Channel.cpp srcs/Client.cpp srcs/utils.cpp srcs/Join.cpp srcs/Topic.cpp srcs/Mode.cpp
+SRCS = srcs/main.cpp srcs/Server.cpp srcs/Client.cpp  srcs/utils.cpp srcs/Join.cpp srcs/Topic.cpp srcs/Mode.cpp srcs/Channel.cpp 
+
 OBJS = $(patsubst srcs/%.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 
 GREEN = \033[32m
@@ -16,12 +17,12 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	@echo "$(GREEN)Compiling executable...$(RESET)"
-	$(CXX) $(FLAGS) $(OBJS) -o $(NAME)
+	@$(CXX) $(FLAGS) $(OBJS) -o $(NAME)
 	@echo "$(GREEN)COMPILATION COMPLETE!$(RESET)"
 
 $(OBJS_DIR)/%.o: srcs/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(FLAGS) $(HDRS) -MMD -MP -c $< -o $@
+	@$(CXX) $(FLAGS) $(HDRS) -MMD -MP -c $< -o $@
 
 clean:
 	@echo "$(GREEN)Cleaning object files$(RESET)"

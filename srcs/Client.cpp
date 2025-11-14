@@ -1,5 +1,7 @@
 #include "Client.hpp"
 #include <cerrno>
+#include "Channel.hpp"
+#include "Server.hpp"
 
 int	Client::getClientFd()
 {
@@ -80,17 +82,11 @@ void Client::addChannel(Channel* chan)
 	_joinedChannels.push_back(chan);
 }
 
-/**
- * @brief need to fix this one, currently fix value for channel testing */
-//Do we need this?
-// void Client::updateClientInfo(std::string bufferStr)
-// {
-// 	(void) bufferStr;
-// 	// _clientNick = "trpham";
-// 	// _userName ="trpham";
-// 	_hostName = "localhost";
-// 	_serverName = "localhost";
-// }
+std::string Client::makeUser()
+{
+	return ":" + this->getNick() + "!" 
+		+ this->getUserName() + "@" + this->getHostName();
+}
 
 void Client::recieve(Server &server, Client &c, int clientIndex)
 {
@@ -191,4 +187,11 @@ void Client::parseMessage(Server &server, Client &c, const std::string &line)
 	if (!msg.empty() && msg.back() == ' ')
 		msg.pop_back();
 	server.handleCommand(server, c, msg);
+}
+bool	Client::isOps(Channel* channel)
+{
+	auto it = channel->getOps().find(this);
+	if (it != channel->getOps().end())
+		return true;
+	return false;
 }

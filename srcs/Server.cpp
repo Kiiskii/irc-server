@@ -1,5 +1,14 @@
 #include "Server.hpp"
 #include "utils.hpp"
+
+/* @note rememeber to check all on-heap allocated memory, such as chan */
+Server::~Server()
+{
+	for (auto chan : _channelInfo)
+		delete chan;
+	
+}
+
 /* @def check if the channel exists
 	@return ptr to channel if exist else return after the end of vector */
 std::vector<Channel*>::iterator Server::isChannelExisting(std::string newChannel) 
@@ -170,7 +179,7 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		line = ft_trimString(line);
 		std::cout << "mode comd: [" << line << "]" << std::endl;
 		// check command topic
-		client.changeMode(line);       
+		client.changeMode(line);
 	}
 }
 

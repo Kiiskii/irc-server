@@ -4,7 +4,7 @@
 
 Channel* Client::setActiveChannel(std::string buffer)
 {
-	Channel* channelPtr = nullptr;
+	// Channel* channelPtr = nullptr;
 	std::string	channelName;
 
 	size_t hashPos = buffer.find("#");
@@ -19,50 +19,65 @@ Channel* Client::setActiveChannel(std::string buffer)
 	std::cout << "channelName: [" << channelName << "]" << std::endl;
 	for (auto chan : this->_joinedChannels)
 	{
-		if (chan->getChannelName() == channelName)
+		if (chan && chan->getChannelName() == channelName)
+			return chan;
+		else
 		{
-			channelPtr = chan;
-			// std::cout << "current channel name: " << chan->getChannelName() << std::endl;
-			return channelPtr;
+			std::cout << "there is no channel saved in _joinedChannel" << std::endl;
 		}
 	}
 
 	return nullptr;
 }
 
+void Channel::setTopic(std::string buffer, Client* client)
+{
+	// not test this yet
+	if (!this->canNonOpsSetTopic() && !client->isOps(this))
+	{
+		this->sendOpPrivsNeeded(client); 
+		return; 
+	}
+	unsigned long topicPos = buffer.find_first_of(':');
+	std::string newTopic = buffer.substr(topicPos + 1, 
+							buffer.length() - topicPos -1);
+	_topic = newTopic;
+	
+	this->setTopicSetter(client);
+	time_t timestamp;
+	time(&timestamp);
+	this->setTopicTimestamp(timestamp);
+}
+
 void Client::askTopic(std::string buffer)
 {
 	Channel* channelPtr;
-	channelMsg result;
 
 	std::cout << "channel size: " << this->_joinedChannels.size() << std::endl;
 	channelPtr = setActiveChannel(buffer);
 	// if not on any channel, return do nothing
 	if (channelPtr == nullptr)
 		return;
+	// client hasn't joined channel
+	if (!channelPtr->isClientOnChannel(*this))
+	{
+		std::string notOnChanMsg = makeNumericReply(this->getServerName(), 
+			ERR_NOTONCHANNEL, this->getNick(), {"#" + channelPtr->getChannelName()}, "You're not on that channel");
+		channelPtr->sendMsg(this, notOnChanMsg);
+		return;
+	}
 
 	if (buffer == "TOPIC")
 	{
 		if (channelPtr && channelPtr->getTopic().empty())
-			result = NO_TOPIC_MSG;
+			channelPtr->sendNoTopic(this);
 		else if (channelPtr && !channelPtr->getTopic().empty())
-			result = CHANNEL_TOPIC_MSG;
+			channelPtr->sendTopic(this);
 	}
     else if (buffer.find(":") != std::string::npos)
     {
         // std::cout << "im here setting chan name: " << std::endl;
-        channelPtr->setTopic(buffer);
-        std::cout << "topic after set: " << channelPtr->getTopic() << std::endl;
-        result = CHANGE_TOPIC_MSG;
+        channelPtr->setTopic(buffer, this);
+		channelPtr->channelMessage(CHANGE_TOPIC_MSG, this);
     }
-
-	std::string topicMsg = channelPtr->channelMessage(result, this);
-	std::cout << "topicmsg: " << topicMsg << std::endl;
-	if (send(this->getClientFd(), topicMsg.c_str(), topicMsg.size(), 0) < 0)
-	{
-		std::cout << "setTopic: failed to send\r\n";
-		close(this->getClientFd());
-		return;
-	}   
-
 }
