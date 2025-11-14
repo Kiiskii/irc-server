@@ -59,9 +59,8 @@ class Client
 		void		setClientState(enum ClientState state);
 		void		addChannel(Channel* chan);
 
-		// other
-		// void		updateClientInfo(std::string bufferStr);
 		// JOIN
+		std::string makeUser();
 		void		askToJoin(std::string buffer, Server& server);
 		
 		// TOPIC

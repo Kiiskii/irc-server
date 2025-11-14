@@ -86,17 +86,17 @@ void Channel::setMode(std::string buffer, Client* client)
 		std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
 
 	}
-	std::string modeMsg = this->channelMessage(msgEnum, client, modeStr, args);
-	std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
-	for (auto user : this->getUserList())
-	{
-		if (send(user->getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
-		{
-			std::cout << "setMode: failed to send\r\n";
-			close(user->getClientFd());
-			return;
-		}
-	}
+	this->channelMessage(msgEnum, client, modeStr, args);
+	// std::cout << "modeMsg: [" << modeMsg << "]" << std::endl;
+	// for (auto user : this->getUserList())
+	// {
+	// 	if (send(user->getClientFd(), modeMsg.c_str(), modeMsg.size(), 0) < 0)
+	// 	{
+	// 		std::cout << "setMode: failed to send\r\n";
+	// 		close(user->getClientFd());
+	// 		return;
+	// 	}
+	// }
 }
 
 //mode: itkol

@@ -59,14 +59,14 @@ void Client::askTopic(std::string buffer)
         std::cout << "topic after set: " << channelPtr->getTopic() << std::endl;
         result = CHANGE_TOPIC_MSG;
     }
-
-	std::string topicMsg = channelPtr->channelMessage(result, this);
-	std::cout << "topicmsg: " << topicMsg << std::endl;
-	if (send(this->getClientFd(), topicMsg.c_str(), topicMsg.size(), 0) < 0)
-	{
-		std::cout << "setTopic: failed to send\r\n";
-		close(this->getClientFd());
-		return;
-	}   
+	channelPtr->channelMessage(result, this);
+	// std::string topicMsg = channelPtr->channelMessage(result, this);
+	// std::cout << "topicmsg: " << topicMsg << std::endl;
+	// if (send(this->getClientFd(), topicMsg.c_str(), topicMsg.size(), 0) < 0)
+	// {
+	// 	std::cout << "setTopic: failed to send\r\n";
+	// 	close(this->getClientFd());
+	// 	return;
+	// }   
 
 }

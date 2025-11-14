@@ -4,10 +4,11 @@
 #include <vector>
 #include <map>
 #include <unordered_set>
+#include <string>
 #include <utility>
 #include <unistd.h>
 #include <sys/socket.h> 
-// #include "Client.hpp"
+#include <ctime>
 #include "macro.hpp"
 
 class Client;
@@ -15,19 +16,22 @@ class Client;
 enum	channelMsg
 {
 	NO_MSG,
+	JOIN_OK,
+
+
 	NO_TOPIC_MSG,
 	CHANNEL_TOPIC_MSG,
 	WHO_CHANGE_TOPIC,
 	NAME_LIST_MSG,
 	CHANGE_TOPIC_MSG,
 	// JOIN MSG
-	JOIN_OK,
 	// NO_SUCH_CHANNEL, // may not need cause creating new channel anyway
 	TOO_MANY_CHANNELS,
 	BAD_CHANNEL_KEY,
 	INVITE_ONLY_CHAN,
 	ALREADY_ON_CHAN,
-	SET_MODE_OK
+	SET_MODE_OK,
+	ENDOFNAMES_MSG
 
 };
 
@@ -84,23 +88,25 @@ class Channel
 		std::vector<Client*> 		_userList; //who in channel
 		std::map<char, std::string>	_mode; //mode: itkol
 		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
-		// std::string			_chanKey;
+		time_t						_topicSetTimestamp;
+		Client*						_topicSetter;
 		
 	public:
 
-	
 		Channel();
 		~Channel() = default;
 		Channel(std::string newChannel);
 
 		// getters
-		std::string 		getChannelName() const;
-		std::string 		getTopic() const;
+		std::string 				getChannelName() const;
+		std::string 				getTopic() const;
 		std::unordered_set<Client*>	getChanop() const;
 		std::vector<Client*>		getUserList() const;
-		std::string			getChanKey() const;
-		// std::map<char,std::string> getMode() const;
-		std::map<char,std::string> getMode() const;
+		std::string					getChanKey() const;
+		std::map<char,std::string>	getMode() const;
+		std::string					printUser() const;
+		time_t						getTopicTimestamp();
+		Client*						getTopicSetter();
 
 		// setters
 		void		setChannelName(std::string channelName);
@@ -111,19 +117,23 @@ class Channel
 		void		setChanKey(std::string newKey);
 		void 		addMode(char key, std::string param);
 		void		removeMode(char key);
+		void		setTopicTimestamp(time_t timestamp);
+		void		setTopicSetter(Client* setter);
 
 		// channel public method
 		bool		isClientOnChannel( Client& client);
-		channelMsg	canClientJoinChannel( Client& client, std::string clientKey);
-		void		sendJoinSuccessMsg( Client& client);
+		channelMsg	canClientJoinChannel( Client& client, 
+						std::string clientKey);
+		void		sendMsg(Client* client, std::string& msg);
+		void		sendJoinSuccessMsg( Client* client);
+		
 		
 		// template
 		template <typename ...args>
-		std::string channelMessage(channelMsg msg, args ...moreArgs);
+		void		channelMessage(channelMsg msg, args ...moreArgs);
 
 		// mode
 		void			setMode(std::string buffer, Client* client);
-		void			setMode(std::string buffer, channelMsg& msgEnum, std::string& modeStatus, std::string& params);
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);
 		channelMsg		handleChannelKey(bool add, std::string& args);

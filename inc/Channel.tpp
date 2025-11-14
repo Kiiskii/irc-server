@@ -2,23 +2,35 @@
 #include "Client.hpp"
 
 
+
+/* The most common form of reply is the numeric reply, used for both errors and normal replies. Distinct from a normal message, a numeric reply MUST contain a <source> and use a three-digit numeric as the command. A numeric reply SHOULD contain the target of the reply as the first parameter of the message. A numeric reply is not allowed to originate from a client */
+// : channel names, usernames, modes, numbers -> param
+// Everything after : is considered the trailing field
+static std::string makeNumericReply(std::string prefix, int code, std::string target, std::vector<std::string> params, std::string trailing)
+{
+	std::string p, s;
+	for (auto param : params)
+		p += param + " ";
+	s = ":" + prefix + " " + std::to_string(code) + " " + target 
+		+ (p.empty() ? "" : " " + p)
+		+ (trailing.empty() ? "" : ":" + trailing)
+		+ "\r\n";
+	return s;
+}
+
 template <typename ...args>
-std::string Channel::channelMessage(channelMsg msg, args ...moreArgs)
+void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 {
 	auto		tupleArgs = std::make_tuple(moreArgs...);
 	constexpr size_t		nArgs = sizeof...(moreArgs);
 	std::cout << "Tuple size: " << nArgs << std::endl;
 
-	std::string	returnMsg, chanop, mode, params, modeStr;
+	std::string	user, mode, params, modeStr;
 	Client*		client;
 	if constexpr (nArgs > 0)
 	{
 		client = std::get<0>(tupleArgs);
-		chanop = ":" + client->getNick() + "!" 
-			+ client->getUserName() + "@" + client->getHostName();
 	}
-	// std::string mode, params;
-	// std::string modeStr = "";
 	if constexpr (nArgs > 1)
 	{
 		mode = std::get<1>(tupleArgs);
@@ -34,61 +46,38 @@ std::string Channel::channelMessage(channelMsg msg, args ...moreArgs)
 	switch (msg)
 	{
 	case JOIN_OK:
-		returnMsg = chanop + " JOIN #" + this->getChannelName() 
-			+" " + RPL_TOPIC + " \r\n";
+		this->sendJoinSuccessMsg(client);
 		break;
 
-	case TOO_MANY_CHANNELS: 	
-		returnMsg = ":" + client->getServerName() + " " + ERR_TOOMANYCHANNELS 
-		+ " " + client->getNick() + " " + this->getChannelName() 
-		+" :You have joined too many channels" + " \r\n";
-		break;
+	// case TOO_MANY_CHANNELS: 	
+	// 	returnMsg = ":" + client->getServerName() + " " + ERR_TOOMANYCHANNELS 
+	// 	+ " " + client->getNick() + " " + this->getChannelName() 
+	// 	+" :You have joined too many channels" + " \r\n";
+	// 	break;
 
-	case SET_MODE_OK:
-		returnMsg = chanop + " MODE #" + this->getChannelName() + " " + modeStr + " \r\n";
-		break;
+	// case SET_MODE_OK:
+	// 	returnMsg = chanop + " MODE #" + this->getChannelName() + " " + modeStr + " \r\n";
+	// 	break;
 		
-	case CHANGE_TOPIC_MSG:
-		returnMsg = chanop + " TOPIC #" + this->getChannelName() +" :" 
-		+ this->getTopic() + "\r\n";
-		break;
+	// case CHANGE_TOPIC_MSG:
+	// 	returnMsg = chanop + " TOPIC #" + this->getChannelName() +" :" 
+	// 	+ this->getTopic() + "\r\n";
+	// 	break;
 
-
-	// not test this yet, need key
+	// // NOT TEST YET
 	// case BAD_CHANNEL_KEY: 	
-	// 	returnMsg = ":" + extraInfo->client->getServerName() + " " + ERR_TOOMANYCHANNELS 
-	// 	+ " " + extraInfo->client->getNick() + " " + this->getChannelName() 
-	// 	+" :Cannot join channel" + " \r\n";
+	// 	returnMsg = ":" + client->getServerName() + " " 
+	// 	+ ERR_BADCHANNELKEY	+ " #" + this->getChannelName() 
+	// 	+" :Cannot join channel " + "\r\n";
 	// 	break;
 	
-	// case NO_TOPIC_MSG:
-	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_NOTOPIC + " " + 
-	// 	currentClient->_clientNick + " #" + this->getChannelName() 
-	// 	+ " :No topic is set\r\n";
-	// 	break;
-	
-	// case CHANNEL_TOPIC_MSG:
-	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPIC + " " + 
-	// 	currentClient->_clientNick + " #" + this->getChannelName() 
-	// 	+ " :" + this->getTopic() +" \r\n";
-	// 	break;
-	
-	// case WHO_CHANGE_TOPIC:
-	// 	returnMsg = ":" + currentClient->_serverName + " " + RPL_TOPICWHOTIME + " " + 
-	// 	currentClient->_clientNick + " #" + this->getChannelName() 
-	// 	+ " :" + this->getTopic() +" \r\n";
-	// 	break;
-	
-	
-	// case NAME_LIST_MSG:
-	// 	returnMsg = ":" + currentClient._serverName + RPL_NAMREPLY  + "!" + 
-	// 	currentClient._clientNick + "=#" + currentClient._atChannel->getChannelName() 
-	// 	+ ":" + currentClient._atChannel->getUserList() +" \r\n";
+
 
 	default:
-		returnMsg = "NO MESSAGE";
+		std::string s = "NO MESSAGE";
+		this->sendMsg(client, s);
 		break;
 	}
 	// std::cout << "msg sent by server: " << returnMsg << std::endl;
-	return returnMsg;
+	
 }

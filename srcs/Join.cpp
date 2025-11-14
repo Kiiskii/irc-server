@@ -97,17 +97,20 @@ void Client::askToJoin(std::string buffer, Server& server)
 				channelPtr->addUser(this);
 				if (channelPtr->getUserList().size() == 1)
 					channelPtr->addChanop(this); // there is only 1 user ->ops
-				channelPtr->sendJoinSuccessMsg(*this);
+				channelPtr->channelMessage(JOIN_OK, this);
 			}
-			std::string joinMsg 
-				= channelPtr->channelMessage(result, this);
-			if (send(this->getClientFd(), joinMsg.c_str(), joinMsg.size(), 0) < 0)
-			{
-	
-				std::cout << "joinmsg: failed to send";
-				close(this->getClientFd());
-				return; // ?? recheck this, should disconnect the client and flag to the main loop
-			}
+			// else
+			// {
+			// 	std::string joinMsg 
+			// 		= channelPtr->channelMessage(result, this);
+			// 	if (send(this->getClientFd(), joinMsg.c_str(), joinMsg.size(), 0) < 0)
+			// 	{
+		
+			// 		std::cout << "joinmsg: failed to send";
+			// 		close(this->getClientFd());
+			// 		return; // ?? recheck this, should disconnect the client and flag to the main loop
+			// 	}
+			// }
 		}
 	}
 	// server.printChannelList(); //print all the channel on server

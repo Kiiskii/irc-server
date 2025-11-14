@@ -2,12 +2,12 @@
 
 #define MAX_CHANNELS_PER_CLIENT 5 //recheck CHANLIMIT IN RP_SUPPORT
 
-
-
-#define RPL_NOTOPIC "331"
-#define RPL_TOPIC "332"
-#define RPL_NAMREPLY "353"
-#define RPL_TOPICWHOTIME "333"
+// #define RPL_NOTOPIC(server, nick, channelName) ":" + server + " 331 " + nick + " #" + channelName + " :No topic is set\r\n";
+#define RPL_NOTOPIC 331
+#define RPL_TOPIC 332
+#define RPL_NAMREPLY 353
+#define RPL_TOPICWHOTIME 333
+#define RPL_ENDOFNAMES 366
 #define ERR_TOOMANYCHANNELS "405"
 #define ERR_NOTONCHANNEL "442"
 #define ERR_BADCHANNELKEY "475"
