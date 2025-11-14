@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Channel.hpp"
 
 int	Client::getClientFd()
 {
@@ -73,4 +74,12 @@ std::string Client::makeUser()
 {
 	return ":" + this->getNick() + "!" 
 		+ this->getUserName() + "@" + this->getHostName();
+}
+
+bool	Client::isOps(Channel* channel)
+{
+	auto it = channel->getOps().find(this);
+	if (it != channel->getOps().end())
+		return true;
+	return false;
 }

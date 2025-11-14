@@ -44,6 +44,9 @@ void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 		modeStr += " " + params;
 	}
 
+	std::string server = client->getServerName(),
+				nick = client->getNick(),
+				chanName = this->getChannelName();
 	switch (msg)
 	{
 	case JOIN_OK:
@@ -56,32 +59,31 @@ void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 
 	case TOO_MANY_CHANNELS:
 	{
-		std::string manyChannelsMsg = makeNumericReply(client->getServerName(), 
-		ERR_TOOMANYCHANNELS, client->getNick(), {"#" + this->getChannelName()}, "You have joined too many channels");
+		std::string manyChannelsMsg = makeNumericReply(server,
+			ERR_TOOMANYCHANNELS, nick, {"#" + chanName}, "You have joined too many channels");
 		this->sendMsg(client, manyChannelsMsg);
 		break;
 	}
 	
 	case BAD_CHANNEL_KEY: //not test this yet
 	{
-		std::string badKeyMsg = makeNumericReply(client->getServerName(), ERR_BADCHANNELKEY, client->getNick(), {"#" + this->getChannelName()}, "Cannot join channel (+k)");
+		std::string badKeyMsg = makeNumericReply(server, ERR_BADCHANNELKEY, 
+			nick, {"#" + chanName}, "Cannot join channel (+k)");
 		this->sendMsg(client, badKeyMsg);
 		break;
 	}
 
+	case CHANGE_TOPIC_MSG:
+	{
+		std::string	returnMsg = client->makeUser() + " TOPIC #" + 
+			this->getChannelName() +" :" + this->getTopic() + "\r\n";
+		this->sendMsg(client, returnMsg);
+		break;
+	}
 	
 	// case SET_MODE_OK:
 	// 	returnMsg = chanop + " MODE #" + this->getChannelName() + " " + modeStr + " \r\n";
 	// 	break;
-		
-	// case CHANGE_TOPIC_MSG:
-	// 	returnMsg = chanop + " TOPIC #" + this->getChannelName() +" :" 
-	// 	+ this->getTopic() + "\r\n";
-	// 	break;
-
-	// // NOT TEST YET
-	
-
 
 	default:
 		std::string s = "NO MESSAGE";

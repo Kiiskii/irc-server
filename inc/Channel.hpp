@@ -20,41 +20,11 @@ enum	channelMsg
 	TOO_MANY_CHANNELS,
 	ALREADY_ON_CHAN,
 	BAD_CHANNEL_KEY,
-
-
-	NO_TOPIC_MSG,
-	CHANNEL_TOPIC_MSG,
-	WHO_CHANGE_TOPIC,
-	NAME_LIST_MSG,
 	CHANGE_TOPIC_MSG,
-	// JOIN MSG
-	// NO_SUCH_CHANNEL, // may not need cause creating new channel anyway
+	//below not use
 	INVITE_ONLY_CHAN,
 	SET_MODE_OK,
-	ENDOFNAMES_MSG
-
 };
-
-// struct joinInfo { 
-// 	Client* client;
-	
-// };
-
-// struct topicInfo { 
-// 	Client* client;
-// 	std::string topic;
-// };
-
-// struct modeInfo { 
-// 	Client*		client;
-// 	char		addMode;
-// 	char		mode;
-// 	std::string	param;
-// 	channelMsg	msgEnum;
-// };
-
-
-
 
 /*
 	@brief The channel is created implicitly when the first client joins it, 
@@ -107,11 +77,12 @@ class Channel
 		std::string					printUser() const;
 		time_t						getTopicTimestamp();
 		Client*						getTopicSetter();
+		std::unordered_set<Client*>	getOps() const;
 
 		// setters
 		void		setChannelName(std::string channelName);
 		void		addChanop(Client* chanop);
-		void		setTopic(std::string newTopic);
+		void		setTopic(std::string newTopic, Client* client);
 		void		addUser(Client* newClient);
 		void		removeUser(Client* user);
 		void		setChanKey(std::string newKey);
@@ -125,8 +96,11 @@ class Channel
 		channelMsg	canClientJoinChannel( Client& client, 
 						std::string clientKey);
 		void		sendMsg(Client* client, std::string& msg);
+		void		sendTopic(Client* client);
+		void		sendNoTopic(Client* client);
 		void		sendTopicAndNames(Client* client);
 		void		sendJoinSuccessMsg( Client* client);
+		void 		sendOpPrivsNeeded(Client* client);
 		
 		
 		// template
@@ -135,6 +109,7 @@ class Channel
 
 		// mode
 		void			setMode(std::string buffer, Client* client);
+		bool 			canNonOpsSetTopic();
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);
 		channelMsg		handleChannelKey(bool add, std::string& args);

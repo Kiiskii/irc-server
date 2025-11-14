@@ -94,17 +94,34 @@ void Channel::addChanop(Client* chanop)
 	_ops.insert(chanop);
 }
 
+std::unordered_set<Client*>	Channel::getOps() const
+{
+	return _ops;
+}
+
+
 void Channel::setChannelName(std::string channelName)
 {
 	_channelName = channelName;
 }
 
-void Channel::setTopic(std::string buffer)
+bool Channel::canNonOpsSetTopic()
 {
-	unsigned long topicPos = buffer.find_first_of(':');
+	auto it = _mode.find('t');
+	if (it != _mode.end())
+		return false;
+	return true;
+}
 
-	std::string newTopic = buffer.substr(topicPos + 1, buffer.length() - topicPos -1);
-	_topic = newTopic;
+void Channel::sendOpPrivsNeeded(Client* client)
+{
+	std::string	server = client->getServerName(),
+			nick = client->getNick(),
+			chanName = this->getChannelName();
+
+	std::string notOpsMsg = makeNumericReply(server, ERR_CHANOPRIVSNEEDED, 
+		nick, {"#" + chanName}, "You're not channel operator");
+	this->sendMsg(client, notOpsMsg);
 }
 
 void Channel::setChanKey(std::string newKey)
@@ -146,19 +163,13 @@ bool Channel::isClientOnChannel( Client& client)
 		if (this->getChannelName() == (*chan).getChannelName())
 			return true;
 	}
-	
-	// for (auto it : _userList)
-	// {
-	// 	if (client.getNick() == it->getNick())
-	// 		return true;
-	// }
 	return false;
 }
 
 /** @brief check if the channel key matches the key that client inputs */
 channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
-	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
+	// std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
 	if (this->isClientOnChannel(client))
 		return ALREADY_ON_CHAN;
 	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
@@ -168,6 +179,34 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	return JOIN_OK;
 }
 
+void	Channel::sendTopic(Client* client)
+{
+	std::string	server = client->getServerName(),
+				nick = client->getNick(),
+				chanName = this->getChannelName();
+
+	std::string topicMsg = makeNumericReply(server, RPL_TOPIC, nick, 
+		{"#" + chanName}, this->getTopic());
+	this->sendMsg(client, topicMsg);
+	
+	// below not test yet
+	std::time_t timestamp = this->getTopicTimestamp();
+	std::string topicWhoMsg = makeNumericReply(server, RPL_TOPICWHOTIME,
+		nick, {"#" + chanName, getTopicSetter()->getNick(), std::to_string(timestamp)}, "");
+	this->sendMsg(client, topicWhoMsg);
+}
+
+void	Channel::sendNoTopic(Client* client)
+{
+	std::string	server = client->getServerName(),
+				nick = client->getNick(),
+				chanName = this->getChannelName();
+
+	std::string topicMsg = makeNumericReply(server, RPL_NOTOPIC, nick, 
+		{"#" + chanName}, "No topic is set");
+	this->sendMsg(client, topicMsg);
+}
+
 void	Channel::sendTopicAndNames(Client* client)
 {
 	std::string	server = client->getServerName(),
@@ -175,23 +214,9 @@ void	Channel::sendTopicAndNames(Client* client)
 				chanName = this->getChannelName();
 	// send topic / no_topic
 	if (this->getTopic().empty())
-	{
-		std::string topicMsg = makeNumericReply(server, RPL_NOTOPIC, nick, 
-			{"#" + chanName}, "No topic is set");
-		this->sendMsg(client, topicMsg);
-	}
+		this->sendNoTopic(client);
 	else
-	{
-		std::string topicMsg = makeNumericReply(server, RPL_TOPIC, nick, 
-			{"#" + chanName}, this->getTopic());
-		this->sendMsg(client, topicMsg);
-		
-		// below not test yet
-		std::time_t timestamp = this->getTopicTimestamp();
-		std::string topicWhoMsg = makeNumericReply(server, RPL_TOPICWHOTIME,
-			nick, {"#" + chanName, getTopicSetter()->getNick(), std::to_string(timestamp)}, "");
-		this->sendMsg(client, topicWhoMsg);
-	}
+		this->sendTopic(client);
 
 	// send name list and end of list
 	std::string nameReplyMsg = makeNumericReply(server, RPL_NAMREPLY, nick,  {"=", "#"+ chanName}, this->printUser() );

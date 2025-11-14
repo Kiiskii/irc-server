@@ -59,6 +59,7 @@ class Client
 		void		setClientState(enum ClientState state);
 		void		addChannel(Channel* chan);
 
+		bool		isOps(Channel* channel);
 		// JOIN
 		std::string makeUser();
 		void		askToJoin(std::string buffer, Server& server);
@@ -66,6 +67,7 @@ class Client
 		// TOPIC
 		Channel*	setActiveChannel(std::string buffer);
 		void		askTopic(std::string buffer);
+
 		// MODE
 		void		changeMode(std::string buffer);	
 	

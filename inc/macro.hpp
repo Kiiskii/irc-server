@@ -9,8 +9,9 @@
 #define RPL_TOPICWHOTIME 333
 #define RPL_ENDOFNAMES 366
 #define ERR_TOOMANYCHANNELS 405
-#define ERR_NOTONCHANNEL 442
 #define ERR_BADCHANNELKEY 475
+#define ERR_NOTONCHANNEL 442
+#define ERR_CHANOPRIVSNEEDED 482
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
 
