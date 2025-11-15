@@ -17,13 +17,17 @@ enum	channelMsg
 {
 	NO_MSG,
 	JOIN_OK,
-	TOO_MANY_CHANNELS,
 	ALREADY_ON_CHAN,
-	BAD_CHANNEL_KEY,
 	CHANGE_TOPIC_MSG,
-	SET_MODE_OK,
 	//below not use
 	INVITE_ONLY_CHAN,
+
+	// mode response, should move out??
+	SET_MODE_OK,
+	NO_ACTION,
+	MODE_DEACTIVATED,
+	
+
 };
 
 /*
@@ -100,7 +104,10 @@ class Channel
 		void		sendNoTopic(Client* client);
 		void		sendTopicAndNames(Client* client);
 		void		sendJoinSuccessMsg( Client* client);
-		void 		sendOpPrivsNeeded(Client* client);
+		void 		sendOpPrivsNeededMsg(Client* client);
+		void		broadcastChannelMsg(std::string& msg);
+		void		sendClientErr(int num, Client* client);
+
 		
 		
 		// template

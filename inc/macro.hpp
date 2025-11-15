@@ -12,6 +12,7 @@
 #define ERR_BADCHANNELKEY 475
 #define ERR_NOTONCHANNEL 442
 #define ERR_CHANOPRIVSNEEDED 482
+// #define ERR_NEEDMOREPARAMS 461 //duplicate
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
 #define RPL_PONG(token) "PONG " + token + "\r\n"

@@ -77,8 +77,9 @@ void Client::setClientState(enum ClientState state)
 	_clientState = state;
 }
 
-void Client::addChannel(Channel* chan)
+void Client::addJoinedChannel(Channel* chan)
 {
+	std::cout << "added\n";
 	_joinedChannels.push_back(chan);
 }
 
@@ -188,6 +189,7 @@ void Client::parseMessage(Server &server, Client &c, const std::string &line)
 		msg.pop_back();
 	server.handleCommand(server, c, msg);
 }
+
 bool	Client::isOps(Channel* channel)
 {
 	auto it = channel->getOps().find(this);
