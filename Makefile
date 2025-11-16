@@ -19,6 +19,7 @@ $(NAME): $(OBJS)
 	@echo "$(GREEN)Compiling executable...$(RESET)"
 	@$(CXX) $(FLAGS) $(OBJS) -o $(NAME)
 	@echo "$(GREEN)COMPILATION COMPLETE!$(RESET)"
+	@echo "Usage: ./ircserv <port> <set_password>"
 
 $(OBJS_DIR)/%.o: srcs/%.cpp
 	@mkdir -p $(dir $@)

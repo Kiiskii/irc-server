@@ -17,13 +17,17 @@ enum	channelMsg
 {
 	NO_MSG,
 	JOIN_OK,
-	TOO_MANY_CHANNELS,
 	ALREADY_ON_CHAN,
-	BAD_CHANNEL_KEY,
 	CHANGE_TOPIC_MSG,
-	SET_MODE_OK,
 	//below not use
 	INVITE_ONLY_CHAN,
+
+	// mode response, should move out??
+	SET_MODE_OK,
+	NO_ACTION,
+	UNKNOWN_MODE,
+	
+
 };
 
 /*
@@ -81,10 +85,9 @@ class Channel
 
 		// setters
 		void		setChannelName(std::string channelName);
-		void		addChanop(Client* chanop);
 		void		setTopic(std::string newTopic, Client* client);
 		void		addUser(Client* newClient);
-		// void		removeUser(Client* user);
+		void		removeUser(std::string userNick);
 		void		setChanKey(std::string newKey);
 		void 		addMode(char key, std::string param);
 		void		removeMode(char key);
@@ -100,7 +103,10 @@ class Channel
 		void		sendNoTopic(Client* client);
 		void		sendTopicAndNames(Client* client);
 		void		sendJoinSuccessMsg( Client* client);
-		void 		sendOpPrivsNeeded(Client* client);
+		void 		sendOpPrivsNeededMsg(Client* client);
+		void		broadcastChannelMsg(std::string& msg);
+		void		sendClientErr(int num, Client* client);
+
 		
 		
 		// template
@@ -110,12 +116,15 @@ class Channel
 		// mode
 		void			setMode(std::string buffer, Client* client);
 		bool 			canNonOpsSetTopic();
+		bool			isModeActive(char mode, std::string& key);
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);
 		channelMsg		handleChannelKey(bool add, std::string& args);
 		channelMsg		handleChannelOperator(bool add, std::string& args);
 		channelMsg		handleChannelLimit(bool add, std::string& args);
-	
+		void			addChanop(Client* chanop);
+		void			removeChanop(std::string opNick);
+
 };
 
 std::ostream& operator<<(std::ostream& os, const Channel& channel);
