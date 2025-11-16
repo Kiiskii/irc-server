@@ -44,18 +44,66 @@ static void extractModeAndParams(std::string buffer, std::string& modeStr,
 	
 }
 
+static void combineExecutedMode(std::string& executedMode, char mode, bool addMode)
+{
+	bool activeAddMode = true;
+
+	if (executedMode.empty())
+	{
+		if (addMode)
+			executedMode += "+";
+		else
+			executedMode += "-";
+		executedMode += mode;
+	}
+	else
+	{
+		for (size_t i  = 0; i < executedMode.length(); i++)
+		{
+			if (executedMode[i] == '+')
+				activeAddMode = true;
+			else if (executedMode[i] == '-')
+				activeAddMode = false;
+		}
+		if (addMode == activeAddMode)
+			executedMode += mode;
+		else
+			executedMode += (addMode ? "+" : "-") + mode;
+	}
+}
+
+/** @brief Servers MAY choose to hide sensitive information when sending the mode changes like key MODE args. Use asterisk to hide that args*/
+static void restrictRemoveKeyMode(std::string& executedMode, std::string& executedArgs)
+{
+	bool activeAddMode;
+
+	if (executedMode.empty())
+		return;
+	for (size_t i  = 0; i < executedMode.length(); i++)
+	{
+		std::cout << "value at i : " << executedMode[i] << std::endl;
+		if (executedMode[i] == '+')
+			activeAddMode = true;
+		else if (executedMode[i] == '-')
+			activeAddMode = false;
+		else if (executedMode[i] == 'k')
+			break;
+	}
+	if (activeAddMode == false)
+		executedArgs = "*";
+}
+
 void Channel::setMode(std::string buffer, Client* client)
 {
 	std::string					modeStr, args;
 	std::vector<std::string>	argsVec;
 
 	extractModeAndParams(buffer, modeStr, args);
-	std::cout << "mode are: [" << modeStr << "]" << " and args [" << args << "]" << std::endl;
+	// std::cout << "mode are: [" << modeStr << "]" << " and args [" << args << "]" << std::endl;
 
 	if (!args.empty())
 			argsVec = splitString(args, ' ');
 	
-	// this only handle the map of _mode, not yet what to response??
 	std::string params, modeStatus, executedMode, executedArgs;
 	bool		addMode = true;
 	channelMsg	msgEnum;
@@ -65,9 +113,7 @@ void Channel::setMode(std::string buffer, Client* client)
 		if (mode == '+') {addMode = true; continue;}	
 		if (mode == '-') {addMode = false; continue;}
 		if (mode == 'i' || mode == 't')
-		{
 			params = "";
-		}
 		else if ( mode == 'l' || mode == 'o')
 		{
 			if (argsVec.empty())
@@ -88,20 +134,18 @@ void Channel::setMode(std::string buffer, Client* client)
 				argsVec.erase(argsVec.begin());
 			}
 		}
+
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
-	
-		// not send back but broadcast to all user on channel
-		// if cannot set a mode, what to do here?
 		if (msgEnum == SET_MODE_OK)
 		{
 			std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
-			executedMode += (addMode ? "+" : "-") + mode;
-			executedArgs += params + " ";
+			combineExecutedMode(executedMode, mode, addMode);
+			executedArgs += (params.empty() ? "" : params + " ");
 		}
-	}
-	std::cout << " msg has mode: [" << executedMode << "] and params: [" << executedArgs << "]\n";
+		// if cannot set a mode, what to do here?
 
-	// When the server is done processing the modes, a MODE command is sent to all members of the channel containing the mode changes. Servers MAY choose to hide sensitive information when sending the mode changes.
+	}
+	restrictRemoveKeyMode(executedMode, executedArgs);
 	this->channelMessage(msgEnum, client, executedMode, executedArgs);
 }
 
@@ -109,9 +153,6 @@ void Channel::setMode(std::string buffer, Client* client)
 void	Client::changeMode(std::string buffer)
 {
 	Channel*	channelPtr = nullptr;
-	// channelMsg	msgEnum;
-	// bool		addMode = true;
-	// std::string	params = "";
 
 	// validate the command here
 	if (isValidModeCmd(buffer) == false)
@@ -131,17 +172,10 @@ void	Client::changeMode(std::string buffer)
 	else {
 		std::cout << "message doesn't have channel # \n";
 	}
-	// std::cout << "here ok \n";
 
 	std::string		mode;
 	channelPtr->setMode(buffer, this);
-	channelPtr->getMode(); //=> to print the mode active
-	
-
-	// // not send back but broadcast to all user on channel
-	// if (msgEnum == SET_MODE_OK)
-	// 	std::cout << "mode: set_mode_ok\n";
-	// std::cout << "mode: [" << mode << "] and params: [" << params << "]\n";
+	// channelPtr->getMode(); //=> to print the mode active
 }	
 	
 /**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ?? */
@@ -164,10 +198,13 @@ channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 		this->addMode('i', args);
 		return SET_MODE_OK;
 	}
-	if (active)
+	else
 	{
-		this->removeMode('i');
-		return MODE_DEACTIVATED;
+		if (active)
+		{
+			this->removeMode('i');
+			return SET_MODE_OK;
+		}
 	}
 	return NO_ACTION;
 }
@@ -209,10 +246,13 @@ channelMsg	Channel::handleChannelKey(bool add, std::string& args)
 		this->addMode('k', args);
 		return SET_MODE_OK;
 	}
-	if (active)
+	else
 	{
-		this->removeMode('k');
-		return MODE_DEACTIVATED; //recheck, send an empty key or nothing
+		if (active)
+		{
+			this->removeMode('k');
+			return SET_MODE_OK; //recheck, send an empty key or nothing
+		}
 	}
 	return NO_ACTION;
 }
