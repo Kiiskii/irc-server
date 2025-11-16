@@ -93,8 +93,24 @@ void Channel::addChanop(Client* chanop)
 	_ops.insert(chanop);
 }
 
+void	Channel::removeChanop(std::string opNick)
+{
+	for (auto op : _ops)
+	{
+		if (op->getNick() == opNick)
+			_ops.erase(op);
+	}
+}
+
+
 std::unordered_set<Client*>	Channel::getOps() const
 {
+	std::cout << "operators list: \n";
+	for (auto op : _ops)
+	{
+		std::cout << op->getNick() << ", ";
+	}
+	std::cout << "\n";
 	return _ops;
 }
 
@@ -131,6 +147,18 @@ void Channel::addUser(Client* newClient)
 {
 	_userList.push_back(newClient);
 }
+
+void	Channel::removeUser(std::string userNick)
+{
+	for (auto it  = _userList.begin(); it != _userList.end();)
+	{
+		if ((*it)->getNick() == userNick)
+			it = _userList.erase(it);
+		else
+			++it;
+	}
+}
+
 
 /**
  * @brief Check whether the client is already on the channel, if already then open the window
@@ -172,22 +200,37 @@ void Channel::sendClientErr(int num, Client* client)
 	std::string server = client->getServerName(),
 				nick = client->getNick(),
 				chanName = this->getChannelName(),
-				msg;
+				msg, extraArg;
+	// auto				tupleArgs = make_tuple(args);
+	// constexpr size_t	nArgs = sizeof...(args);
+
+	// if constexpr (nArgs > 0)
+	// 	extraArg = get<0>tupleArgs;
 
 	switch (num)
 	{
 	case ERR_BADCHANNELKEY: //not test this yet
 		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+k)");
 		break;
+
 	case ERR_TOOMANYCHANNELS:
 		msg = makeNumericReply(server, num , nick, {"#" + chanName}, "You have joined too many channels");
 		break;
+
+	case ERR_UNKNOWNMODE:
+	{
+		msg = makeNumericReply(server, num , nick, {}, "is unknown mode char to me");
+		break;
+	}
+
 	case 461:
-		msg = ERR_NEEDMOREPARAMS(server, "MODE"); // need fix
+		// msg = ERR_NEEDMOREPARAMS(server, "MODE"); // need fix
+		msg = makeNumericReply(server, num, nick, {"MODE"}, "Not enough parameters");
 		break;	
 	
 	default:
 		break;
 	}
+	std::cout << "461 msg: " << msg << std::endl;
 	this->sendMsg(client, msg);
 }

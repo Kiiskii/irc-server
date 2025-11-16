@@ -7,7 +7,7 @@
  * @brief MODE <#channel> <+/-modestring> [<mode arguments>...] */ 
 static bool isValidModeCmd(std::string buffer)
 {
-	std::regex modeRegex("^MODE\\s+#[a-zA-Z_0-9]+\\s+([+-][a-zA-Z]+)+(\\s+[a-zA-Z_0-9]+)*$");
+	std::regex modeRegex("^MODE\\s+#[a-zA-Z_0-9]+\\s+([+-][a-zA-Z]+)+(\\s+[a-zA-Z_0-9\"]+)*$");
 	if (std::regex_match(buffer, modeRegex))
 		return true;
 	std::cout << "DOES NOT match regex pattern for mode\n";
@@ -76,20 +76,24 @@ static void combineExecutedMode(std::string& executedMode, char mode, bool addMo
 static void restrictRemoveKeyMode(std::string& executedMode, std::string& executedArgs)
 {
 	bool activeAddMode;
+	bool hasKeyMode = false;
 
 	if (executedMode.empty())
 		return;
 	for (size_t i  = 0; i < executedMode.length(); i++)
 	{
-		std::cout << "value at i : " << executedMode[i] << std::endl;
+		// std::cout << "value at i : " << executedMode[i] << std::endl;
 		if (executedMode[i] == '+')
 			activeAddMode = true;
 		else if (executedMode[i] == '-')
 			activeAddMode = false;
 		else if (executedMode[i] == 'k')
+		{
+			hasKeyMode = true;
 			break;
+		}
 	}
-	if (activeAddMode == false)
+	if (activeAddMode == false && hasKeyMode)
 		executedArgs = "*";
 }
 
@@ -114,27 +118,45 @@ void Channel::setMode(std::string buffer, Client* client)
 		if (mode == '-') {addMode = false; continue;}
 		if (mode == 'i' || mode == 't')
 			params = "";
-		else if ( mode == 'l' || mode == 'o')
+		else if ( mode == 'l')
 		{
-			if (argsVec.empty())
+			if (addMode && argsVec.empty())
 			{
 				sendClientErr(461, client);
 				break;
-			}	
-			params = argsVec.front();
-			argsVec.erase(argsVec.begin());
-		}
-		else if (mode == 'k')
-		{
-			if (argsVec.empty()) 
-				params = "";
-			else
+			}
+			if (!argsVec.empty() && addMode)
 			{
 				params = argsVec.front();
 				argsVec.erase(argsVec.begin());
 			}
 		}
-
+		else if ( mode == 'k')
+		{
+			if (addMode && argsVec.empty())
+			{
+				sendClientErr(461, client);
+				break;
+			}
+			if (!argsVec.empty() && mode == 'k')
+			{
+				params = argsVec.front();
+				argsVec.erase(argsVec.begin());
+			}
+		}
+		else if (mode == 'o')
+		{
+			if (argsVec.empty()) 
+			{
+				sendClientErr(461, client);
+				break;
+			}
+			params = argsVec.front();
+			argsVec.erase(argsVec.begin());
+		}
+		else
+			this->sendClientErr(ERR_UNKNOWNMODE, client);
+		// this only handle the _mode mapping, not action with client yet
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (msgEnum == SET_MODE_OK)
 		{
@@ -175,22 +197,16 @@ void	Client::changeMode(std::string buffer)
 
 	std::string		mode;
 	channelPtr->setMode(buffer, this);
-	// channelPtr->getMode(); //=> to print the mode active
+	channelPtr->getMode(); //=> to print the mode active
+	channelPtr->getOps();
 }	
 	
 /**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ?? */
 channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 {
-	bool active = false;
+	std::string key;
+	bool active = this->isModeActive('i', key);
 
-	for (auto m : _mode)
-	{
-		if (m.first == 'i')
-		{
-			active = true;
-			break;
-		}
-	}
 	if (add)
 	{
 		if (active)
@@ -227,43 +243,80 @@ channelMsg	Channel::handleTopicRestriction(bool add, std::string& args)
 If this mode is set on a channel, and a client sends a JOIN request for that channel, they must supply <key> in order for the command to succeed. If they do not supply a <key>, or the key they supply does not match the value of this mode, they will receive an ERR_BADCHANNELKEY (475) reply and the command will fail. */
 channelMsg	Channel::handleChannelKey(bool add, std::string& args)
 {
-	bool active = false;
 	std::string key;
-	for (auto m : _mode)
-	{
-		if (m.first == 'k')
-		{
-			active = true;
-			key = m.second;
-			break;
-		}
-	}
+	bool active = this->isModeActive('k', key);
+	
 	if (add)
 	{
-		if (active && args == key)
-			return NO_ACTION;
 		this->removeMode('k');
 		this->addMode('k', args);
 		return SET_MODE_OK;
 	}
-	else
+	else if (!add && active)
 	{
-		if (active)
-		{
-			this->removeMode('k');
-			return SET_MODE_OK; //recheck, send an empty key or nothing
-		}
+		this->removeMode('k');
+		return SET_MODE_OK; //recheck, send an empty key or nothing
 	}
 	return NO_ACTION;
 }
 
-channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
+bool	Channel::isModeActive(char mode, std::string& key)
 {
-	return SET_MODE_OK;
+	for (auto m : _mode)
+	{
+		if (m.first == mode)
+		{
+			key = m.second;
+			return true;
+		}
+	}
+	return false;
 }
 
+channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
+{
+	std::string key;
+	bool active = this->isModeActive('o', key);
+	
+	if (add)
+	{
+		this->removeMode('o');
+		this->addMode('o', args);
+		for (Client* user : _userList)
+		{
+			if (user->getNick() == args)
+				this->addChanop(user); // check duplicate??
+		}
+		return SET_MODE_OK;
+	}
+	else if (!add && active)
+	{
+		this->removeMode('o');
+		this->removeChanop(args); // recheck whitespace??
+		return SET_MODE_OK;
+	}
+	return NO_ACTION;
+}
+
+/** @brief This channel mode controls whether new users may join based on the number of users who already exist in the channel. If this mode is set, its value is an integer and defines the limit of how many clients may be joined to the channel.
+
+If this mode is set on a channel, and the number of users joined to that channel matches or exceeds the value of this mode, new users cannot join that channel. If a client sends a JOIN request for this channel, they will receive an ERR_CHANNELISFULL (471) reply and the command will fail. */
 channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 {
-	return SET_MODE_OK;
+	std::string key;
+	bool active = this->isModeActive('l', key);
+
+	if (add)
+	{
+		this->removeMode('l');
+		this->addMode('l', args);
+		return SET_MODE_OK;
+	}
+	else if (!add && active)
+	{
+		this->removeMode('l');
+		return SET_MODE_OK;
+	}
+	return NO_ACTION;
 
 }
