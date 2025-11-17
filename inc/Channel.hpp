@@ -56,11 +56,11 @@ class Channel
 	private:
 		std::string					_channelName;
 		std::string					_topic;
-		std::unordered_set<Client*>	_ops; //previledge(chanop,halfop,voiced??)
-		std::unordered_set<Client*>	_halfOps; // set allows uniqueness
+		std::unordered_set<Client*>	_ops; //set allows uniqueness, but is it necessar? or vector is good?
+		std::unordered_set<Client*>	_halfOps; 
 		std::unordered_set<Client*>	_voices;
 		std::vector<Client*> 		_userList; //who in channel
-		std::map<char, std::string>	_mode; //mode: itkol
+		std::map<char, std::string>	_mode; //active mode: itkol
 		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
 		time_t						_topicSetTimestamp;
 		Client*						_topicSetter;

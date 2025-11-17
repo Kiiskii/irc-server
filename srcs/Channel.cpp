@@ -106,11 +106,14 @@ void	Channel::removeChanop(std::string opNick)
 std::unordered_set<Client*>	Channel::getOps() const
 {
 	std::cout << "operators list: \n";
-	for (auto op : _ops)
+	if (!_ops.empty())
 	{
-		std::cout << op->getNick() << ", ";
+		for (auto op : _ops)
+		{
+			std::cout << op->getNick() << ", ";
+		}
+		std::cout << "\n";
 	}
-	std::cout << "\n";
 	return _ops;
 }
 
@@ -180,10 +183,12 @@ void	Channel::sendMsg(Client* client, std::string& msg)
 {
 	if (send(client->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
 	{
-		std::cout << "joinmsg: failed to send";
-		close(client->getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
+		std::cout << "joinmsg: failed to send\n";
+		// close(client->getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
 		return;
 	}
+	std::cout << "joinMsg sent: " << msg << std::endl;
+
 }
 /**
  * @brief send message to all member on channels and the joining member itself

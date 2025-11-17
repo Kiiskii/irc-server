@@ -25,12 +25,15 @@ void	Channel::sendTopicAndNames(Client* client)
 
 	// send name list and end of list
 	std::string nameReplyMsg = makeNumericReply(server, RPL_NAMREPLY, nick,  {"=", "#"+ chanName}, this->printUser() );
+	
 	this->sendMsg(client, nameReplyMsg);
-
+	std::cout << "come here\n";
+	
 	std::string endOfNamesMsg = makeNumericReply(server,
 	RPL_ENDOFNAMES,	nick, {"#" + chanName},
 	"End of /NAMES list.");
 	this->sendMsg(client, endOfNamesMsg);
+	std::cout << "topic sent\n";
 }
 
 void	Channel::sendTopic(Client* client)

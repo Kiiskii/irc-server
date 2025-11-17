@@ -162,11 +162,17 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	{
 		ping(server, client, tokens);
 	}
-	if (line.find("JOIN") != std::string::npos)
+	if (command == "JOIN")
 	{
-		line = ft_trimString(line); //trim whitespace
+		std::cout << "join comd: [" << line << "]" << std::endl;
 		client.askToJoin(line, server);
 	}
+	// if (line.find("JOIN") != std::string::npos)
+	// {
+	// 	line = ft_trimString(line); //trim whitespace
+	// 	std::cout << "join comd: [" << line << "]" << std::endl;
+	// 	client.askToJoin(line, server);
+	// }
 	if (line.find("TOPIC") != std::string::npos)
 	{
 		line = ft_trimString(line);
@@ -178,7 +184,6 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	{
 		line = ft_trimString(line);
 		std::cout << "mode comd: [" << line << "]" << std::endl;
-		// check command topic
 		client.changeMode(line);
 	}
 }

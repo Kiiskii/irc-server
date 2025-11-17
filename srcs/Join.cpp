@@ -9,7 +9,7 @@ static std::map<std::string, std::string> mappingChannelKey(std::string buffer)
 	std::vector<std::string>	tokens = splitString(buffer, ' ');
 	bool						hasKey = false;
 
-	if (tokens.size() == 3 && !!tokens[2].empty())
+	if (tokens.size() == 3 && !tokens[2].empty())
 		hasKey = true;
 	
 	std::string cmd = tokens.front();
@@ -42,6 +42,7 @@ static std::map<std::string, std::string> mappingChannelKey(std::string buffer)
 			channelKeyMap.insert({channelList[i], keyList[i]});
 		
 	}
+	std::cout << "chan-key mapping size : " << channelKeyMap.size() << std::endl;
 	return channelKeyMap;
 }
 
@@ -68,13 +69,12 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		return ALREADY_ON_CHAN;
 	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
 	{
-		// return TOO_MANY_CHANNELS;
 		this->sendClientErr(ERR_TOOMANYCHANNELS, &client );
 		return NO_MSG;
 	}
 	if (!this->getChanKey().empty() && this->getChanKey() != clientKey)
 	{
-		// return BAD_CHANNEL_KEY;
+		std::cout << "bad key: client key : [" << clientKey << "]\n";
 		this->sendClientErr(ERR_BADCHANNELKEY, &client );
 		return NO_MSG;
 	}
@@ -100,7 +100,7 @@ void	Channel::sendJoinSuccessMsg( Client* client)
 
 bool Client::isValidJoinCmd(std::string buffer)
 {
-	if (buffer.find(":") != std::string::npos) //first JOIN "JOIN :"
+	if (buffer.find(":") != std::string::npos) //first JOIN "JOIN :", need to rethink??
 		return false;
 	return true;
 }
@@ -119,7 +119,7 @@ void Client::askToJoin(std::string buffer, Server& server)
 		{
 			std::string channelName = chan.first;
 			std::string clientKey = chan.second;
-			// std::cout << "channel name: " << channelName << std::endl;
+			std::cout << "channel name: [" << channelName << "] and key [" << clientKey << "]" << std::endl;
 			std::vector<Channel*>::iterator channelNameIt 
 				= server.isChannelExisting(channelName);
 			Channel* channelPtr = nullptr;
@@ -140,8 +140,8 @@ void Client::askToJoin(std::string buffer, Server& server)
 				channelPtr->addUser(this);
 				if (channelPtr->getUserList().size() == 1)
 					channelPtr->addChanop(this); // there is only 1 user ->ops
+				channelPtr->channelMessage(result, this);
 			}
-			channelPtr->channelMessage(result, this);
 		}
 	}
 	// server.printChannelList(); //print all the channel on server
