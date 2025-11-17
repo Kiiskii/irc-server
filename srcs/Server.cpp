@@ -255,9 +255,9 @@ void Server::pass(Server &server, Client &client, std::vector<std::string> token
 /*Nickname rules, characters and length*/
 void Server::nick(Server &server, Client &client, std::vector<std::string> tokens)
 {
-	//so first one cannot have digits but the second one can...
-	//underscore gives erronious but irssi gives that as the next available nick?? XDDD
-	std::regex pattern(R"(^[A-Za-z\[\]{}\\|][A-Za-z0-9\[\]{}\\|]*$)");
+	//so first one cannot have digits but the second one can... also added the underscore
+	//this needs further investigation
+	std::regex pattern(R"(^[A-Za-z\[\]{}\\|_][A-Za-z0-9\[\]{}\\|_]*$)");
 	std::string oldnick = client.getNick();
 	if (tokens.size() == 0)
 	{
@@ -281,12 +281,12 @@ void Server::nick(Server &server, Client &client, std::vector<std::string> token
 		}
 	}
 	client.setNick(tokens[0]);
-	attemptRegister(client);
 	if (client.getClientState() == REGISTERED) // if new nick given, we need to broadcast a message
 	{
 		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
 		send(client.getClientFd(), message.c_str(), message.size(), 0);			
 	}
+	attemptRegister(client);
 }
 
 /*
