@@ -18,14 +18,12 @@
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
 #define RPL_PONG(token) "PONG " + token + "\r\n"
-
 #define NEW_NICK(oldnick, user, host, newnick) ":" + oldnick + "!" + user + "@" + host + " NICK " + newnick + "\r\n"
-#define ERR_NONICKNAMEGIVEN(servername) ":" + servername + "431 :No nickname given\r\n"
-#define ERR_ERRONEUSNICKNAME(servername, nickname) ":" + servername + " 432 " + nickname + " :Erroneus nickname\r\n"
-#define ERR_NICKNAMEINUSE(servername, nickname) ":" + servername + " 433 " + nickname + " :Nickname is already in use\r\n"
-
-#define ERR_NEEDMOREPARAMS(servername, command) ":" + servername + " 461 * " + command + " :Not enough parameters\r\n"
-#define ERR_PASSWDMISMATCH(servername) ":" + servername + " 464 * : Password incorrect\r\n"
+#define ERR_NONICKNAMEGIVEN(servername, nickname) ":" + servername + " 431 " + nickname + " :No nickname given\r\n"
+#define ERR_ERRONEUSNICKNAME(servername, nickname, badnick) ":" + servername + " 432 " + nickname + " " + badnick + " :Erroneus nickname\r\n"
+#define ERR_NICKNAMEINUSE(servername, nickname, badnick) ":" + servername + " 433 " + nickname + " " + badnick + " :Nickname is already in use\r\n"
+#define ERR_NEEDMOREPARAMS(servername, nickname, command) ":" + servername + " 461 " + nickname + " " + command + " :Not enough parameters\r\n"
+#define ERR_PASSWDMISMATCH(servername, nickname) ":" + servername + " 464 " + nickname + " :Password incorrect\r\n"
 #define ERR_ALREADYREGISTERED(servername, nickname) ":" + servername + " 462 " + nickname + " :You may not register\r\n"
 
 //..this is example
@@ -35,3 +33,7 @@
 // :<server> 461 <client> <command> :Not enough parameters
 // If the client is not yet registered 
 //(example: during the PASS command before NICK or USER is set), use * or a connection identifier in place of <client>.​
+
+
+
+

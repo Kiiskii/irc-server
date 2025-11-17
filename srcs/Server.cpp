@@ -213,17 +213,29 @@ std::vector<Channel*>& Server::getChannelInfo()
 	return _channelInfo;
 }
 
+std::string getTarget(Client &client)
+{
+	std::string target;
+	if (client.getNick().empty())
+	{
+		target = "*";
+	}
+	else
+		target = client.getNick();
+	return target;
+}
+
 void Server::pass(Server &server, Client &client, std::vector<std::string> tokens)
 {
 	if (client.getClientState() == REGISTERED)
 	{
-		std::string message = ERR_ALREADYREGISTERED(client.getServerName(), client.getNick());
+		std::string message = ERR_ALREADYREGISTERED(client.getServerName(), getTarget(client));
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;	
 	}
 	if (tokens.size() == 0)
 	{
-		std::string message = ERR_NEEDMOREPARAMS(getServerName(), "PASS");
+		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "PASS");
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;			
 	}
@@ -235,7 +247,7 @@ void Server::pass(Server &server, Client &client, std::vector<std::string> token
 	}
 	else
 	{
-		std::string message = ERR_PASSWDMISMATCH(getServerName());
+		std::string message = ERR_PASSWDMISMATCH(getServerName(), getTarget(client));
 		send(client.getClientFd(), message.c_str(), message.size(), 0);					
 	}	
 }
@@ -243,18 +255,19 @@ void Server::pass(Server &server, Client &client, std::vector<std::string> token
 /*Nickname rules, characters and length*/
 void Server::nick(Server &server, Client &client, std::vector<std::string> tokens)
 {
-	//so first one cannot have digits but the second one can...
-	std::regex pattern(R"(^[A-Za-z\[\]{}\\|][A-Za-z0-9\[\]{}\\|]*$)");
+	//so first one cannot have digits but the second one can... also added the underscore
+	//this needs further investigation
+	std::regex pattern(R"(^[A-Za-z\[\]{}\\|_][A-Za-z0-9\[\]{}\\|_]*$)");
 	std::string oldnick = client.getNick();
 	if (tokens.size() == 0)
 	{
-		std::string message = ERR_NONICKNAMEGIVEN(getServerName());
+		std::string message = ERR_NONICKNAMEGIVEN(getServerName(), getTarget(client));
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;			
 	}
 	if (std::regex_match(tokens[0], pattern) == false)
 	{
-		std::string message = ERR_ERRONEUSNICKNAME(getServerName(), tokens[0]);
+		std::string message = ERR_ERRONEUSNICKNAME(getServerName(), getTarget(client), tokens[0]);
 		send(client.getClientFd(), message.c_str(), message.size(), 0);	
 		return ;
 	}
@@ -262,18 +275,18 @@ void Server::nick(Server &server, Client &client, std::vector<std::string> token
 	{
 		if (server.getClientInfo()[i].getNick() == tokens[0])
 		{
-			std::string message = ERR_NICKNAMEINUSE(getServerName(), tokens[0]);
+			std::string message = ERR_NICKNAMEINUSE(getServerName(), getTarget(client), tokens[0]);
 			send(client.getClientFd(), message.c_str(), message.size(), 0);
 			return ;
 		}
 	}
 	client.setNick(tokens[0]);
-	attemptRegister(client);
 	if (client.getClientState() == REGISTERED) // if new nick given, we need to broadcast a message
 	{
 		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
 		send(client.getClientFd(), message.c_str(), message.size(), 0);			
 	}
+	attemptRegister(client);
 }
 
 /*
@@ -288,7 +301,7 @@ void Server::user(Server &server, Client &client, std::vector<std::string> token
 {
 	if (tokens.size() < 4)
 	{
-		std::string message = ERR_NEEDMOREPARAMS(getServerName(), "USER");
+		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "USER");
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;			
 	}
@@ -323,3 +336,10 @@ void Server::ping(Server &server, Client &client, std::vector<std::string> token
 		std::string message = RPL_PONG(tokens[0]);
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 }
+
+
+
+
+
+
+
