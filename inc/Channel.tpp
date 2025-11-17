@@ -55,7 +55,7 @@ void Channel::channelMessage(channelMsg msg, args ...moreArgs)
 		std::string	modeMsg = client->makeUser() + " MODE #" + 
 			this->getChannelName() + " " + modeStr + " \r\n";
 		// std::cout << "mode msg: " << modeMsg << std::endl;
-		this->broadcastChannelMsg(modeMsg);
+		this->sendMsg(client, modeMsg);
 		break;
 	}
 

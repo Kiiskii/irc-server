@@ -273,6 +273,17 @@ bool	Channel::isModeActive(char mode, std::string& key)
 	return false;
 }
 
+bool	Channel::isModeActive(char mode)
+{
+	for (auto m : _mode)
+	{
+		if (m.first == mode)
+			return true;
+	}
+	return false;
+}
+
+
 channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 {
 	std::string key;

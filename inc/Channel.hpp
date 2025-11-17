@@ -56,7 +56,7 @@ class Channel
 	private:
 		std::string					_channelName;
 		std::string					_topic;
-		std::unordered_set<Client*>	_ops; //set allows uniqueness, but is it necessar? or vector is good?
+		std::unordered_set<Client*>	_ops; //set allows uniqueness, but is it necessar?
 		std::unordered_set<Client*>	_halfOps; 
 		std::unordered_set<Client*>	_voices;
 		std::vector<Client*> 		_userList; //who in channel
@@ -74,14 +74,13 @@ class Channel
 		// getters
 		std::string 				getChannelName() const;
 		std::string 				getTopic() const;
-		std::unordered_set<Client*>	getChanop() const;
-		std::vector<Client*>		getUserList() const;
+		std::vector<Client*>&		getUserList() const;
 		std::string					getChanKey() const;
 		std::map<char,std::string>	getMode() const;
 		std::string					printUser() const;
 		time_t						getTopicTimestamp();
 		Client*						getTopicSetter();
-		std::unordered_set<Client*>	getOps() const;
+		std::unordered_set<Client*>&	getOps();
 
 		// setters
 		void		setChannelName(std::string channelName);
@@ -112,11 +111,15 @@ class Channel
 		// template
 		template <typename ...args>
 		void		channelMessage(channelMsg msg, args ...moreArgs);
+		// template <typename ...args>
+		// void		sendClientErr(int num, Client* client, args ...moreArgs);
+
 
 		// mode
 		void			setMode(std::string buffer, Client* client);
 		bool 			canNonOpsSetTopic();
 		bool			isModeActive(char mode, std::string& key);
+		bool			isModeActive(char mode);
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);
 		channelMsg		handleChannelKey(bool add, std::string& args);
@@ -124,6 +127,7 @@ class Channel
 		channelMsg		handleChannelLimit(bool add, std::string& args);
 		void			addChanop(Client* chanop);
 		void			removeChanop(std::string opNick);
+		// bool			isValidChanName(std::string name);
 
 };
 

@@ -36,12 +36,8 @@ std::string Channel::getTopic() const
 	return _topic;
 }
 
-std::unordered_set<Client*>	Channel::getChanop() const
-{
-	return _ops;
-}
 
-std::vector<Client*>	Channel::getUserList() const
+std::vector<Client*>&	Channel::getUserList() const
 {
 	return _userList;
 }
@@ -68,13 +64,19 @@ void	Channel::setTopicSetter(Client* setter)
 
 std::string	Channel::printUser() const
 {
+	std::cout << "ENTER PRINT USER: " << std::endl;
 	std::string returnStr = "";
 	for (auto it : _ops)
+	{
+		std::cout << "OP PTR=" << it << std::endl;
+   		std::cout << "NICK=" << it->getNick() << std::endl;
 		returnStr += "@" + (*it).getNick() + " ";
+	}
 	for (auto it : _halfOps)
 		returnStr += "%" + (*it).getNick() + " ";
 	for (auto it : _voices)
 		returnStr += "+" + (*it).getNick() + " ";
+	std::cout << "print user not break: " << returnStr << std::endl;
 	return returnStr;
 }
 
@@ -103,7 +105,7 @@ void	Channel::removeChanop(std::string opNick)
 }
 
 
-std::unordered_set<Client*>	Channel::getOps() const
+std::unordered_set<Client*>&	Channel::getOps()
 {
 	std::cout << "operators list: \n";
 	if (!_ops.empty())
@@ -181,14 +183,13 @@ bool Channel::isClientOnChannel( Client& client)
  */
 void	Channel::sendMsg(Client* client, std::string& msg)
 {
+	std::cout << "we here: " << std::endl;
 	if (send(client->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
 	{
 		std::cout << "joinmsg: failed to send\n";
-		// close(client->getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
 		return;
 	}
-	std::cout << "joinMsg sent: " << msg << std::endl;
-
+	std::cout << "msg sent: " << msg << std::endl;
 }
 /**
  * @brief send message to all member on channels and the joining member itself
@@ -200,21 +201,23 @@ void Channel::broadcastChannelMsg(std::string& msg)
 	//recheck does this send to the joining memeber itself
 }
 
+// template <typename ...args>
 void Channel::sendClientErr(int num, Client* client)
 {
 	std::string server = client->getServerName(),
 				nick = client->getNick(),
 				chanName = this->getChannelName(),
 				msg, extraArg;
-	// auto				tupleArgs = make_tuple(args);
-	// constexpr size_t	nArgs = sizeof...(args);
+	
+	// auto				tupleArgs = std::make_tuple(moreArgs);
+	// constexpr size_t	nArgs = sizeof...(moreArgs);
 
 	// if constexpr (nArgs > 0)
-	// 	extraArg = get<0>tupleArgs;
+	// 	extraArg = std::get<0>tupleArgs;
 
 	switch (num)
 	{
-	case ERR_BADCHANNELKEY: //not test this yet
+	case ERR_BADCHANNELKEY:
 		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+k)");
 		break;
 
@@ -223,19 +226,20 @@ void Channel::sendClientErr(int num, Client* client)
 		break;
 
 	case ERR_UNKNOWNMODE:
-	{
 		msg = makeNumericReply(server, num , nick, {}, "is unknown mode char to me");
 		break;
-	}
+
+	case ERR_CHANNELISFULL:
+		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+l)");
 
 	case 461:
-		// msg = ERR_NEEDMOREPARAMS(server, "MODE"); // need fix
-		msg = makeNumericReply(server, num, nick, {"MODE"}, "Not enough parameters");
+		msg = ERR_NEEDMOREPARAMS(server, client->getNick(),"MODE"); // need fix
+		// msg = makeNumericReply(server, num, nick, {"MODE"}, "Not enough parameters");
 		break;	
 	
 	default:
 		break;
 	}
-	std::cout << "461 msg: " << msg << std::endl;
 	this->sendMsg(client, msg);
 }
+

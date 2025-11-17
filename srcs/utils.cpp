@@ -36,5 +36,18 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 		+ (p.empty() ? "" : " " + p)
 		+ (trailing.empty() ? "" : ":" + trailing)
 		+ "\r\n";
+	std::cout << "make s: " << s << std::endl;
 	return s;
+}
+
+
+void	printVector(std::vector<std::string> tokens)
+{
+	std::cout << "vector memebers: " << std::endl;
+
+	for (auto token : tokens)
+	{
+		std::cout << "[" <<  token << "] ";
+	}
+	std::cout << std::endl;
 }

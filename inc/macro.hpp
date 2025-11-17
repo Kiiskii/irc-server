@@ -2,6 +2,9 @@
 
 #define MAX_CHANNELS_PER_CLIENT 5 //recheck CHANLIMIT IN RP_SUPPORT
 
+#define L_MODE 'l'
+
+
 #define RPL_NOTOPIC 331
 #define RPL_TOPIC 332
 #define RPL_NAMREPLY 353
@@ -12,7 +15,9 @@
 #define ERR_BADCHANNELKEY 475
 #define ERR_NOTONCHANNEL 442
 #define ERR_CHANOPRIVSNEEDED 482
-#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
+#define ERR_CHANNELISFULL 471
+
+// #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 
 
 

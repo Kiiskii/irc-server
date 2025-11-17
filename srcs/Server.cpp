@@ -165,14 +165,10 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	if (command == "JOIN")
 	{
 		std::cout << "join comd: [" << line << "]" << std::endl;
-		client.askToJoin(line, server);
+		printVector(tokens);
+		server.handleJoin(&client, tokens);
+		std::cout << "JOIN CMd \n";
 	}
-	// if (line.find("JOIN") != std::string::npos)
-	// {
-	// 	line = ft_trimString(line); //trim whitespace
-	// 	std::cout << "join comd: [" << line << "]" << std::endl;
-	// 	client.askToJoin(line, server);
-	// }
 	if (line.find("TOPIC") != std::string::npos)
 	{
 		line = ft_trimString(line);

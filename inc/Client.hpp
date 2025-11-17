@@ -69,12 +69,13 @@ class Client
 		void parseMessage(Server &server, Client &c, const std::string &line);
 
 		// other
-		bool 		isValidJoinCmd(std::string buffer);
+		bool 		isValidJoinCmd(std::vector<std::string> tokens);
 
 		bool		isOps(Channel* channel);
+
 		// JOIN
 		std::string makeUser();
-		void		askToJoin(std::string buffer, Server& server);
+		// void		askToJoin(std::vector<std::string> tokens, Server& server);
 		
 		// TOPIC
 		Channel*	setActiveChannel(std::string buffer);
