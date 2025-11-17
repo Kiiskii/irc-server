@@ -11,7 +11,6 @@ Channel::Channel() : _channelName(""), _topic("")
 	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
 
-
 Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 {
 	_modeHandlers['i'] = &Channel::handleInviteOnly;
@@ -73,7 +72,7 @@ std::string	Channel::printUser() const
 	for (auto it : _ops)
 		returnStr += "@" + (*it).getNick() + " ";
 	for (auto it : _halfOps)
-		returnStr += "@" + (*it).getNick() + " ";
+		returnStr += "%" + (*it).getNick() + " ";
 	for (auto it : _voices)
 		returnStr += "+" + (*it).getNick() + " ";
 	return returnStr;
@@ -94,34 +93,30 @@ void Channel::addChanop(Client* chanop)
 	_ops.insert(chanop);
 }
 
-std::unordered_set<Client*>	Channel::getOps() const
+void	Channel::removeChanop(std::string opNick)
 {
-	return _ops;
+	for (auto op : _ops)
+	{
+		if (op->getNick() == opNick)
+			_ops.erase(op);
+	}
 }
 
+
+std::unordered_set<Client*>	Channel::getOps() const
+{
+	std::cout << "operators list: \n";
+	for (auto op : _ops)
+	{
+		std::cout << op->getNick() << ", ";
+	}
+	std::cout << "\n";
+	return _ops;
+}
 
 void Channel::setChannelName(std::string channelName)
 {
 	_channelName = channelName;
-}
-
-bool Channel::canNonOpsSetTopic()
-{
-	auto it = _mode.find('t');
-	if (it != _mode.end())
-		return false;
-	return true;
-}
-
-void Channel::sendOpPrivsNeeded(Client* client)
-{
-	std::string	server = client->getServerName(),
-			nick = client->getNick(),
-			chanName = this->getChannelName();
-
-	std::string notOpsMsg = makeNumericReply(server, ERR_CHANOPRIVSNEEDED, 
-		nick, {"#" + chanName}, "You're not channel operator");
-	this->sendMsg(client, notOpsMsg);
 }
 
 void Channel::setChanKey(std::string newKey)
@@ -153,6 +148,18 @@ void Channel::addUser(Client* newClient)
 	_userList.push_back(newClient);
 }
 
+void	Channel::removeUser(std::string userNick)
+{
+	for (auto it  = _userList.begin(); it != _userList.end();)
+	{
+		if ((*it)->getNick() == userNick)
+			it = _userList.erase(it);
+		else
+			++it;
+	}
+}
+
+
 /**
  * @brief Check whether the client is already on the channel, if already then open the window
  */
@@ -164,85 +171,6 @@ bool Channel::isClientOnChannel( Client& client)
 			return true;
 	}
 	return false;
-}
-
-/** @brief check if the channel key matches the key that client inputs */
-channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
-{
-	// std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
-	if (this->isClientOnChannel(client))
-		return ALREADY_ON_CHAN;
-	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
-		return TOO_MANY_CHANNELS;
-	if (!this->getChanKey().empty() && this->getChanKey() != clientKey)
-		return BAD_CHANNEL_KEY;
-	return JOIN_OK;
-}
-
-void	Channel::sendTopic(Client* client)
-{
-	std::string	server = client->getServerName(),
-				nick = client->getNick(),
-				chanName = this->getChannelName();
-
-	std::string topicMsg = makeNumericReply(server, RPL_TOPIC, nick, 
-		{"#" + chanName}, this->getTopic());
-	this->sendMsg(client, topicMsg);
-	
-	// below not test yet
-	std::time_t timestamp = this->getTopicTimestamp();
-	std::string topicWhoMsg = makeNumericReply(server, RPL_TOPICWHOTIME,
-		nick, {"#" + chanName, getTopicSetter()->getNick(), std::to_string(timestamp)}, "");
-	this->sendMsg(client, topicWhoMsg);
-}
-
-void	Channel::sendNoTopic(Client* client)
-{
-	std::string	server = client->getServerName(),
-				nick = client->getNick(),
-				chanName = this->getChannelName();
-
-	std::string topicMsg = makeNumericReply(server, RPL_NOTOPIC, nick, 
-		{"#" + chanName}, "No topic is set");
-	this->sendMsg(client, topicMsg);
-}
-
-void	Channel::sendTopicAndNames(Client* client)
-{
-	std::string	server = client->getServerName(),
-				nick = client->getNick(),
-				chanName = this->getChannelName();
-	// send topic / no_topic
-	if (this->getTopic().empty())
-		this->sendNoTopic(client);
-	else
-		this->sendTopic(client);
-
-	// send name list and end of list
-	std::string nameReplyMsg = makeNumericReply(server, RPL_NAMREPLY, nick,  {"=", "#"+ chanName}, this->printUser() );
-	this->sendMsg(client, nameReplyMsg);
-
-	std::string endOfNamesMsg = makeNumericReply(server,
-	RPL_ENDOFNAMES,	nick, {"#" + chanName},
-	"End of /NAMES list.");
-	this->sendMsg(client, endOfNamesMsg);
-}
-
-/** 
- * @brief if no topic set when client joins the channel, do not send back the topic.
- * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
- * currently joined the channel, including the current client( multiple RPL_NAMREPLY 
- * and 1 RPL_ENDOFNAMES). 
- */
-void	Channel::sendJoinSuccessMsg( Client* client)
-{
-	std::string	user = client->makeUser();
-
-	// send JOIN msg
-	std::string joinMsg = user + " JOIN #" + this->getChannelName() 
-			+ " " + std::to_string(RPL_TOPIC) + " \r\n";
-	this->sendMsg(client, joinMsg);
-	this->sendTopicAndNames(client);
 }
 
 /**
@@ -257,93 +185,52 @@ void	Channel::sendMsg(Client* client, std::string& msg)
 		return;
 	}
 }
-// /**
-//  * @brief send message to all member on channels and the joining member itself
-//  */
-// void	Channel::broadcastMsg(Client& client, std::string& msg)
-// {
-// 	for (auto it : client.getServerName())
-// 	if (send((&client)->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
-// 	{
-// 		std::cout << "joinmsg: failed to send";
-// 		close(client.getClientFd()); //do i need to close, cause then other functions after this will continue on closed client
-// 		return;
-// 	}
-// }
-
-
-/**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ?? */
-channelMsg Channel::handleInviteOnly(bool add, std::string& args)
+/**
+ * @brief send message to all member on channels and the joining member itself
+ */
+void Channel::broadcastChannelMsg(std::string& msg)
 {
-	bool active = false;
-	for (auto m : _mode)
-	{
-		if (m.first == 'i')
-		{
-			active = true;
-			break;
-		}
-	}
-	if (add)
-	{
-		if (active)
-			return NO_MSG;
-		this->addMode('i', args);
-		return SET_MODE_OK;
-	}
-	if (active)
-	{
-		this->removeMode('i');
-		return SET_MODE_OK;
-	}
-	return NO_MSG;
+	for (Client* user : this->_userList)
+		this->sendMsg(user, msg);
+	//recheck does this send to the joining memeber itself
 }
 
-channelMsg	Channel::handleTopicRestriction(bool add, std::string& args)
+void Channel::sendClientErr(int num, Client* client)
 {
+	std::string server = client->getServerName(),
+				nick = client->getNick(),
+				chanName = this->getChannelName(),
+				msg, extraArg;
+	// auto				tupleArgs = make_tuple(args);
+	// constexpr size_t	nArgs = sizeof...(args);
 
-	return NO_MSG;
+	// if constexpr (nArgs > 0)
+	// 	extraArg = get<0>tupleArgs;
 
-}
-
-channelMsg	Channel::handleChannelKey(bool add, std::string& args)
-{
-	bool active = false;
-	std::string key;
-	for (auto m : _mode)
+	switch (num)
 	{
-		if (m.first == 'k')
-		{
-			active = true;
-			key = m.second;
-			break;
-		}
-	}
-	if (add)
+	case ERR_BADCHANNELKEY: //not test this yet
+		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+k)");
+		break;
+
+	case ERR_TOOMANYCHANNELS:
+		msg = makeNumericReply(server, num , nick, {"#" + chanName}, "You have joined too many channels");
+		break;
+
+	case ERR_UNKNOWNMODE:
 	{
-		if (active && args == key)
-			return NO_MSG;
-		
-		this->removeMode('k');
-		this->addMode('k', args);
-		return SET_MODE_OK;
-		
+		msg = makeNumericReply(server, num , nick, {}, "is unknown mode char to me");
+		break;
 	}
-	if (active)
-	{
-		this->removeMode('k');
-		return SET_MODE_OK; //recheck, send an empty key or nothing
+
+	case 461:
+		// msg = ERR_NEEDMOREPARAMS(server, "MODE"); // need fix
+		msg = makeNumericReply(server, num, nick, {"MODE"}, "Not enough parameters");
+		break;	
+	
+	default:
+		break;
 	}
-	return NO_MSG;
-}
-
-channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
-{
-	return NO_MSG;
-}
-
-channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
-{
-	return NO_MSG;
-
+	std::cout << "461 msg: " << msg << std::endl;
+	this->sendMsg(client, msg);
 }

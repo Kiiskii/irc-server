@@ -31,7 +31,7 @@ class Client
 		std::string				_realName = "";
 		std::string				_hostName;
 		std::string				_serverName;
-		std::vector<Channel*>	_joinedChannels;
+		std::vector<Channel*>	_joinedChannels{};
 		enum ClientState		_clientState = NONE;
 
 		std::string				_input;
@@ -41,6 +41,9 @@ class Client
 //		int auth_step = 0;
 		std::string recvBuffer;
 		
+		// Client();
+		// ~Client();
+
 		// getters
 		int						getClientFd();
 		std::string 			getNick();
@@ -59,14 +62,15 @@ class Client
 		void		setHostName(std::string host);
 		void		setServerName(std::string server);
 		void		setClientState(enum ClientState state);
-		void		addChannel(Channel* chan);
+		void		addJoinedChannel(Channel* chan);
 
 		// message parsing
 		void recieve(Server &server, Client &c, int clientIndex);
 		void parseMessage(Server &server, Client &c, const std::string &line);
 
 		// other
-		// void		updateClientInfo(std::string bufferStr);
+		bool 		isValidJoinCmd(std::string buffer);
+
 		bool		isOps(Channel* channel);
 		// JOIN
 		std::string makeUser();
