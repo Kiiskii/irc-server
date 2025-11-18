@@ -58,7 +58,7 @@ public:
 
 /*Commands such as user, pass nick, might be best to create a separate place for commands*/
 	void handleJoin(Client* client, std::vector<std::string> tokens);
-	void handleTopic(Client* client, std::vector<std::string> tokens);
+	void handleTopic(Client& client, std::vector<std::string> tokens);
 	void pass(Client &client, std::vector<std::string> tokens);
 	void nick(Client &client, std::vector<std::string> tokens);
 	void user(Client &client, std::vector<std::string> tokens);

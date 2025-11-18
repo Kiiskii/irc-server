@@ -160,13 +160,13 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "join comd: [" << line << "]" << std::endl;
 		printVector(tokens);
 		server.handleJoin(&client, tokens);
-		std::cout << "JOIN CMd \n";
+		// std::cout << "JOIN CMd \n";
 	}
 	if (command == "TOPIC")
 	{
 		std::cout << "topic comd: [" << line << "]" << std::endl;
 		printVector(tokens);
-		server.handleTopic(&client, tokens);
+		server.handleTopic(client, tokens);
 	}
 	if (line.find("MODE") != std::string::npos)
 	{

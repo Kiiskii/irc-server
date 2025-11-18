@@ -45,7 +45,7 @@ void	Channel::sendTopic(Client* client)
 		{"#" + chanName}, this->getTopic());
 	this->sendMsg(client, topicMsg);
 	
-	// below not test yet
+	// sending topicwhotime
 	std::time_t timestamp = this->getTopicTimestamp();
 	std::string topicWhoMsg = makeNumericReply(server, RPL_TOPICWHOTIME,
 		nick, {"#" + chanName, getTopicSetter()->getNick(), std::to_string(timestamp)}, "");
@@ -73,7 +73,6 @@ void Channel::sendOpPrivsNeededMsg(Client* client)
 
 Channel* Client::setActiveChannel(std::string buffer)
 {
-	// Channel* channelPtr = nullptr;
 	std::string	channelName;
 
 	size_t hashPos = buffer.find("#");
@@ -101,11 +100,11 @@ Channel* Client::setActiveChannel(std::string buffer)
 void Channel::setTopic(std::string buffer, Client* client)
 {
 	// not test this yet
-	if (!this->canNonOpsSetTopic() && !client->isOps(this))
-	{
-		this->sendOpPrivsNeededMsg(client); 
-		return; 
-	}
+	// if (!this->canNonOpsSetTopic() && !client->isOps(this))
+	// {
+	// 	this->sendOpPrivsNeededMsg(client); 
+	// 	return; 
+	// }
 	unsigned long topicPos = buffer.find_first_of(':');
 	std::string newTopic = buffer.substr(topicPos + 1, 
 							buffer.length() - topicPos -1);
@@ -117,65 +116,40 @@ void Channel::setTopic(std::string buffer, Client* client)
 	this->setTopicTimestamp(timestamp);
 }
 
-// void Client::askTopic(std::string buffer)
-// {
-// 	Channel* channelPtr;
-
-// 	channelPtr = setActiveChannel(buffer);
-// 	// if not on any channel, return do nothing
-// 	if (channelPtr == nullptr)
-// 		return;
-// 	// client hasn't joined channel
-// 	if (!channelPtr->isClientOnChannel(*this))
-// 	{
-// 		std::string notOnChanMsg = makeNumericReply(this->getServerName(), 
-// 			ERR_NOTONCHANNEL, this->getNick(), {"#" + channelPtr->getChannelName()}, "You're not on that channel");
-// 		channelPtr->sendMsg(this, notOnChanMsg);
-// 		return;
-// 	}
-
-// 	if (buffer == "TOPIC")
-// 	{
-// 		if (channelPtr && channelPtr->getTopic().empty())
-// 			channelPtr->sendNoTopic(this);
-// 		else if (channelPtr && !channelPtr->getTopic().empty())
-// 			channelPtr->sendTopic(this);
-// 	}
-//     else if (buffer.find(":") != std::string::npos)
-//     {
-//         // std::cout << "im here setting chan name: " << std::endl;
-//         channelPtr->setTopic(buffer, this);
-// 		channelPtr->channelMessage(CHANGE_TOPIC_MSG, this);
-//     }
-// }
-
-void Server::handleTopic(Client* client, std::vector<std::string> tokens)
+/** @note what to do when having too many params for topic ?? */
+void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 {
 	Channel* channelPtr;
-	// std::string chanName = tokens[0];
 
-	channelPtr = client->setActiveChannel(tokens[0]);
+	channelPtr = client.setActiveChannel(tokens[0]);
 	// if not on any channel, return do nothing
 	if (channelPtr == nullptr)
 		return;
+
 	// client hasn't joined channel
-	if (!channelPtr->isClientOnChannel(*client))
+	if (!channelPtr->isClientOnChannel(client))
 	{
-		channelPtr->sendClientErr(ERR_NOTONCHANNEL, client);
+		channelPtr->sendClientErr(ERR_NOTONCHANNEL, &client);
 		return;
 	}
 
 	if (tokens.size() == 1)
 	{
 		if (channelPtr && channelPtr->getTopic().empty())
-			channelPtr->sendNoTopic(client);
+			channelPtr->sendNoTopic(&client);
 		else if (channelPtr && !channelPtr->getTopic().empty())
-			channelPtr->sendTopic(client);
+			channelPtr->sendTopic(&client);
 	}
     else if (tokens.size() == 2)
     {
-        // std::cout << "im here setting chan name: " << std::endl;
-        channelPtr->setTopic(tokens[1], client);
-		channelPtr->channelMessage(CHANGE_TOPIC_MSG);
+        // std::cout << "im here setting chan name: " << tokens[1] << std::endl;
+        channelPtr->setTopic(tokens[1], &client);
+        // std::cout << "im here sending chan name: " << tokens[1] << std::endl;
+		channelPtr->channelMessage(CHANGE_TOPIC_MSG, &client);
     }
+	else
+	{
+		std::cout << "too many params\n";
+		return;
+	}
 }

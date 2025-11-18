@@ -64,7 +64,7 @@ void	Channel::setTopicSetter(Client* setter)
 
 std::string	Channel::printUser() const
 {
-	std::cout << "ENTER PRINT USER: " << std::endl;
+	// std::cout << "ENTER PRINT USER: " << std::endl;
 	std::string returnStr = "";
 	for (auto it : _ops)
 	{
@@ -184,7 +184,6 @@ bool Channel::isClientOnChannel( Client& client)
  */
 void	Channel::sendMsg(Client* client, std::string& msg)
 {
-	std::cout << "we here: " << std::endl;
 	if (send(client->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
 	{
 		std::cout << "joinmsg: failed to send\n";
@@ -197,6 +196,7 @@ void	Channel::sendMsg(Client* client, std::string& msg)
  */
 void Channel::broadcastChannelMsg(std::string& msg)
 {
+	std::cout << "broadcast msg: " << std::endl;
 	for (Client* user : this->_userList)
 		this->sendMsg(user, msg);
 	//recheck does this send to the joining memeber itself

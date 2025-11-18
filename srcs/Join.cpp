@@ -131,10 +131,11 @@ bool Client::isValidJoinCmd(std::vector<std::string> tokens)
 	return true;
 }
 
+/** @note JOIN 0 will leave all the channels -> how?? */
 void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 {
 	// std::cout << "client has join " << this->getJoinedChannels().size() << " channels \n";
-	std::cout << "client nick " << client->getNick() <<" \n";
+	// std::cout << "client nick " << client->getNick() <<" \n";
 	// if (!client.isValidJoinCmd(tokens))
 	// 	return;
 
