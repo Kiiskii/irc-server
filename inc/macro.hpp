@@ -22,8 +22,14 @@
 // #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 
 
+//#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
+#define RPL_YOURHOST(servername, nickname, version) ":" + servername + " 002 " + nickname + " :Your host is " + servername + ", running version " + version + "\r\n"
+#define RPL_CREATED(servername, nickname, datetime) ":" + servername + " 003 " + nickname + " :This server was created " + datetime + "\r\n"
+#define RPL_MYINFO(servername, nickname, version, umodes, cmodes) ":" + servername + " 004 " + nickname + " " + servername + " " + version + " " + umodes + " " + cmodes + "\r\n"
+#define RPL_ISUPPORT(servername, nickname, tokens) ":" + servername + " 005 " + nickname + " " + tokens + " :are supported by this server\r\n"
+
 #define RPL_PONG(token) "PONG " + token + "\r\n"
 #define NEW_NICK(oldnick, user, host, newnick) ":" + oldnick + "!" + user + "@" + host + " NICK " + newnick + "\r\n"
 #define ERR_NONICKNAMEGIVEN(servername, nickname) ":" + servername + " 431 " + nickname + " :No nickname given\r\n"

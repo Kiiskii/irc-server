@@ -1,0 +1,8 @@
+#include "Server.hpp"
+#include "utils.hpp"
+
+void Server::ping(Client &client, std::vector<std::string> tokens)
+{
+		std::string message = RPL_PONG(tokens[0]);
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+}

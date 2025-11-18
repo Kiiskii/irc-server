@@ -17,3 +17,4 @@ std::string					makeNumericReply(std::string prefix, int code,
 							std::string target, std::vector<std::string> params, std::string trailing);
 
 void	printVector(std::vector<std::string> tokens);
+std::string 				getTarget(Client &client);

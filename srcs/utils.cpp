@@ -51,3 +51,14 @@ void	printVector(std::vector<std::string> tokens)
 	}
 	std::cout << std::endl;
 }
+std::string getTarget(Client &client)
+{
+	std::string target;
+	if (client.getNick().empty())
+	{
+		target = "*";
+	}
+	else
+		target = client.getNick();
+	return target;
+}

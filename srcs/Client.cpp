@@ -117,7 +117,6 @@ void Client::recieve(Server &server, Client &c, int clientIndex)
 		// Buffer recieved data
 		else {
 			_input.append(buffer, bytes);
-
 			// Check if message if complete
 			while (true) {
 				size_t newline = _input.find("\r\n");
