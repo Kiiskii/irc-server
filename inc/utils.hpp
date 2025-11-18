@@ -15,3 +15,5 @@ std::vector<std::string>	splitString(std::string buffer, char delimiter);
 
 std::string					makeNumericReply(std::string prefix, int code, 
 							std::string target, std::vector<std::string> params, std::string trailing);
+
+std::string 				getTarget(Client &client);

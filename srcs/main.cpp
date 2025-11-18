@@ -26,13 +26,13 @@ int main(int argc, char *argv[])
 				int clientIndex = 0;
 				for (size_t i = 0; i < server.getClientInfo().size(); i++)
 				{
-					if (server.getClientInfo()[i].getClientFd() == clientFd)
+					if (server.getClientInfo()[i]->getClientFd() == clientFd) // this was changed
 					{
 						clientIndex = i;
 						break;
 					}
 				}
-				Client &c = server.getClientInfo()[clientIndex];
+				Client &c = *server.getClientInfo()[clientIndex]; // this was changed
 
 				std::string msg;
 				c.recieve(server, c, clientIndex);

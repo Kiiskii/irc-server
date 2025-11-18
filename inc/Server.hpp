@@ -31,7 +31,7 @@ class Server
 	int _serverFd = -1;
 	std::string _pass = "";
 	std::string _name = "";
-	std::vector<Client> _clientInfo;
+	std::vector<Client*> _clientInfo;
 	std::vector<Channel*> _channelInfo;
 	int _port = -1;
 	struct sockaddr_in _details;
@@ -45,7 +45,7 @@ public:
 	int getEpollfd() const;
 	std::string& getServerName();
 	struct epoll_event* getEpollEvents();
-	std::vector<Client>& getClientInfo();
+	std::vector<Client*>& getClientInfo();
 	std::vector<Channel*>& getChannelInfo();
 
 	void setupServerDetails(Server &server, int argc, char *argv[]);
@@ -57,10 +57,10 @@ public:
 	void attemptRegister(Client &client);
 
 /*Commands such as user, pass nick, might be best to create a separate place for commands*/
-	void pass(Server &server, Client &client, std::vector<std::string> tokens);
-	void nick(Server &server, Client &client, std::vector<std::string> tokens);
-	void user(Server &server, Client &client, std::vector<std::string> tokens);
-	void ping(Server &server, Client &client, std::vector<std::string> tokens);
+	void pass(Client &client, std::vector<std::string> tokens);
+	void nick(Client &client, std::vector<std::string> tokens);
+	void user(Client &client, std::vector<std::string> tokens);
+	void ping(Client &client, std::vector<std::string> tokens);
 
 	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
