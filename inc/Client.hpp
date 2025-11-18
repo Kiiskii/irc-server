@@ -70,6 +70,14 @@ class Client
 		bool		isOps(Channel& channel);
 		std::string makeUser();
 		
+		// TOPIC
+		Channel*	setActiveChannel(std::string buffer);
+		void		askTopic(std::string buffer);
+
+		// MODE
+		void		changeMode(std::string buffer, Server& server);	
+		void		kickClient(std::string &line, Server &server);
+	
 
 };
 
