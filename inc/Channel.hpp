@@ -10,31 +10,10 @@
 #include <sys/socket.h> 
 #include <ctime>
 
-#include "macro.hpp"
-#include "Client.hpp"
-#include "utils.hpp"
-#include "Server.hpp"
-
-
-enum	channelMsg
-{
-	NO_MSG,
-	JOIN_OK,
-	ALREADY_ON_CHAN,
-	CHANGE_TOPIC_MSG,
-	//below not use
-	INVITE_ONLY_CHAN,
-
-	// mode response, should move out??
-	SET_MODE_OK,
-	NO_ACTION,
-	UNKNOWN_MODE,
-	
-
-};
-
+#include "Enum.hpp"
 
 class Client;
+class Server;
 
 /*
 	@brief The channel is created implicitly when the first client joins it, 
@@ -102,7 +81,7 @@ class Channel
 
 
 		// mode
-		void			setMode(std::string buffer, Client* client);
+		void			setMode(std::string buffer, Client* client, Server& server);
 		bool			isModeActive(char mode, std::string& key);
 		bool			isModeActive(char mode);
 		channelMsg		handleInviteOnly(bool add, std::string& args);

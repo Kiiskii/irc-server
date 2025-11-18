@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Server.hpp"
 #include "utils.hpp"
 
 /** @note not consider the case of local channel start with '&' ?? */

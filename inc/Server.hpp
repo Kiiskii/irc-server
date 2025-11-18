@@ -12,10 +12,9 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 
-#include "macro.hpp"
+#include "Enum.hpp"
 #include "utils.hpp"
-#include "Channel.hpp"
-#include "Client.hpp"
+#include "macro.hpp"
 
 //const char ip[]="127.0.0.1"; // for local host
 #define MAX_EVENTS 200

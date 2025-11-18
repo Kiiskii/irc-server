@@ -7,13 +7,11 @@
 #include <regex> //std::istringstream
 #include <functional>
 
-#include "Channel.hpp"
+#include "utils.hpp"
 #include "macro.hpp"
-#include "Server.hpp"
 
-// class Channel;
-// class Server;
-
+class Channel;
+class Server;
 
 enum ClientState
 {
@@ -83,7 +81,7 @@ class Client
 		void		askTopic(std::string buffer);
 
 		// MODE
-		void		changeMode(std::string buffer);	
+		void		changeMode(std::string buffer, Server& server);	
 	
 
 };

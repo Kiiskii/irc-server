@@ -1,9 +1,8 @@
 #pragma once
 
 #include <iostream>
-#include "Client.hpp"
 #include "Channel.hpp"
-#include "Server.hpp"
+#include "Client.hpp"
 
 
 std::ostream&				operator<<(std::ostream& os, 

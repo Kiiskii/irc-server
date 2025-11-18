@@ -1,6 +1,8 @@
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Server.hpp"
 #include "utils.hpp"
+#include "macro.hpp"
 
 
 /** @note this check only for mode applied to channel, not sure about users mode
@@ -97,7 +99,7 @@ static void restrictRemoveKeyMode(std::string& executedMode, std::string& execut
 		executedArgs = "*";
 }
 
-void Channel::setMode(std::string buffer, Client* client)
+void Channel::setMode(std::string buffer, Client* client, Server& server)
 {
 	std::string					modeStr, args;
 	std::vector<std::string>	argsVec;
@@ -122,7 +124,7 @@ void Channel::setMode(std::string buffer, Client* client)
 		{
 			if (addMode && argsVec.empty())
 			{
-				sendClientErr(461, client);
+				server.sendClientErr(461, *client, *this, {});
 				break;
 			}
 			if (!argsVec.empty() && addMode)
@@ -135,7 +137,7 @@ void Channel::setMode(std::string buffer, Client* client)
 		{
 			if (addMode && argsVec.empty())
 			{
-				sendClientErr(461, client);
+				server.sendClientErr(461, *client, *this, {});
 				break;
 			}
 			if (!argsVec.empty() && mode == 'k')
@@ -148,14 +150,14 @@ void Channel::setMode(std::string buffer, Client* client)
 		{
 			if (argsVec.empty()) 
 			{
-				sendClientErr(461, client);
+				server.sendClientErr(461, *client, *this, {});
 				break;
 			}
 			params = argsVec.front();
 			argsVec.erase(argsVec.begin());
 		}
 		else
-			this->sendClientErr(ERR_UNKNOWNMODE, client);
+			server.sendClientErr(ERR_UNKNOWNMODE, *client, *this, {});
 		// this only handle the _mode mapping, not action with client yet
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (msgEnum == SET_MODE_OK)
@@ -168,11 +170,11 @@ void Channel::setMode(std::string buffer, Client* client)
 
 	}
 	restrictRemoveKeyMode(executedMode, executedArgs);
-	this->channelMessage(msgEnum, client, executedMode, executedArgs);
+	server.channelMessage(msgEnum, client, this, executedMode, executedArgs);
 }
 
 /** @brief mode applied: itkol */
-void	Client::changeMode(std::string buffer)
+void	Client::changeMode(std::string buffer, Server& server)
 {
 	Channel*	channelPtr = nullptr;
 
@@ -196,7 +198,7 @@ void	Client::changeMode(std::string buffer)
 	}
 
 	std::string		mode;
-	channelPtr->setMode(buffer, this);
+	channelPtr->setMode(buffer, this, server);
 	channelPtr->getMode(); //=> to print the mode active
 	channelPtr->getOps();
 }	

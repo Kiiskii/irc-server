@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Server.hpp"
 #include "utils.hpp"
 
 
@@ -87,7 +88,7 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
         // std::cout << "im here setting chan name: " << tokens[1] << std::endl;
         channelPtr->setTopic(tokens[1], client, *this);
         // std::cout << "im here sending chan name: " << tokens[1] << std::endl;
-		this->channelMessage(CHANGE_TOPIC_MSG, &client, &channelPtr);
+		this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
     }
 	else
 	{
