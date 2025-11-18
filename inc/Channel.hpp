@@ -9,39 +9,20 @@
 #include <unistd.h>
 #include <sys/socket.h> 
 #include <ctime>
+
 #include "macro.hpp"
+#include "Client.hpp"
+#include "utils.hpp"
+#include "Server.hpp"
 
 class Client;
-
-enum	channelMsg
-{
-	NO_MSG,
-	JOIN_OK,
-	ALREADY_ON_CHAN,
-	CHANGE_TOPIC_MSG,
-	//below not use
-	INVITE_ONLY_CHAN,
-
-	// mode response, should move out??
-	SET_MODE_OK,
-	NO_ACTION,
-	UNKNOWN_MODE,
-	
-
-};
 
 /*
 	@brief The channel is created implicitly when the first client joins it, 
 	and the channel ceases to  exist when the last client leaves it
 	Channels names are strings (beginning with a '&' or '#' character) of
    length up to 200 characters.
-    Apart from the the requirement that the
-   first character being either '&' or '#'; the only restriction on a
-   channel name is that it may not contain any spaces (' '), a control G
-   (^G or ASCII 7), or a comma (',' which is used as a list item
-   separator by the protocol).
-   A channel operator is identified by the '@' symbol next to their
-   nickname whenever it is associated with a channel
+    
    Because of IRC's scandanavian origin, the characters {}| are
    considered to be the lower case equivalents of the characters []\,
    respectively. This is a critical issue when determining the
@@ -86,41 +67,23 @@ class Channel
 
 		// setters
 		void		setChannelName(std::string channelName);
-		void		setTopic(std::string newTopic, Client* client);
+		void		setTopic(std::string newTopic, Client& client, Server& server);
 		void		addUser(Client* newClient);
 		void		removeUser(std::string userNick);
 		void		setChanKey(std::string newKey);
 		void 		addMode(char key, std::string param);
 		void		removeMode(char key);
 		void		setTopicTimestamp(time_t timestamp);
-		void		setTopicSetter(Client* setter);
-// 0x4de40c0
-//0x4e81630
+		void		setTopicSetter(Client& setter);
+
 		// channel public method
 		bool		isClientOnChannel( Client& client);
 		channelMsg	canClientJoinChannel( Client& client, 
-						std::string clientKey);
-		void		sendMsg(Client* client, std::string& msg);
-		void		sendTopic(Client* client);
-		void		sendNoTopic(Client* client);
-		void		sendTopicAndNames(Client* client);
-		void		sendJoinSuccessMsg( Client* client);
-		void 		sendOpPrivsNeededMsg(Client* client);
-		void		broadcastChannelMsg(std::string& msg);
-		void		sendClientErr(int num, Client* client);
-
-		
-		
-		// template
-		template <typename ...args>
-		void		channelMessage(channelMsg msg, args ...moreArgs);
-		// template <typename ...args>
-		// void		sendClientErr(int num, Client* client, args ...moreArgs);
+						std::string clientKey, Server& server);
 
 
 		// mode
 		void			setMode(std::string buffer, Client* client);
-		bool 			canNonOpsSetTopic();
 		bool			isModeActive(char mode, std::string& key);
 		bool			isModeActive(char mode);
 		channelMsg		handleInviteOnly(bool add, std::string& args);
@@ -137,4 +100,4 @@ class Channel
 
 std::ostream& operator<<(std::ostream& os, const Channel& channel);
 
-#include "Channel.tpp"
+

@@ -4,6 +4,7 @@
 
 #define L_MODE 'l'
 #define I_MODE 'i'
+#define T_MODE 't'
 
 
 #define RPL_NOTOPIC 331

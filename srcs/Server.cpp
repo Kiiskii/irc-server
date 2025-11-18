@@ -168,12 +168,12 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		printVector(tokens);
 		server.handleTopic(client, tokens);
 	}
-	if (line.find("MODE") != std::string::npos)
-	{
-		line = ft_trimString(line);
-		std::cout << "mode comd: [" << line << "]" << std::endl;
-		client.changeMode(line);
-	}
+	// if (line.find("MODE") != std::string::npos)
+	// {
+	// 	line = ft_trimString(line);
+	// 	std::cout << "mode comd: [" << line << "]" << std::endl;
+	// 	client.changeMode(line);
+	// }
 }
 
 int Server::getEpollfd() const

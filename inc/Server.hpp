@@ -13,12 +13,12 @@
 #include <sys/epoll.h>
 
 #include "macro.hpp"
+#include "utils.hpp"
 #include "Channel.hpp"
 #include "Client.hpp"
 
 //const char ip[]="127.0.0.1"; // for local host
 #define MAX_EVENTS 200
-
 
 
 class Client;
@@ -67,4 +67,20 @@ public:
 	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 
+// Server message to client
+	void		sendMsg(Client& client, std::string& msg);
+	void		sendTopic(Client& client, Channel& channel);
+	void		sendNoTopic(Client& client, Channel& channel);
+	void		sendTopicAndNames(Client& client, Channel& channel);
+	void		sendJoinSuccessMsg( Client& client, Channel& channel);
+	void		broadcastChannelMsg(std::string& msg, Channel& channel);
+	void		sendClientErr(int num, Client& client, Channel& channel, 
+					std::vector<std::string> otherArgs);
+
+	
+	template <typename ...args>
+	void		channelMessage(channelMsg msg, args ...moreArgs);
+
 };
+
+#include "Server.tpp"

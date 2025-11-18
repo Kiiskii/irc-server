@@ -7,12 +7,12 @@
 #include <regex> //std::istringstream
 #include <functional>
 
-// #include "Channel.hpp"
-// #include "Server.hpp"
+#include "Channel.hpp"
 #include "macro.hpp"
+#include "Server.hpp"
 
-class Channel;
-class Server;
+// class Channel;
+// class Server;
 
 
 enum ClientState
@@ -35,6 +35,7 @@ class Client
 		enum ClientState		_clientState = NONE;
 
 		std::string				_input;
+
 	
 	public:
 	
@@ -71,7 +72,7 @@ class Client
 		// other
 		bool 		isValidJoinCmd(std::vector<std::string> tokens);
 
-		bool		isOps(Channel* channel);
+		bool		isOps(Channel& channel);
 
 		// JOIN
 		std::string makeUser();

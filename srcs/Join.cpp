@@ -60,7 +60,7 @@ static std::map<std::string, std::string> mappingChannelKey(std::vector<std::str
 }
 
 /** @brief check if the channel key matches the key that client inputs */
-channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
+channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey, Server& server)
 {
 	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
 	if (this->isClientOnChannel(client))
@@ -71,14 +71,14 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 
 	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
 	{
-		this->sendClientErr(ERR_TOOMANYCHANNELS, &client );
+		server.sendClientErr(ERR_TOOMANYCHANNELS, client, *this, {} );
 		return NO_MSG;
 	}
 
 	if (!this->getChanKey().empty() && this->getChanKey() != clientKey)
 	{
 		std::cout << "bad key: client key : [" << clientKey << "]\n";
-		this->sendClientErr(ERR_BADCHANNELKEY, &client );
+		server.sendClientErr(ERR_BADCHANNELKEY,client, *this, {} );
 		return NO_MSG;
 	}
 
@@ -89,7 +89,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		std::cout << "mode L active and limit set for channel is " << limit << std::endl;
 		if (this->_userList.size() >= limit)
 		{
-			this->sendClientErr(ERR_CHANNELISFULL, &client);
+			server.sendClientErr(ERR_CHANNELISFULL, client, *this, {});
 			return NO_MSG;
 		}
 	}
@@ -99,7 +99,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		std::cout << "Invite-only Mode active " << std::endl;
 		if (!this->hasInvitedClient(&client))
 		{
-			this->sendClientErr(ERR_INVITEONLYCHAN, &client);
+			server.sendClientErr(ERR_INVITEONLYCHAN, client, *this, {});
 			return NO_MSG;
 		}
 	}
@@ -107,22 +107,6 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	return JOIN_OK;
 }
 
-/** 
- * @brief if no topic set when client joins the channel, do not send back the topic.
- * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
- * currently joined the channel, including the current client( multiple RPL_NAMREPLY 
- * and 1 RPL_ENDOFNAMES). 
- */
-void	Channel::sendJoinSuccessMsg( Client* client)
-{
-	std::string	user = client->makeUser();
-
-	// send JOIN msg
-	std::string joinMsg = user + " JOIN #" + this->getChannelName() 
-			+ " " + std::to_string(RPL_TOPIC) + " \r\n";
-	this->sendMsg(client, joinMsg);
-	this->sendTopicAndNames(client);
-}
 
 bool Client::isValidJoinCmd(std::vector<std::string> tokens)
 {
@@ -150,7 +134,7 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 			= this->isChannelExisting(channelName);
 		Channel* channelPtr = nullptr;
 
-		// check if the channel exists
+		// check if the channel existschannel.
 		if (channelNameIt == this->getChannelInfo().end()) // not exist
 		{
 			this->getChannelInfo().push_back(new Channel(channelName));
@@ -159,14 +143,14 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 		else
 			channelPtr = *channelNameIt;
 
-		channelMsg result = channelPtr->canClientJoinChannel(*client, clientKey);
+		channelMsg result = channelPtr->canClientJoinChannel(*client, clientKey, *this);
 		if (result == JOIN_OK)
 		{
 			client->addJoinedChannel(channelPtr);
 			channelPtr->addUser(client);
 			if (channelPtr->getUserList().size() == 1)
 				channelPtr->addChanop(client); // there is only 1 user ->ops
-			channelPtr->channelMessage(result,(client));
+			this->channelMessage(result,client);
 		}
 	}
 	std::cout << "END JOIN \n";

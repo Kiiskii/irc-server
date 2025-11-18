@@ -189,10 +189,10 @@ void Client::parseMessage(Server &server, Client &c, const std::string &line)
 	server.handleCommand(server, c, msg);
 }
 
-bool	Client::isOps(Channel* channel)
+bool	Client::isOps(Channel& channel)
 {
-	auto it = channel->getOps().find(this);
-	if (it != channel->getOps().end())
+	auto it = channel.getOps().find(this);
+	if (it != channel.getOps().end())
 		return true;
 	return false;
 }

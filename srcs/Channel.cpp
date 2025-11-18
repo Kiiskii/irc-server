@@ -57,9 +57,9 @@ Client*	Channel::getTopicSetter()
 	return _topicSetter;
 }
 
-void	Channel::setTopicSetter(Client* setter)
+void	Channel::setTopicSetter(Client& setter)
 {
-	_topicSetter = setter;
+	_topicSetter = &setter;
 }
 
 std::string	Channel::printUser() const
@@ -165,7 +165,6 @@ void	Channel::removeUser(std::string userNick)
 	}
 }
 
-
 /**
  * @brief Check whether the client is already on the channel, if already then open the window
  */
@@ -178,78 +177,3 @@ bool Channel::isClientOnChannel( Client& client)
 	}
 	return false;
 }
-
-/**
- * @brief send message to the joining member, does it go to all members??
- */
-void	Channel::sendMsg(Client* client, std::string& msg)
-{
-	if (send(client->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
-	{
-		std::cout << "joinmsg: failed to send\n";
-		return;
-	}
-	std::cout << "msg sent: " << msg << std::endl;
-}
-/**
- * @brief send message to all member on channels and the joining member itself
- */
-void Channel::broadcastChannelMsg(std::string& msg)
-{
-	std::cout << "broadcast msg: " << std::endl;
-	for (Client* user : this->_userList)
-		this->sendMsg(user, msg);
-	//recheck does this send to the joining memeber itself
-}
-
-// template <typename ...args>
-void Channel::sendClientErr(int num, Client* client)
-{
-	std::string server = client->getServerName(),
-				nick = client->getNick(),
-				chanName = this->getChannelName(),
-				msg, extraArg;
-	
-	// auto				tupleArgs = std::make_tuple(moreArgs);
-	// constexpr size_t	nArgs = sizeof...(moreArgs);
-
-	// if constexpr (nArgs > 0)
-	// 	extraArg = std::get<0>tupleArgs;
-
-	switch (num)
-	{
-	case ERR_BADCHANNELKEY:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+k)");
-		break;
-
-	case ERR_TOOMANYCHANNELS:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "You have joined too many channels");
-		break;
-
-	case ERR_UNKNOWNMODE:
-		msg = makeNumericReply(server, num, nick, {}, "is unknown mode char to me");
-		break;
-
-	case ERR_CHANNELISFULL:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+l)");
-		break;
-
-	case ERR_INVITEONLYCHAN:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+i)");
-		break;
-	
-	case ERR_NOTONCHANNEL:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "You're not on that channel");
-		break;
-
-	case 461:
-		msg = ERR_NEEDMOREPARAMS(server, client->getNick(),"MODE"); // need fix
-		// msg = makeNumericReply(server, num, nick, {"MODE"}, "Not enough parameters");
-		break;	
-	
-	default:
-		break;
-	}
-	this->sendMsg(client, msg);
-}
-
