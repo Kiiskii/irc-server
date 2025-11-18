@@ -64,18 +64,24 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
 	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
 	if (this->isClientOnChannel(client))
+	{
+		std::cout << "client is already on channel\n";
 		return ALREADY_ON_CHAN;
+	}
+
 	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
 	{
 		this->sendClientErr(ERR_TOOMANYCHANNELS, &client );
 		return NO_MSG;
 	}
+
 	if (!this->getChanKey().empty() && this->getChanKey() != clientKey)
 	{
 		std::cout << "bad key: client key : [" << clientKey << "]\n";
 		this->sendClientErr(ERR_BADCHANNELKEY, &client );
 		return NO_MSG;
 	}
+
 	std::string	chanLimit;
 	if (this->isModeActive(L_MODE, chanLimit))
 	{
@@ -87,6 +93,17 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 			return NO_MSG;
 		}
 	}
+
+	if (this->isModeActive(I_MODE))
+	{
+		std::cout << "Invite-only Mode active " << std::endl;
+		if (!this->hasInvitedClient(&client))
+		{
+			this->sendClientErr(ERR_INVITEONLYCHAN, &client);
+			return NO_MSG;
+		}
+	}
+	
 	return JOIN_OK;
 }
 

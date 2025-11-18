@@ -139,6 +139,8 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		tokens.push_back(token);
 	}
 	std::cout << "Fd is: " << client.getClientFd() << " and cmd and args: " << line << std::endl;
+	std::cout << "Client object address: " << &client << std::endl;
+
 	//still look into this...
 	if (command == "CAP")
 	{
@@ -169,12 +171,11 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		server.handleJoin(&client, tokens);
 		std::cout << "JOIN CMd \n";
 	}
-	if (line.find("TOPIC") != std::string::npos)
+	if (command == "TOPIC")
 	{
-		line = ft_trimString(line);
 		std::cout << "topic comd: [" << line << "]" << std::endl;
-		// check command topic
-		client.askTopic(line);       
+		printVector(tokens);
+		server.handleTopic(&client, tokens);
 	}
 	if (line.find("MODE") != std::string::npos)
 	{

@@ -59,6 +59,7 @@ class Channel
 		std::unordered_set<Client*>	_ops; //set allows uniqueness, but is it necessar?
 		std::unordered_set<Client*>	_halfOps; 
 		std::unordered_set<Client*>	_voices;
+		std::unordered_set<Client*>	_invitedUser;
 		std::vector<Client*> 		_userList; //who in channel
 		std::map<char, std::string>	_mode; //active mode: itkol
 		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
@@ -74,13 +75,14 @@ class Channel
 		// getters
 		std::string 				getChannelName() const;
 		std::string 				getTopic() const;
-		std::vector<Client*>&		getUserList() const;
+		std::vector<Client*>&		getUserList() ;
 		std::string					getChanKey() const;
 		std::map<char,std::string>	getMode() const;
 		std::string					printUser() const;
 		time_t						getTopicTimestamp();
 		Client*						getTopicSetter();
 		std::unordered_set<Client*>&	getOps();
+
 
 		// setters
 		void		setChannelName(std::string channelName);
@@ -92,7 +94,8 @@ class Channel
 		void		removeMode(char key);
 		void		setTopicTimestamp(time_t timestamp);
 		void		setTopicSetter(Client* setter);
-
+// 0x4de40c0
+//0x4e81630
 		// channel public method
 		bool		isClientOnChannel( Client& client);
 		channelMsg	canClientJoinChannel( Client& client, 
@@ -128,6 +131,7 @@ class Channel
 		void			addChanop(Client* chanop);
 		void			removeChanop(std::string opNick);
 		// bool			isValidChanName(std::string name);
+		bool			hasInvitedClient(Client* client);
 
 };
 

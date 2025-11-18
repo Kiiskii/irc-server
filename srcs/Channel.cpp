@@ -37,7 +37,7 @@ std::string Channel::getTopic() const
 }
 
 
-std::vector<Client*>&	Channel::getUserList() const
+std::vector<Client*>&	Channel::getUserList() 
 {
 	return _userList;
 }
@@ -68,6 +68,7 @@ std::string	Channel::printUser() const
 	std::string returnStr = "";
 	for (auto it : _ops)
 	{
+		if (!it){ std::cout << "no iterator exist\n"; continue;}
 		std::cout << "OP PTR=" << it << std::endl;
    		std::cout << "NICK=" << it->getNick() << std::endl;
 		returnStr += "@" + (*it).getNick() + " ";
@@ -222,15 +223,24 @@ void Channel::sendClientErr(int num, Client* client)
 		break;
 
 	case ERR_TOOMANYCHANNELS:
-		msg = makeNumericReply(server, num , nick, {"#" + chanName}, "You have joined too many channels");
+		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "You have joined too many channels");
 		break;
 
 	case ERR_UNKNOWNMODE:
-		msg = makeNumericReply(server, num , nick, {}, "is unknown mode char to me");
+		msg = makeNumericReply(server, num, nick, {}, "is unknown mode char to me");
 		break;
 
 	case ERR_CHANNELISFULL:
 		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+l)");
+		break;
+
+	case ERR_INVITEONLYCHAN:
+		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+i)");
+		break;
+	
+	case ERR_NOTONCHANNEL:
+		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "You're not on that channel");
+		break;
 
 	case 461:
 		msg = ERR_NEEDMOREPARAMS(server, client->getNick(),"MODE"); // need fix

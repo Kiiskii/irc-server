@@ -62,6 +62,7 @@ public:
 	void user(Server &server, Client &client, std::vector<std::string> tokens);
 	void ping(Server &server, Client &client, std::vector<std::string> tokens);
 	void handleJoin(Client* client, std::vector<std::string> tokens);
+	void handleTopic(Client* client, std::vector<std::string> tokens);
 
 	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
