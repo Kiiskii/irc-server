@@ -7,9 +7,12 @@
 // check that client getting kicked exists
 // remove client from channels userList
 
-bool removeClient(Server& server, std::string& clientString, std::string& channelString)
+bool Client::removeClient(Server& server, std::string& clientString, std::string& channelString)
 {
-	auto &clients = server.getClientInfo();
+	//auto &clients = server.getClientInfo();
+	Channel* chann = setActiveChannel(channelString);
+	chann.removeUser(clientString);
+
 	/*
 	decltype(clients.begin()) client = nullptr;
 	for (auto it = clients.begin(); it != clients.end(); ++it) {
