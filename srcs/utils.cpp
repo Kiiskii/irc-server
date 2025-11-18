@@ -38,3 +38,15 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 		+ "\r\n";
 	return s;
 }
+
+std::string getTarget(Client &client)
+{
+	std::string target;
+	if (client.getNick().empty())
+	{
+		target = "*";
+	}
+	else
+		target = client.getNick();
+	return target;
+}
