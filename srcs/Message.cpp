@@ -76,7 +76,7 @@ void	Server::sendTopic(Client& client, Channel& channel)
 
 void	Server::sendTopicAndNames(Client& client, Channel& channel)
 {
-	std::string	server = client.getServerName(),
+	std::string	server = this->getServerName(),
 				nick = client.getNick(),
 				chanName = channel.getChannelName();
 

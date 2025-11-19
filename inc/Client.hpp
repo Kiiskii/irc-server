@@ -28,7 +28,7 @@ class Client
 		std::string				_userName = "";
 		std::string				_realName = "";
 		std::string				_hostName;
-		std::string				_serverName;
+
 		std::vector<Channel*>	_joinedChannels{};
 		enum ClientState		_clientState = NONE;
 
@@ -36,12 +36,12 @@ class Client
 
 	
 	public:
-	
+		class Server			&_myServer;	
 //		int auth_step = 0;
 		std::string recvBuffer;
 		
-		// Client();
-		// ~Client();
+		Client(Server &server);
+		~Client();
 
 		// getters
 		int						getClientFd();
@@ -49,7 +49,7 @@ class Client
 		std::string 			getUserName();
 		std::string				getRealName();
 		std::string 			getHostName();
-		std::string 			getServerName();
+		// std::string 			getServerName();
 		std::vector<Channel*> 	getJoinedChannels();
 		enum ClientState		getClientState();
 

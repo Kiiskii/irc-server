@@ -24,7 +24,7 @@ Channel* Client::setActiveChannel(std::string buffer)
 			return chan;
 		else
 		{
-			std::string server = this->getServerName(),
+			std::string server = this->_myServer.getServerName(),
 				nick = this->getNick();
 	
 			std::cout << "there is no channel saved in _joinedChannel" << std::endl;

@@ -34,7 +34,7 @@ void Server::channelMessage(channelMsg msg, args ...moreArgs)
 		modeStr += " " + params;
 	}
 
-	std::string server = client->getServerName(),
+	std::string server = client->_myServer.getServerName(),
 				nick = client->getNick(),
 				chanName = channel->getChannelName();
 

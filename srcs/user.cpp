@@ -2,11 +2,10 @@
 #include "utils.hpp"
 
 /*
-- Can we remove servername from Client, maybe have a pointer to server if name is needed? So then setservername could be removed from this function
 - User name and real name might also have some naming rules and lengths
 - Need to check if either user name or real name is empty
-- Check the :, and whether we are capturing the entire real name because that can be separated by space
-
+- Check if : is requirement
+- Figure out a cleaner way to extract the real name
 - Do we need to show in which format this needs to be???
 */
 void Server::user(Client &client, std::vector<std::string> tokens)
@@ -25,7 +24,6 @@ void Server::user(Client &client, std::vector<std::string> tokens)
 	}
 	client.setUserName(tokens[0]);
 	std::string realname = "";
-	//cleaner way to do this..?
 	if (tokens[3].find(":") != std::string::npos)
 	{
 		tokens[3].erase(0, tokens[3].find(":") + 1);		
@@ -38,7 +36,6 @@ void Server::user(Client &client, std::vector<std::string> tokens)
 			realname = realname + " ";
 		}
 	}
-	client.setRealName(tokens[3]);
-	client.setServerName(getServerName());
+	client.setRealName(realname);
 	attemptRegister(client);
 }
