@@ -62,7 +62,7 @@ public:
 	void nick(Client &client, std::vector<std::string> tokens);
 	void user(Client &client, std::vector<std::string> tokens);
 	void ping(Client &client, std::vector<std::string> tokens);
-
+	std::vector<Client*>::iterator 	iterateClients(Server &server, Client &client);
 	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
 	void printChannelList() const;
 

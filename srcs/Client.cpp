@@ -46,6 +46,10 @@ enum ClientState Client::getClientState()
 {
 	return _clientState;
 }
+Server& Client::getServer()
+{
+	return _myServer;
+}
 
 void Client::setClientFd(int num)
 {
@@ -89,7 +93,7 @@ std::string Client::makeUser()
 		+ this->getUserName() + "@" + this->getHostName();
 }
 
-void Client::recieve(Server &server, Client &c, int clientIndex)
+void Client::receive(Server &server, Client &c, int clientIndex)
 {
 	// Recieve data from the client
 	char buffer[512];

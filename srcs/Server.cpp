@@ -151,6 +151,8 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	{
 		user(client, tokens);
 	}
+	if (client.getClientState() != REGISTERED)
+		return;
 	if (command == "PING")
 	{
 		ping(client, tokens);

@@ -40,6 +40,8 @@
 #define ERR_PASSWDMISMATCH(servername, nickname) ":" + servername + " 464 " + nickname + " :Password incorrect\r\n"
 #define ERR_ALREADYREGISTERED(servername, nickname) ":" + servername + " 462 " + nickname + " :You may not register\r\n"
 
+//should this also have the servername and nickname?
+#define ERR_GENERIC(servername, nickname, reason) ":" + servername + " " + nickname + " :" + reason + "\r\n"
 //..this is example
 // The ERR_NEEDMOREPARAMS response should follow the format:
 
