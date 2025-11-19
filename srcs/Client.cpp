@@ -3,6 +3,16 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
+
+Client::Client(Server &server) : _myServer(server)
+{
+
+}
+Client::~Client()
+{
+
+}
+
 int	Client::getClientFd()
 {
 	return _clientfd;
@@ -25,11 +35,6 @@ std::string	Client::getRealName()
 std::string Client::getHostName()
 {
 	return _hostName;
-}
-
-std::string Client::getServerName()
-{
-	return _serverName;
 }
 
 std::vector<Channel*> Client::getJoinedChannels()
@@ -65,11 +70,6 @@ void Client::setRealName(std::string name)
 void Client::setHostName(std::string host)
 {
 	_hostName = host;
-}
-
-void Client::setServerName(std::string server)
-{
-	_serverName = server;
 }
 
 void Client::setClientState(enum ClientState state)

@@ -85,7 +85,7 @@ void Server::setupEpoll()
 - Epoll is like event manager, it contains a list of sockets that we want to "track", if they communicate*/
 void Server::handleNewClient()
 {
-	Client *newClient = new Client;
+	Client *newClient = new Client(*this);
 	struct sockaddr_in clientAddress;
 	socklen_t addressLength = sizeof(clientAddress);
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
