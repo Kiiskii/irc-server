@@ -26,4 +26,6 @@ void Server::pass(Client &client, std::vector<std::string> tokens)
 		std::string message = ERR_PASSWDMISMATCH(getServerName(), getTarget(client));
 		send(client.getClientFd(), message.c_str(), message.size(), 0);					
 	}	
+
+
 }

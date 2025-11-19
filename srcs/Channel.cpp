@@ -69,15 +69,13 @@ std::string	Channel::printUser() const
 	for (auto it : _ops)
 	{
 		if (!it){ std::cout << "no iterator exist\n"; continue;}
-		std::cout << "OP PTR=" << it << std::endl;
-   		std::cout << "NICK=" << it->getNick() << std::endl;
 		returnStr += "@" + (*it).getNick() + " ";
 	}
 	for (auto it : _halfOps)
 		returnStr += "%" + (*it).getNick() + " ";
 	for (auto it : _voices)
 		returnStr += "+" + (*it).getNick() + " ";
-	std::cout << "print user not break: " << returnStr << std::endl;
+	// std::cout << "print user not break: " << returnStr << std::endl;
 	return returnStr;
 }
 
@@ -142,9 +140,12 @@ void Channel::removeMode(char key)
 
 std::map<char, std::string> Channel::getMode() const
 {
-	for (auto it : _mode)
+	std::cout << "active mode saved size: " << _mode.size() << std::endl;
+	for (auto& it : _mode)
 	{
+		// if (!it) { std::cout << "this mode cannot access/n"; continue; }
 		std::cout << "existing mode: key and param: [" << it.first << ", " << it.second << "]" << std::endl;
+		std::cout << "here msg: " << std::endl;
 	}
 	return _mode;
 }

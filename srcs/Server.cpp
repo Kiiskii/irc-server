@@ -172,14 +172,8 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	{
 		std::cout << "mode comd: [" << line << "]" << std::endl;
 		printVector(tokens);
-		server.handleTopic(client, tokens);
+		server.handleMode(client, tokens);
 	}
-	// if (line.find("MODE") != std::string::npos)
-	// {
-	// 	line = ft_trimString(line);
-	// 	std::cout << "mode comd: [" << line << "]" << std::endl;
-	// 	client.changeMode(line, server);
-	// }
 }
 
 int Server::getEpollfd() const
@@ -233,7 +227,7 @@ Channel* Client::setActiveChannel(std::string buffer)
 			return chan;
 		else
 		{
-			std::string server = this->getServerName(),
+			std::string server = this->_myServer.getServerName(),
 				nick = this->getNick();
 	
 			std::cout << "there is no channel saved in _joinedChannel" << std::endl;

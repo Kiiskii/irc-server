@@ -81,7 +81,7 @@ class Channel
 
 
 		// mode
-		void			setMode(std::string buffer, Client* client, Server& server);
+		void			setMode(std::string& modeStr, std::vector<std::string> args, Client& client);
 		bool			isModeActive(char mode, std::string& key);
 		bool			isModeActive(char mode);
 		channelMsg		handleInviteOnly(bool add, std::string& args);

@@ -154,6 +154,6 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 			this->channelMessage(result, client, channelPtr);
 		}
 	}
-	std::cout << "END JOIN \n";
+	// std::cout << "END JOIN \n";
 	// this->printChannelList(); //print all the channel on server
 }

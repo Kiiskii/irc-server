@@ -45,13 +45,6 @@ void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 
 void	Server::sendNoTopic(Client& client, Channel& channel)
 {
-	// std::string	server = client.getServerName(),
-	// 			nick = client.getNick(),
-	// 			chanName = channel.getChannelName();
-
-	// std::string topicMsg = makeNumericReply(server, RPL_NOTOPIC, nick, 
-	// 	{"#" + chanName}, "No topic is set");
-	// this->sendMsg(client, topicMsg);
 	this->sendClientErr(RPL_NOTOPIC, client, channel, {});
 }
 
@@ -90,12 +83,12 @@ void	Server::sendTopicAndNames(Client& client, Channel& channel)
 	std::string nameReplyMsg = makeNumericReply(server, RPL_NAMREPLY, nick,  {"=", "#"+ chanName}, channel.printUser() );
 	
 	this->sendMsg(client, nameReplyMsg);
-	std::cout << "SENT NAMEPLY\n";
+	// std::cout << "SENT NAMEPLY\n";
 	
 	std::string endOfNamesMsg = makeNumericReply(server, RPL_ENDOFNAMES, 
 		nick, {"#" + chanName},	"End of /NAMES list.");
 	this->sendMsg(client, endOfNamesMsg);
-	std::cout << "SENT ENDOFNAMES\n";
+	// std::cout << "SENT ENDOFNAMES\n";
 }
 
 

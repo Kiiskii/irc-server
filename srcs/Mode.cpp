@@ -7,44 +7,44 @@
 
 /** @note this check only for mode applied to channel, not sure about users mode
  * @brief MODE <#channel> <+/-modestring> [<mode arguments>...] */ 
-static bool isValidModeCmd(std::string buffer)
+static bool isValidModeCmd(std::string modeStr)
 {
-	std::regex modeRegex("^MODE\\s+#[a-zA-Z_0-9]+\\s+([+-][a-zA-Z]+)+(\\s+[a-zA-Z_0-9\"]+)*$");
-	if (std::regex_match(buffer, modeRegex))
+	std::regex modeRegex("^[+-][iklot]+([+-][iklot]+)*$");
+	if (std::regex_match(modeStr, modeRegex))
 		return true;
 	std::cout << "DOES NOT match regex pattern for mode\n";
 	return false;
 }
 
-static void extractModeAndParams(std::string buffer, std::string& modeStr, 
-	std::string& args)
-{
-	// mode start position
-	bool addMode = true, haveArgs = true;
-	size_t modePos = buffer.find("+");
-	if ( modePos == std::string::npos)
-	{
-		addMode = false;
-		modePos = buffer.find("-");
-	}
-	if (modePos == std::string::npos)
-		return ;
+// static void extractModeAndParams( std::string& modeStr, std::string& args)
+// {
+// 	// std::cout << "we here\n";
+// 	// mode start position
+// 	bool addMode = true, haveArgs = true;
+// 	size_t modePos = modeStr.find("+");
+// 	if ( modePos == std::string::npos)
+// 	{
+// 		addMode = false;
+// 		modePos = modeStr.find("-");
+// 	}
+// 	if (modePos == std::string::npos)
+// 		return ;
 
-	// mode end position
-	size_t modeEndPos = buffer.find(' ', modePos);
-	if (modeEndPos == std::string::npos)
-	{
-		modeEndPos = buffer.length();
-		haveArgs = false;
-	}
-	// all modes are extracted into modeStr
-	modeStr = buffer.substr(modePos, modeEndPos - modePos);
+// 	// mode end position
+// 	size_t modeEndPos = modeStr.find(' ', modePos);
+// 	if (modeEndPos == std::string::npos)
+// 	{
+// 		modeEndPos = modeStr.length();
+// 		haveArgs = false;
+// 	}
+// 	// // all modes are extracted into modeStr
+// 	// modeStr = buffer.substr(modePos, modeEndPos - modePos);
 
-	// extract the args string
-	if (haveArgs)
-		args = buffer.substr(modeEndPos + 1);
+// 	// // extract the args string
+// 	// if (haveArgs)
+// 	// 	args = buffer.substr(modeEndPos + 1);
 	
-}
+// }
 
 static void combineExecutedMode(std::string& executedMode, char mode, bool addMode)
 {
@@ -99,17 +99,14 @@ static void restrictRemoveKeyMode(std::string& executedMode, std::string& execut
 		executedArgs = "*";
 }
 
-void Channel::setMode(std::string buffer, Client* client, Server& server)
+void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Client& client)
 {
-	std::string					modeStr, args;
-	std::vector<std::string>	argsVec;
+	Server&	server = client._myServer;
 
-	extractModeAndParams(buffer, modeStr, args);
-	// std::cout << "mode are: [" << modeStr << "]" << " and args [" << args << "]" << std::endl;
+	// extractModeAndParams(modeStr, args);
+	std::cout << "mode are: [" << modeStr << "]" << " and args. ";
+	printVector(argsVec);
 
-	if (!args.empty())
-			argsVec = splitString(args, ' ');
-	
 	std::string params, modeStatus, executedMode, executedArgs;
 	bool		addMode = true;
 	channelMsg	msgEnum;
@@ -124,7 +121,7 @@ void Channel::setMode(std::string buffer, Client* client, Server& server)
 		{
 			if (addMode && argsVec.empty())
 			{
-				server.sendClientErr(461, *client, *this, {});
+				server.sendClientErr(461, client, *this, {});
 				break;
 			}
 			if (!argsVec.empty() && addMode)
@@ -137,7 +134,7 @@ void Channel::setMode(std::string buffer, Client* client, Server& server)
 		{
 			if (addMode && argsVec.empty())
 			{
-				server.sendClientErr(461, *client, *this, {});
+				server.sendClientErr(461, client, *this, {});
 				break;
 			}
 			if (!argsVec.empty() && mode == 'k')
@@ -150,14 +147,14 @@ void Channel::setMode(std::string buffer, Client* client, Server& server)
 		{
 			if (argsVec.empty()) 
 			{
-				server.sendClientErr(461, *client, *this, {});
+				server.sendClientErr(461, client, *this, {});
 				break;
 			}
 			params = argsVec.front();
 			argsVec.erase(argsVec.begin());
 		}
 		else
-			server.sendClientErr(ERR_UNKNOWNMODE, *client, *this, {});
+			server.sendClientErr(ERR_UNKNOWNMODE, client, *this, {});
 		// this only handle the _mode mapping, not action with client yet
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (msgEnum == SET_MODE_OK)
@@ -170,69 +167,52 @@ void Channel::setMode(std::string buffer, Client* client, Server& server)
 
 	}
 	restrictRemoveKeyMode(executedMode, executedArgs);
-	server.channelMessage(msgEnum, client, this, executedMode, executedArgs);
+	server.channelMessage(msgEnum, &client, this, executedMode, executedArgs);
 }
-
-// /** @brief mode applied: itkol */
-// void	Client::changeMode(std::string buffer, Server& server)
-// {
-// 	Channel*	channelPtr = nullptr;
-
-// 	// validate the command here
-// 	if (isValidModeCmd(buffer) == false)
-// 	{
-// 		std::cout << "Invalid mode cmd" << std::endl;
-// 		return;
-// 	}
-
-// 	// ONLY work on channel mode, so always have channel??
-// 	if (buffer.find("#") != std::string::npos)
-// 	{
-// 		channelPtr = setActiveChannel(buffer);
-// 		// if not on any channel, return do nothing
-// 		if (channelPtr == nullptr) {
-// 			std::cout << "null ptr \n";	return; }
-// 	}
-// 	else {
-// 		std::cout << "message doesn't have channel # \n";
-// 	}
-
-// 	std::string		mode;
-// 	channelPtr->setMode(buffer, this, server);
-// 	channelPtr->getMode(); //=> to print the mode active
-// 	channelPtr->getOps();
-// }	
-
 
 /** @brief mode applied: itkol */
 void Server::handleMode(Client& client, std::vector<std::string> tokens)
 {
 	Channel*	channelPtr = nullptr;
-	std::string modeStr = tokens[0];
+	std::string	nameStr, modeStr;
+	std::vector<std::string> modeParams;
+
+	if (tokens.size() > 0)
+		nameStr = tokens[0];
 	if (tokens.size() > 1)
-		std::string modeParams = tokens[1];
-	// validate the command here, need to fix this??
-	// if (isValidModeCmd(buffer) == false)
-	// {
-	// 	std::cout << "Invalid mode cmd" << std::endl;
-	// 	return;
-	// }
+		modeStr = tokens[1];
+	if (tokens.size() > 2)
+	{
+		tokens.erase(tokens.begin(), tokens.begin() + 2);
+		modeParams = tokens;
+	}
 
 	// ONLY work on channel mode, so always have channel??
-	if (modeStr.find("#") != std::string::npos)
+	if (nameStr.find("#") != std::string::npos)
 	{
-		channelPtr = client.setActiveChannel(modeStr);
+		channelPtr = client.setActiveChannel(nameStr);
 		// if not on any channel, return do nothing
-		if (channelPtr == nullptr) {
-			std::cout << "null ptr \n";	return; }
+		if (channelPtr == nullptr) 
+		{
+			std::cout << "null ptr \n";	return; 
+		}
 	}
-	else {
-		std::cout << "message doesn't have channel # \n";
+	else 
+	{
+		std::cout << "message doesn't have channel # \n"; return;
 	}
 
-	std::string		mode;
-	channelPtr->setMode(buffer, this, server);
-	channelPtr->getMode(); //=> to print the mode active
+	// validate the command here, need to fix this??
+	if (isValidModeCmd(modeStr) == false)
+	{
+		this->sendClientErr(ERR_UNKNOWNMODE, client, *channelPtr, {});
+		return;
+	}
+
+	// std::string		mode;
+	channelPtr->setMode(modeStr, modeParams, client);
+	channelPtr->getMode(); //=> to print the mode active, remove later
+	std::cout << "print mode ok: " << std::endl;
 	channelPtr->getOps();
 }	
 
