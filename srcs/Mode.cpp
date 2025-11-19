@@ -173,22 +173,55 @@ void Channel::setMode(std::string buffer, Client* client, Server& server)
 	server.channelMessage(msgEnum, client, this, executedMode, executedArgs);
 }
 
+// /** @brief mode applied: itkol */
+// void	Client::changeMode(std::string buffer, Server& server)
+// {
+// 	Channel*	channelPtr = nullptr;
+
+// 	// validate the command here
+// 	if (isValidModeCmd(buffer) == false)
+// 	{
+// 		std::cout << "Invalid mode cmd" << std::endl;
+// 		return;
+// 	}
+
+// 	// ONLY work on channel mode, so always have channel??
+// 	if (buffer.find("#") != std::string::npos)
+// 	{
+// 		channelPtr = setActiveChannel(buffer);
+// 		// if not on any channel, return do nothing
+// 		if (channelPtr == nullptr) {
+// 			std::cout << "null ptr \n";	return; }
+// 	}
+// 	else {
+// 		std::cout << "message doesn't have channel # \n";
+// 	}
+
+// 	std::string		mode;
+// 	channelPtr->setMode(buffer, this, server);
+// 	channelPtr->getMode(); //=> to print the mode active
+// 	channelPtr->getOps();
+// }	
+
+
 /** @brief mode applied: itkol */
-void	Client::changeMode(std::string buffer, Server& server)
+void Server::handleMode(Client& client, std::vector<std::string> tokens)
 {
 	Channel*	channelPtr = nullptr;
-
-	// validate the command here
-	if (isValidModeCmd(buffer) == false)
-	{
-		std::cout << "Invalid mode cmd" << std::endl;
-		return;
-	}
+	std::string modeStr = tokens[0];
+	if (tokens.size() > 1)
+		std::string modeParams = tokens[1];
+	// validate the command here, need to fix this??
+	// if (isValidModeCmd(buffer) == false)
+	// {
+	// 	std::cout << "Invalid mode cmd" << std::endl;
+	// 	return;
+	// }
 
 	// ONLY work on channel mode, so always have channel??
-	if (buffer.find("#") != std::string::npos)
+	if (modeStr.find("#") != std::string::npos)
 	{
-		channelPtr = setActiveChannel(buffer);
+		channelPtr = client.setActiveChannel(modeStr);
 		// if not on any channel, return do nothing
 		if (channelPtr == nullptr) {
 			std::cout << "null ptr \n";	return; }
@@ -202,7 +235,7 @@ void	Client::changeMode(std::string buffer, Server& server)
 	channelPtr->getMode(); //=> to print the mode active
 	channelPtr->getOps();
 }	
-	
+
 /**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ?? */
 channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 {

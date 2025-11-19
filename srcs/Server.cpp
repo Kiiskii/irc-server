@@ -168,12 +168,18 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		printVector(tokens);
 		server.handleTopic(client, tokens);
 	}
-	if (line.find("MODE") != std::string::npos)
+	if (command == "MODE")
 	{
-		line = ft_trimString(line);
 		std::cout << "mode comd: [" << line << "]" << std::endl;
-		client.changeMode(line, server);
+		printVector(tokens);
+		server.handleTopic(client, tokens);
 	}
+	// if (line.find("MODE") != std::string::npos)
+	// {
+	// 	line = ft_trimString(line);
+	// 	std::cout << "mode comd: [" << line << "]" << std::endl;
+	// 	client.changeMode(line, server);
+	// }
 }
 
 int Server::getEpollfd() const
@@ -207,7 +213,40 @@ std::vector<Channel*>& Server::getChannelInfo()
 }
 
 
+Channel* Client::setActiveChannel(std::string buffer)
+{
+	std::string	channelName;
 
+	size_t hashPos = buffer.find("#");
+	if (hashPos == std::string::npos)
+		return nullptr;
+	
+	size_t chanEndPos = buffer.find(' ', hashPos);
+	if (chanEndPos == std::string::npos)
+		chanEndPos = buffer.length();
+
+	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
+	std::cout << "channelName: [" << channelName << "]" << std::endl;
+	for (auto chan : this->_joinedChannels)
+	{
+		if (chan && chan->getChannelName() == channelName)
+			return chan;
+		else
+		{
+			std::string server = this->getServerName(),
+				nick = this->getNick();
+	
+			std::cout << "there is no channel saved in _joinedChannel" << std::endl;
+			std::string msg = makeNumericReply(server, ERR_NOTONCHANNEL, nick, {"#" + channelName}, "You're not on that channel");
+			if (send(this->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
+			{
+				std::cout << "joinmsg: failed to send\n";
+				return nullptr;
+			}
+		}
+	}
+	return nullptr;
+}
 
 
 

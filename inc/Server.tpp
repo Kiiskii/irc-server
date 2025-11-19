@@ -4,7 +4,7 @@
 #include "Server.hpp"
 
 
-
+/** @brief template order: client - channel - mode - params  */
 template <typename ...args>
 void Server::channelMessage(channelMsg msg, args ...moreArgs)
 {
