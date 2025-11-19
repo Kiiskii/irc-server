@@ -5,6 +5,7 @@
 #define L_MODE 'l'
 #define I_MODE 'i'
 #define T_MODE 't'
+#define K_MODE 'k'
 
 
 #define RPL_NOTOPIC 331
@@ -12,6 +13,7 @@
 #define RPL_NAMREPLY 353
 #define RPL_TOPICWHOTIME 333
 #define RPL_ENDOFNAMES 366
+#define ERR_NOSUCHCHANNEL 403
 #define ERR_TOOMANYCHANNELS 405
 #define ERR_UNKNOWNMODE 472
 #define ERR_BADCHANNELKEY 475

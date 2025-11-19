@@ -33,7 +33,7 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 	for (auto param : params)
 		p += param + " ";
 	s = ":" + prefix + " " + std::to_string(code) + " " + target 
-		+ (p.empty() ? "" : " " + p)
+		+ (p.empty() ? " " : " " + p)
 		+ (trailing.empty() ? "" : ":" + trailing)
 		+ "\r\n";
 	// std::cout << ": " << s << std::endl;

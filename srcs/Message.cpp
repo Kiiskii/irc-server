@@ -24,8 +24,6 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel)
 	//recheck does this send to the joining memeber itself
 }
 
-
-
 /** 
  * @brief if no topic set when client joins the channel, do not send back the topic.
  * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
@@ -50,20 +48,7 @@ void	Server::sendNoTopic(Client& client, Channel& channel)
 
 void	Server::sendTopic(Client& client, Channel& channel)
 {
-	// std::string	server = client->getServerName(),
-	// 			nick = client->getNick(),
-	// 			chanName = this->getChannelName();
-
-	// std::string topicMsg = makeNumericReply(server, RPL_TOPIC, nick, 
-	// 	{"#" + chanName}, this->getTopic());
-	// this->sendMsg(client, topicMsg);
 	this->sendClientErr(RPL_TOPIC, client, channel, {});
-
-	// sending topicwhotime
-	// std::time_t timestamp = channel.getTopicTimestamp();
-	// std::string topicWhoMsg = makeNumericReply(server, RPL_TOPICWHOTIME,
-	// 	nick, {"#" + chanName, getTopicSetter()->getNick(), std::to_string(timestamp)}, "");
-	// this->sendMsg(client, topicWhoMsg);
 	this->sendClientErr(RPL_TOPICWHOTIME, client, channel, {});
 }
 
@@ -97,13 +82,13 @@ void Server::sendClientErr(int num, Client& client, Channel& channel, std::vecto
 	std::string server = this->getServerName(),
 				nick = client.getNick(),
 				chanName = channel.getChannelName(),
-				msg, command;
+				msg, arg;
 
-	// if (!otherArgs.empty())
-	// {
-	// 	if (otherArgs.size() == 1) {command = otherArgs[0]; };
-	// 	// if (otherArgs.size() == 1) {command = otherArgs[0]; };
-	// }
+	if (!otherArgs.empty())
+	{
+		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
+		// if (otherArgs.size() == 1) {command = otherArgs[0]; };
+	}
 	
 	switch (num)
 	{
@@ -116,7 +101,7 @@ void Server::sendClientErr(int num, Client& client, Channel& channel, std::vecto
 		break;
 
 	case ERR_UNKNOWNMODE:
-		msg = makeNumericReply(server, num, nick, {}, "is unknown mode char to me");
+		msg = makeNumericReply(server, num, nick, {arg}, "is unknown mode char to me");
 		break;
 
 	case ERR_CHANNELISFULL:
@@ -133,6 +118,10 @@ void Server::sendClientErr(int num, Client& client, Channel& channel, std::vecto
 	
 	case ERR_CHANOPRIVSNEEDED:
 		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "You're not channel operator");
+		break;
+
+	case ERR_NOSUCHCHANNEL:
+		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
 		break;
 
 	

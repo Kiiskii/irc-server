@@ -61,8 +61,9 @@ static std::map<std::string, std::string> mappingChannelKey(std::vector<std::str
 }
 
 /** @brief check if the channel key matches the key that client inputs */
-channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey, Server& server)
+channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
+	Server& server = client._myServer;
 	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
 	if (this->isClientOnChannel(client))
 	{
@@ -130,7 +131,7 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 	{
 		std::string channelName = chan.first;
 		std::string clientKey = chan.second;
-		std::cout << "channel name: [" << channelName << "] and key [" << clientKey << "]" << std::endl;
+		// std::cout << "channel name: [" << channelName << "] and key [" << clientKey << "]" << std::endl;
 		std::vector<Channel*>::iterator channelNameIt 
 			= this->isChannelExisting(channelName);
 		Channel* channelPtr = nullptr;
@@ -144,7 +145,7 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 		else
 			channelPtr = *channelNameIt;
 
-		channelMsg result = channelPtr->canClientJoinChannel(*client, clientKey, *this);
+		channelMsg result = channelPtr->canClientJoinChannel(*client, clientKey);
 		if (result == JOIN_OK)
 		{
 			client->addJoinedChannel(channelPtr);
@@ -154,6 +155,5 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 			this->channelMessage(result, client, channelPtr);
 		}
 	}
-	// std::cout << "END JOIN \n";
 	// this->printChannelList(); //print all the channel on server
 }

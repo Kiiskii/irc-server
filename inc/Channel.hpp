@@ -65,7 +65,7 @@ class Channel
 
 		// setters
 		void		setChannelName(std::string channelName);
-		void		setTopic(std::string newTopic, Client& client, Server& server);
+		void		setTopic(std::string newTopic, Client& client);
 		void		addUser(Client* newClient);
 		void		removeUser(std::string userNick);
 		void		setChanKey(std::string newKey);
@@ -76,8 +76,7 @@ class Channel
 
 		// channel public method
 		bool		isClientOnChannel( Client& client);
-		channelMsg	canClientJoinChannel( Client& client, 
-						std::string clientKey, Server& server);
+		channelMsg	canClientJoinChannel( Client& client, std::string clientKey);
 
 
 		// mode
@@ -93,6 +92,7 @@ class Channel
 		void			removeChanop(std::string opNick);
 		// bool			isValidChanName(std::string name);
 		bool			hasInvitedClient(Client* client);
+		bool			isValidModeCmd(std::string modeStr, Client& client);
 
 };
 

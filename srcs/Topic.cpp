@@ -5,8 +5,9 @@
 
 
 /** @brief if the t_mode is on, only chanop can set/remove topic */
-void Channel::setTopic(std::string buffer, Client& client, Server& server)
+void Channel::setTopic(std::string buffer, Client& client)
 {
+	Server& server = client._myServer;
 	// not test this yet
 	if (this->isModeActive(T_MODE) && !client.isOps(*this))
 	{
@@ -28,21 +29,30 @@ void Channel::setTopic(std::string buffer, Client& client, Server& server)
 void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 {
 	Channel* channelPtr;
+	std::string	channelName;
 
-	channelPtr = client.setActiveChannel(tokens[0]);
+	if (tokens.empty())
+	{
+		std::string msg = ERR_NEEDMOREPARAMS(this->getServerName(), client.getNick(), "TOPIC");
+		this->sendMsg(client , msg);
+		return;
+	}
+
+	channelPtr = client.setActiveChannel(channelName);
 	// if not on any channel, return do nothing
 	if (channelPtr == nullptr)
+	{
 		return;
+	}
 
-	// // client hasn't joined channel
-	// if (!channelPtr->isClientOnChannel(client))
-	// {
-	// 	channelPtr->sendClientErr(ERR_NOTONCHANNEL, &client);
-	// 	return;
-	// }
+	if (tokens.size() > 0)
+	{
+		channelName = tokens[0];
+	}
 
 	if (tokens.size() == 1)
 	{
+		
 		if (channelPtr && channelPtr->getTopic().empty())
 			this->sendNoTopic(client, *channelPtr);
 		else if (channelPtr && !channelPtr->getTopic().empty())
@@ -51,7 +61,7 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
     else if (tokens.size() == 2)
     {
         // std::cout << "im here setting chan name: " << tokens[1] << std::endl;
-        channelPtr->setTopic(tokens[1], client, *this);
+        channelPtr->setTopic(tokens[1], client);
         // std::cout << "im here sending chan name: " << tokens[1] << std::endl;
 		this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
     }

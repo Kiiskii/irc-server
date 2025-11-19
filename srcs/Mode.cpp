@@ -7,44 +7,26 @@
 
 /** @note this check only for mode applied to channel, not sure about users mode
  * @brief MODE <#channel> <+/-modestring> [<mode arguments>...] */ 
-static bool isValidModeCmd(std::string modeStr)
+bool Channel::isValidModeCmd(std::string modeStr, Client& client)
 {
 	std::regex modeRegex("^[+-][iklot]+([+-][iklot]+)*$");
 	if (std::regex_match(modeStr, modeRegex))
 		return true;
+
+	std::string validChars = "+-iklot";
+	for (size_t i = 0; i < modeStr.length(); ++i)
+	{
+		if (validChars.find(modeStr[i]) == std::string::npos)
+		{
+			std::string str(1, static_cast<char>(modeStr[i]));
+			client._myServer.sendClientErr(ERR_UNKNOWNMODE, client, *this, {str});
+			return false;
+		}
+	}
 	std::cout << "DOES NOT match regex pattern for mode\n";
+	client._myServer.sendClientErr(ERR_UNKNOWNMODE, client, *this, {});
 	return false;
 }
-
-// static void extractModeAndParams( std::string& modeStr, std::string& args)
-// {
-// 	// std::cout << "we here\n";
-// 	// mode start position
-// 	bool addMode = true, haveArgs = true;
-// 	size_t modePos = modeStr.find("+");
-// 	if ( modePos == std::string::npos)
-// 	{
-// 		addMode = false;
-// 		modePos = modeStr.find("-");
-// 	}
-// 	if (modePos == std::string::npos)
-// 		return ;
-
-// 	// mode end position
-// 	size_t modeEndPos = modeStr.find(' ', modePos);
-// 	if (modeEndPos == std::string::npos)
-// 	{
-// 		modeEndPos = modeStr.length();
-// 		haveArgs = false;
-// 	}
-// 	// // all modes are extracted into modeStr
-// 	// modeStr = buffer.substr(modePos, modeEndPos - modePos);
-
-// 	// // extract the args string
-// 	// if (haveArgs)
-// 	// 	args = buffer.substr(modeEndPos + 1);
-	
-// }
 
 static void combineExecutedMode(std::string& executedMode, char mode, bool addMode)
 {
@@ -103,7 +85,6 @@ void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Cl
 {
 	Server&	server = client._myServer;
 
-	// extractModeAndParams(modeStr, args);
 	std::cout << "mode are: [" << modeStr << "]" << " and args. ";
 	printVector(argsVec);
 
@@ -203,16 +184,12 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	}
 
 	// validate the command here, need to fix this??
-	if (isValidModeCmd(modeStr) == false)
-	{
-		this->sendClientErr(ERR_UNKNOWNMODE, client, *channelPtr, {});
+	if (channelPtr->isValidModeCmd(modeStr, client) == false)
 		return;
-	}
 
-	// std::string		mode;
 	channelPtr->setMode(modeStr, modeParams, client);
 	channelPtr->getMode(); //=> to print the mode active, remove later
-	std::cout << "print mode ok: " << std::endl;
+	// std::cout << "print mode ok: " << std::endl;
 	channelPtr->getOps();
 }	
 
