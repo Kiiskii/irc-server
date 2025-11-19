@@ -151,7 +151,7 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 			channelPtr->addUser(client);
 			if (channelPtr->getUserList().size() == 1)
 				channelPtr->addChanop(client); // there is only 1 user ->ops
-			this->channelMessage(result,client);
+			this->channelMessage(result,client, channelPtr);
 		}
 	}
 	std::cout << "END JOIN \n";

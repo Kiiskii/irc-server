@@ -5,7 +5,7 @@ void Server::pass(Client &client, std::vector<std::string> tokens)
 {
 	if (client.getClientState() == REGISTERED)
 	{
-		std::string message = ERR_ALREADYREGISTERED(client.getServerName(), getTarget(client));
+		std::string message = ERR_ALREADYREGISTERED(getServerName(), getTarget(client));
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;	
 	}
