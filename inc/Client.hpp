@@ -77,6 +77,7 @@ class Client
 		// MODE
 		void		changeMode(std::string buffer, Server& server);	
 		void		kickClient(std::string &line, Server &server);
+		bool		removeClient(Server& server, std::string& clientString, std::string& channelString);
 	
 
 };

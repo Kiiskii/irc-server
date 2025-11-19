@@ -11,7 +11,7 @@ bool Client::removeClient(Server& server, std::string& clientString, std::string
 {
 	//auto &clients = server.getClientInfo();
 	Channel* chann = setActiveChannel(channelString);
-	chann.removeUser(clientString);
+	chann->removeUser(clientString);
 
 	/*
 	decltype(clients.begin()) client = nullptr;
