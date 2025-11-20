@@ -96,6 +96,6 @@ class Channel
 
 };
 
-std::ostream& operator<<(std::ostream& os, const Channel& channel);
+// std::ostream& operator<<(std::ostream& os, const Channel& channel);
 
 

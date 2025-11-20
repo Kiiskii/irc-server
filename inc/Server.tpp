@@ -42,12 +42,16 @@ void Server::channelMessage(channelMsg msg, args ...moreArgs)
 	{
 	case JOIN_OK:
 		this->sendJoinSuccessMsg(*client, *channel);
+		// this->broadcastChannelMsg()
 		// need to fix for broadcast
 		break;
 	
 	case ALREADY_ON_CHAN:
-		this->sendTopicAndNames(*client, *channel);
+	{
+		this->sendTopic(*client, *channel);
+		this->sendNameReply(*client, *channel);
 		break;
+	}
 
 	case CHANGE_TOPIC_MSG:
 	{

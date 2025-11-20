@@ -19,12 +19,12 @@ Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
 	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
-
-std::ostream& operator<<(std::ostream& os, const Channel& channel){
-	os << "channel name is: " << channel.getChannelName() 
-		<< ", its topic is: " << channel.getTopic();
-	return os;
-}
+// to remove
+// std::ostream& operator<<(std::ostream& os, const Channel& channel){
+// 	os << "channel name is: " << channel.getChannelName() 
+// 		<< ", its topic is: " << channel.getTopic();
+// 	return os;
+// }
 
 std::string Channel::getChannelName() const
 {
@@ -145,7 +145,6 @@ std::map<char, std::string> Channel::getMode() const
 	{
 		// if (!it) { std::cout << "this mode cannot access/n"; continue; }
 		std::cout << "existing mode: key and param: [" << it.first << ", " << it.second << "]" << std::endl;
-		// std::cout << "here msg: " << std::endl;
 	}
 	return _mode;
 }

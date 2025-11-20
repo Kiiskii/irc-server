@@ -2,8 +2,9 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-static bool	isValidChanName(std::string name)
+static bool	isValidTopic(std::string name)
 {
+
 	return true;
 }
 
@@ -15,7 +16,7 @@ void Channel::setTopic(std::string buffer, Client& client)
 	// not test this yet
 	if (this->isModeActive(T_MODE) && !client.isOps(*this))
 	{
-		server.sendClientErr(ERR_CHANOPRIVSNEEDED, client, *this, {});
+		server.sendClientErr(ERR_CHANOPRIVSNEEDED, client, this, {});
 		return; 
 	}
 	unsigned long topicPos = buffer.find_first_of(':');
@@ -45,30 +46,27 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 	if (tokens.size() > 0)
 	{
 		channelName = tokens[0];
-		if (!isValidChanName(channelName)) //Work in progress
+
+		if (!isValidChanName(channelName))
+		{
+			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, {channelName});
 			return;
+		}
 		channelPtr = this->setActiveChannel(channelName);
-		// if not on any channel, return do nothing
+		// if channel not exist, send error
 		if (channelPtr == nullptr)
 		{
-			std::string msg = makeNumericReply(this->getServerName(), ERR_NOSUCHCHANNEL, client.getNick(), {"#" + channelName}, "No such channel");
-			this->sendMsg(client, msg);
+			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, {channelName});
 			return;
 		}
 		if (!channelPtr->isClientOnChannel(client))
 		{
-			std::cout << "in here\n";
-			this->sendClientErr(ERR_NOTONCHANNEL, client, *channelPtr, {});
+			this->sendClientErr(ERR_NOTONCHANNEL, client, channelPtr, {});
 			return;
 		}
 		tokens.erase(tokens.begin(), tokens.begin() + 1);
-		if (tokens.empty()) // ask TOPIC
-		{
-			if (channelPtr && channelPtr->getTopic().empty())
-				this->sendNoTopic(client, *channelPtr);
-			else if (channelPtr && !channelPtr->getTopic().empty())
-				this->sendTopic(client, *channelPtr);
-		}
+		if (tokens.empty() && channelPtr) // ask TOPIC
+			this->sendTopic(client, *channelPtr);
 		else // set TOPIC
 		{
 			std::string topicStr;
@@ -80,7 +78,6 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 			}
 			std::cout << "im here setting chan name: " << topicStr << std::endl;
 			channelPtr->setTopic(topicStr, client);
-			// std::cout << "im here sending chan name: " << tokens[1] << std::endl;
 			this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
 		}
 	}

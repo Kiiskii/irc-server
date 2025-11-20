@@ -2,34 +2,23 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-/** @note not consider the case of local channel start with '&' ?? */
-static bool	isValidChanName(std::string name)
-{
-	std::regex chanNameRegex("^#[^ \\x07,]+$");
-
-	if (!std::regex_match(name, chanNameRegex))
-	{
-		std::cout << "DOES NOT match regex pattern for channel name\n";
-		return false;
-	}
-	return true;
-}
-
 /** @brief validate the channel name and create a map of <channel name - key> 
  *  @note The insert() operation adds a new key-value pair to the map only 
 			if the key is not already present.
 			If the key exists, insert() does not update the value and the map unchanged.
 			IF (NUMBER OF KEYS INPUT IS SMALLER THAN NUMBER OF CHANNEL INPUT, 
 			irssi sent key == "x") --> retest when finish??
-			case insensitive ??
 */
-static std::map<std::string, std::string> mappingChannelKey(std::vector<std::string> tokens)
+bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, std::map<std::string, std::string>& channelKeyMap)
 {
-	std::map<std::string, std::string>		channelKeyMap;
-	bool						hasKey = false;
+	// std::string msg;
 
-	if (tokens.size() == 2 && !tokens[1].empty())
-		hasKey = true;
+	if (tokens.empty())
+	{
+		std::string msg = ERR_NEEDMOREPARAMS(client._myServer.getServerName(), client.getNick(), "JOIN");
+		client._myServer.sendMsg(client, msg);
+		return false;
+	}
 	
 	std::vector<std::string> channelList;
 	std::vector<std::string> keyList;
@@ -37,7 +26,7 @@ static std::map<std::string, std::string> mappingChannelKey(std::vector<std::str
 		channelList = splitString(tokens[0], ',');
 	else
 		channelList.push_back(tokens[0]);
-	if (hasKey)
+	if (tokens.size() > 1) //has key
 	{
 		if (tokens[1].find(",") != std::string::npos)
 			keyList = splitString(tokens[1], ',');
@@ -49,15 +38,22 @@ static std::map<std::string, std::string> mappingChannelKey(std::vector<std::str
 		for (size_t i = 0; i < channelList.size(); ++i)
 			keyList.push_back("");
 	}
+	// add to map
 	for (size_t i = 0; i < channelList.size(); ++i)
 	{
-			if (isValidChanName(channelList[i]))
-			{
-				channelList[i].erase(0, 1); // remove the hash
-				channelKeyMap.insert({channelList[i], keyList[i]});
-			}
+		if (isValidChanName(channelList[i]))
+		{
+			channelList[i].erase(0, 1); // remove the hash
+			channelKeyMap.insert({channelList[i], keyList[i]});
+		}
+		else
+		{
+			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, 
+				{"#" + channelList[i]});
+			continue;
+		}
 	}
-	return channelKeyMap;
+	return true;
 }
 
 /** @brief check if the channel key matches the key that client inputs */
@@ -73,14 +69,14 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 
 	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
 	{
-		server.sendClientErr(ERR_TOOMANYCHANNELS, client, *this, {} );
+		server.sendClientErr(ERR_TOOMANYCHANNELS, client, this, {} );
 		return NO_MSG;
 	}
 
 	if (!this->getChanKey().empty() && this->getChanKey() != clientKey)
 	{
 		std::cout << "bad key: client key : [" << clientKey << "]\n";
-		server.sendClientErr(ERR_BADCHANNELKEY,client, *this, {} );
+		server.sendClientErr(ERR_BADCHANNELKEY,client, this, {} );
 		return NO_MSG;
 	}
 
@@ -91,7 +87,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		std::cout << "mode L active and limit set for channel is " << limit << std::endl;
 		if (this->_userList.size() >= limit)
 		{
-			server.sendClientErr(ERR_CHANNELISFULL, client, *this, {});
+			server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
 			return NO_MSG;
 		}
 	}
@@ -101,7 +97,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		std::cout << "Invite-only Mode active " << std::endl;
 		if (!this->hasInvitedClient(&client))
 		{
-			server.sendClientErr(ERR_INVITEONLYCHAN, client, *this, {});
+			server.sendClientErr(ERR_INVITEONLYCHAN, client, this, {});
 			return NO_MSG;
 		}
 	}
@@ -109,25 +105,16 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	return JOIN_OK;
 }
 
-
-// bool Client::isValidJoinCmd(std::vector<std::string> tokens)
-// {
-// 	if (tokens.size() < 2) //first JOIN "JOIN :", need to rethink??
-// 		return false;
-// 	return true;
-// }
-
 /** @note JOIN 0 will leave all the channels -> how?? 
  * regular channel: This channel is what’s referred to as a normal channel. Clients can join this channel, and the first client who joins a normal channel is made a channel operator, along with the appropriate channel membership prefix. On most servers, newly-created channels have then protected topic "+t" and no external messages "+n" modes enabled, but exactly what modes new channels are given is up to the server. 
 */
-void Server::handleJoin(Client* client, std::vector<std::string> tokens)
+void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 {
 	// std::cout << "client has join " << this->getJoinedChannels().size() << " channels \n";
-	// std::cout << "client nick " << client->getNick() <<" \n";
-	// if (!client.isValidJoinCmd(tokens))
-	// 	return;
+	std::map<std::string, std::string>		channelKeyMap;
 
-	std::map<std::string,std::string> channelKeyMap = mappingChannelKey(tokens);
+	if (!mappingChannelKey(tokens, client, channelKeyMap))
+		return;
 
 	for (auto chan : channelKeyMap)
 	{
@@ -135,7 +122,6 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 		std::string clientKey = chan.second;
 		// std::cout << "channel name: [" << channelName << "] and key [" << clientKey << "]" << std::endl;
 
-		
 		// check if the channel existschannel.
 		Channel* channelPtr = this->findChannel(channelName);
 		if (!channelPtr)
@@ -144,14 +130,14 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 			channelPtr = this->getChannelInfo().back();
 		}
 
-		channelMsg result = channelPtr->canClientJoinChannel(*client, clientKey);
+		channelMsg result = channelPtr->canClientJoinChannel(client, clientKey);
 		if (result == JOIN_OK)
 		{
-			client->addJoinedChannel(channelPtr);
-			channelPtr->addUser(client);
+			client.addJoinedChannel(channelPtr);
+			channelPtr->addUser(&client);
 			if (channelPtr->getUserList().size() == 1)
-				channelPtr->addChanop(client); // there is only 1 user ->ops
-			this->channelMessage(result, client, channelPtr);
+				channelPtr->addChanop(&client); // there is only 1 user ->ops
+			this->channelMessage(result, &client, channelPtr);
 		}
 	}
 	// this->printChannelList(); //print all the channel on server

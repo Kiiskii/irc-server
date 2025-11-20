@@ -158,9 +158,9 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	if (command == "JOIN")
 	{
 		std::cout << "\njoin comd: [" << line << "]" << std::endl;
+
 		printVector(tokens);
-		server.handleJoin(&client, tokens);
-		// std::cout << "JOIN CMd \n";
+		server.handleJoin(client, tokens);
 	}
 	if (command == "TOPIC")
 	{
