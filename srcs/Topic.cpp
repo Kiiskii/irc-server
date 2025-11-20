@@ -10,14 +10,15 @@ static bool	isValidTopic(std::string name)
 
 
 /** @brief if the t_mode is on, only chanop can set/remove topic */
-void Channel::setTopic(std::string buffer, Client& client)
+bool Channel::setTopic(std::string buffer, Client& client)
 {
 	Server& server = client._myServer;
-	// not test this yet
+	
+	std::cout << "im here setting chan name: " << buffer << std::endl;
 	if (this->isModeActive(T_MODE) && !client.isOps(*this))
 	{
 		server.sendClientErr(ERR_CHANOPRIVSNEEDED, client, this, {});
-		return; 
+		return false; 
 	}
 	unsigned long topicPos = buffer.find_first_of(':');
 	std::string newTopic = buffer.substr(topicPos + 1, 
@@ -28,6 +29,7 @@ void Channel::setTopic(std::string buffer, Client& client)
 	time_t timestamp;
 	time(&timestamp);
 	this->setTopicTimestamp(timestamp);
+	return true;
 }
 
 /** @note what to do when having too many params for topic ?? */
@@ -74,10 +76,11 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 			{
 				if (i == tokens.size() - 1)
 					topicStr += tokens[i];
-				topicStr += tokens[i] + " ";
+				else
+					topicStr += tokens[i] + " ";
 			}
-			std::cout << "im here setting chan name: " << topicStr << std::endl;
-			channelPtr->setTopic(topicStr, client);
+			if (!channelPtr->setTopic(topicStr, client))
+				return ;
 			this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
 		}
 	}

@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "macro.hpp"
 
+/** @brief check whether a mode is active and save the params if mode requires params */
 bool	Channel::isModeActive(char mode, std::string& key)
 {
 	for (auto m : _mode)
@@ -17,6 +18,7 @@ bool	Channel::isModeActive(char mode, std::string& key)
 	return false;
 }
 
+/** @brief check whether a mode is active, no params required */
 bool	Channel::isModeActive(char mode)
 {
 	for (auto m : _mode)
@@ -27,16 +29,21 @@ bool	Channel::isModeActive(char mode)
 	return false;
 }
 
-
+/** @brief  
+ * The commands which may only be used by channel moderators include:
+ * KICK: Eject a client from the channel
+ * MODE: Change the channel’s modes
+ * INVITE: Invite a client to an invite-only channel (mode +i)
+ * TOPIC: Change the channel topic in a mode +t channel */
 channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 {
 	std::string key;
-	bool active = this->isModeActive('o', key);
+	bool active = this->isModeActive(O_MODE, key);
 	
 	if (add)
 	{
-		this->removeMode('o');
-		this->addMode('o', args);
+		this->removeMode(O_MODE);
+		this->addMode(O_MODE, args);
 		for (Client* user : _userList)
 		{
 			if (user->getNick() == args)
@@ -46,7 +53,7 @@ channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 	}
 	else if (!add && active)
 	{
-		this->removeMode('o');
+		this->removeMode(O_MODE);
 		this->removeChanop(args); // recheck whitespace??
 		return SET_MODE_OK;
 	}
@@ -59,52 +66,71 @@ If this mode is set on a channel, and the number of users joined to that channel
 channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 {
 	std::string key;
-	bool active = this->isModeActive('l', key);
+	bool active = this->isModeActive(L_MODE, key);
 
 	if (add)
 	{
-		this->removeMode('l');
-		this->addMode('l', args);
+		this->removeMode(L_MODE);
+		this->addMode(L_MODE, args);
 		return SET_MODE_OK;
 	}
 	else if (!add && active)
 	{
-		this->removeMode('l');
+		this->removeMode(L_MODE);
 		return SET_MODE_OK;
 	}
 	return NO_ACTION;
 
 }
 
-/**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. --> when to handle client ?? */
+/**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. */
 channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 {
 	std::string key;
-	bool active = this->isModeActive('i', key);
+	bool active = this->isModeActive(I_MODE, key);
 
 	if (add)
 	{
 		if (active)
 			return NO_ACTION;
-		this->addMode('i', args);
+		this->addMode(I_MODE, args);
 		return SET_MODE_OK;
 	}
 	else
 	{
 		if (active)
 		{
-			this->removeMode('i');
+			this->removeMode(I_MODE);
 			return SET_MODE_OK;
 		}
 	}
 	return NO_ACTION;
 }
 
+
+/** @brief T_MODE controls whether channel privileges are required to set the topic, and does not have any value. 
+ * If this mode is enabled, users must have channel privileges such as halfop or operator status in order to change the topic of a channel. In a channel that does not have this mode enabled, anyone may set the topic of the channel using the TOPIC command.
+*/
 channelMsg	Channel::handleTopicRestriction(bool add, std::string& args)
 {
+	bool active = this->isModeActive(T_MODE);
 
-	return SET_MODE_OK;
-
+	if (add)
+	{
+		if (active)
+			return NO_ACTION;
+		this->addMode(T_MODE, args);
+		return SET_MODE_OK;
+	}
+	else
+	{
+		if (active)
+		{
+			this->removeMode(T_MODE);
+			return SET_MODE_OK;
+		}
+	}
+	return NO_ACTION;
 }
 
 /**
@@ -119,17 +145,17 @@ If this mode is set on a channel, and a client sends a JOIN request for that cha
 channelMsg	Channel::handleChannelKey(bool add, std::string& args)
 {
 	std::string key;
-	bool active = this->isModeActive('k', key);
+	bool active = this->isModeActive(K_MODE, key);
 	
 	if (add)
 	{
-		this->removeMode('k');
-		this->addMode('k', args);
+		this->removeMode(K_MODE);
+		this->addMode(K_MODE, args);
 		return SET_MODE_OK;
 	}
 	else if (!add && active)
 	{
-		this->removeMode('k');
+		this->removeMode(K_MODE);
 		return SET_MODE_OK; //recheck, send an empty key or nothing
 	}
 	return NO_ACTION;

@@ -6,6 +6,7 @@
 #define I_MODE 'i'
 #define T_MODE 't'
 #define K_MODE 'k'
+#define O_MODE 'o'
 
 
 #define RPL_NOTOPIC 331
