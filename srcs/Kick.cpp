@@ -9,20 +9,30 @@
 
 bool Client::removeClient(Server& server, std::string& clientString, std::string& channelString)
 {
-	//auto &clients = server.getClientInfo();
+	Client* c = nullptr;
 	Channel* chann = setActiveChannel(channelString);
-	chann->removeUser(clientString);
-
-	/*
-	decltype(clients.begin()) client = nullptr;
-	for (auto it = clients.begin(); it != clients.end(); ++it) {
+	if (!chann) {
+		std::cout << "Channel does not exist." << std::endl;
+		return false;
+	}
+	for (auto it:chann->getUserList()) {
 		if ((*it).getNick() == clientString) {
-			client = it;
-			break;
+			c = it;
+			break ;
 		}
 	}
-	if (client != nullptr)
+	if (!c) {
+		std::cout << "User not found in channel." << std::endl;
 		return false;
+	}
+	chann->removeUser(clientString);
+	c->removeChannel(chann);
+	/*
+	std::cout << "JOINED CHANNELS AFTER: ";
+	for (auto ite:c->getJoinedChannels()) {
+		std::cout << (*ite).getChannelName() << " / ";
+	}
+	std::cout << std::endl;
 	*/
 	return true;
 }
@@ -39,7 +49,10 @@ void Client::kickClient(std::string &line, Server &server)
 		if (i + 1 != msgParts.size())
 			kickMsg.append(" ");
 	}
+	removeClient(server, kickedUser, currChannel);
+	/*
 	std::cout << "KICK MSG: " << currChannel << ", ";
 	std::cout << kickedUser << ", ";
 	std::cout << kickMsg << std::endl;
+	*/
 }
