@@ -171,7 +171,7 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	// ONLY work on channel mode, so always have channel??
 	if (nameStr.find("#") != std::string::npos)
 	{
-		channelPtr = client.setActiveChannel(nameStr);
+		channelPtr = this->setActiveChannel(nameStr);
 		// if not on any channel, return do nothing
 		if (channelPtr == nullptr) 
 		{

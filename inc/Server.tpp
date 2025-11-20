@@ -11,7 +11,7 @@ void Server::channelMessage(channelMsg msg, args ...moreArgs)
 	// this part is mainly for mode, considering split up or ??
 	auto		tupleArgs = std::make_tuple(moreArgs...);
 	constexpr size_t		nArgs = sizeof...(moreArgs);
-	std::cout << "Tuple size: " << nArgs << std::endl;
+	// std::cout << "Tuple size: " << nArgs << std::endl;
 
 	std::string	user, mode, params, modeStr;
 	Client*		client;
@@ -42,6 +42,7 @@ void Server::channelMessage(channelMsg msg, args ...moreArgs)
 	{
 	case JOIN_OK:
 		this->sendJoinSuccessMsg(*client, *channel);
+		// need to fix for broadcast
 		break;
 	
 	case ALREADY_ON_CHAN:

@@ -65,7 +65,7 @@ class Channel
 
 		// setters
 		void		setChannelName(std::string channelName);
-		void		setTopic(std::string newTopic, Client& client);
+		void		setTopic(std::string newTopic, Client& clientset);
 		void		addUser(Client* newClient);
 		void		removeUser(std::string userNick);
 		void		setChanKey(std::string newKey);

@@ -110,14 +110,16 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 }
 
 
-bool Client::isValidJoinCmd(std::vector<std::string> tokens)
-{
-	if (tokens.size() < 2) //first JOIN "JOIN :", need to rethink??
-		return false;
-	return true;
-}
+// bool Client::isValidJoinCmd(std::vector<std::string> tokens)
+// {
+// 	if (tokens.size() < 2) //first JOIN "JOIN :", need to rethink??
+// 		return false;
+// 	return true;
+// }
 
-/** @note JOIN 0 will leave all the channels -> how?? */
+/** @note JOIN 0 will leave all the channels -> how?? 
+ * regular channel: This channel is what’s referred to as a normal channel. Clients can join this channel, and the first client who joins a normal channel is made a channel operator, along with the appropriate channel membership prefix. On most servers, newly-created channels have then protected topic "+t" and no external messages "+n" modes enabled, but exactly what modes new channels are given is up to the server. 
+*/
 void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 {
 	// std::cout << "client has join " << this->getJoinedChannels().size() << " channels \n";
@@ -132,18 +134,15 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 		std::string channelName = chan.first;
 		std::string clientKey = chan.second;
 		// std::cout << "channel name: [" << channelName << "] and key [" << clientKey << "]" << std::endl;
-		std::vector<Channel*>::iterator channelNameIt 
-			= this->isChannelExisting(channelName);
-		Channel* channelPtr = nullptr;
 
+		
 		// check if the channel existschannel.
-		if (channelNameIt == this->getChannelInfo().end()) // not exist
+		Channel* channelPtr = this->findChannel(channelName);
+		if (!channelPtr)
 		{
 			this->getChannelInfo().push_back(new Channel(channelName));
 			channelPtr = this->getChannelInfo().back();
 		}
-		else
-			channelPtr = *channelNameIt;
 
 		channelMsg result = channelPtr->canClientJoinChannel(*client, clientKey);
 		if (result == JOIN_OK)

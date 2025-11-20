@@ -106,7 +106,7 @@ void	Channel::removeChanop(std::string opNick)
 
 std::unordered_set<Client*>&	Channel::getOps()
 {
-	std::cout << "operators list: \n";
+	std::cout << "@CHANOPS list: \n";
 	if (!_ops.empty())
 	{
 		for (auto op : _ops)
@@ -145,7 +145,7 @@ std::map<char, std::string> Channel::getMode() const
 	{
 		// if (!it) { std::cout << "this mode cannot access/n"; continue; }
 		std::cout << "existing mode: key and param: [" << it.first << ", " << it.second << "]" << std::endl;
-		std::cout << "here msg: " << std::endl;
+		// std::cout << "here msg: " << std::endl;
 	}
 	return _mode;
 }
