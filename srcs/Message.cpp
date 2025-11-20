@@ -120,7 +120,7 @@ void Server::sendClientErr(int num, Client& client, Channel& channel, std::vecto
 		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "You're not channel operator");
 		break;
 
-	case ERR_NOSUCHCHANNEL:
+	case ERR_NOSUCHCHANNEL: //cannot dereference the nullptr, so this segfault. what now??
 		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
 		break;
 

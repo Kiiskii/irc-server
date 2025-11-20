@@ -2,6 +2,10 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
+static bool	isValidChanName(std::string name)
+{
+	return true;
+}
 
 
 /** @brief if the t_mode is on, only chanop can set/remove topic */
@@ -41,10 +45,19 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 	if (tokens.size() > 0)
 	{
 		channelName = tokens[0];
+		if (!isValidChanName(channelName)) //Work in progress
+			return;
 		channelPtr = this->setActiveChannel(channelName);
 		// if not on any channel, return do nothing
-		if (channelPtr == nullptr || !channelPtr->isClientOnChannel(client))
+		if (channelPtr == nullptr)
 		{
+			std::string msg = makeNumericReply(this->getServerName(), ERR_NOSUCHCHANNEL, client.getNick(), {"#" + channelName}, "No such channel");
+			this->sendMsg(client, msg);
+			return;
+		}
+		if (!channelPtr->isClientOnChannel(client))
+		{
+			std::cout << "in here\n";
 			this->sendClientErr(ERR_NOTONCHANNEL, client, *channelPtr, {});
 			return;
 		}

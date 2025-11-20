@@ -134,12 +134,11 @@ void Server::handleJoin(Client* client, std::vector<std::string> tokens)
 		std::string channelName = chan.first;
 		std::string clientKey = chan.second;
 		// std::cout << "channel name: [" << channelName << "] and key [" << clientKey << "]" << std::endl;
-		// std::vector<Channel*>::iterator channelNameIt 
-		// 	= this->findChannel(channelName);
-		Channel* channelPtr = this->findChannel(channelName);
 
+		
 		// check if the channel existschannel.
-		if (!channelPtr) // not exist
+		Channel* channelPtr = this->findChannel(channelName);
+		if (!channelPtr)
 		{
 			this->getChannelInfo().push_back(new Channel(channelName));
 			channelPtr = this->getChannelInfo().back();
