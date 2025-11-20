@@ -59,7 +59,7 @@ class Client
 		void		setUserName(std::string user);
 		void		setRealName(std::string user);
 		void		setHostName(std::string host);
-		void		setServerName(std::string server);
+		// void		setServerName(std::string server);
 		void		setClientState(enum ClientState state);
 		void		addJoinedChannel(Channel* chan);
 
@@ -68,21 +68,9 @@ class Client
 		void parseMessage(Server &server, Client &c, const std::string &line);
 
 		// other
-		bool 		isValidJoinCmd(std::vector<std::string> tokens);
-
 		bool		isOps(Channel& channel);
-
-		// JOIN
 		std::string makeUser();
-		// void		askToJoin(std::vector<std::string> tokens, Server& server);
 		
-		// TOPIC
-		Channel*	setActiveChannel(std::string buffer);
-		void		askTopic(std::string buffer);
-
-		// MODE
-		void		changeMode(std::string buffer, Server& server);	
-	
 
 };
 

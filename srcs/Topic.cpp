@@ -38,36 +38,37 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 		return;
 	}
 
-	channelPtr = client.setActiveChannel(channelName);
-	// if not on any channel, return do nothing
-	if (channelPtr == nullptr)
-	{
-		return;
-	}
-
 	if (tokens.size() > 0)
 	{
 		channelName = tokens[0];
-	}
-
-	if (tokens.size() == 1)
-	{
-		
-		if (channelPtr && channelPtr->getTopic().empty())
-			this->sendNoTopic(client, *channelPtr);
-		else if (channelPtr && !channelPtr->getTopic().empty())
-			this->sendTopic(client, *channelPtr);
-	}
-    else if (tokens.size() == 2)
-    {
-        // std::cout << "im here setting chan name: " << tokens[1] << std::endl;
-        channelPtr->setTopic(tokens[1], client);
-        // std::cout << "im here sending chan name: " << tokens[1] << std::endl;
-		this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
-    }
-	else
-	{
-		std::cout << "too many params\n";
-		return;
+		channelPtr = this->setActiveChannel(channelName);
+		// if not on any channel, return do nothing
+		if (channelPtr == nullptr || !channelPtr->isClientOnChannel(client))
+		{
+			this->sendClientErr(ERR_NOTONCHANNEL, client, *channelPtr, {});
+			return;
+		}
+		tokens.erase(tokens.begin(), tokens.begin() + 1);
+		if (tokens.empty()) // ask TOPIC
+		{
+			if (channelPtr && channelPtr->getTopic().empty())
+				this->sendNoTopic(client, *channelPtr);
+			else if (channelPtr && !channelPtr->getTopic().empty())
+				this->sendTopic(client, *channelPtr);
+		}
+		else // set TOPIC
+		{
+			std::string topicStr;
+			for (size_t i = 0; i < tokens.size(); ++i)
+			{
+				if (i == tokens.size() - 1)
+					topicStr += tokens[i];
+				topicStr += tokens[i] + " ";
+			}
+			std::cout << "im here setting chan name: " << topicStr << std::endl;
+			channelPtr->setTopic(topicStr, client);
+			// std::cout << "im here sending chan name: " << tokens[1] << std::endl;
+			this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
+		}
 	}
 }

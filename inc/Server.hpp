@@ -64,10 +64,11 @@ public:
 	void handleTopic(Client& client, std::vector<std::string> tokens);
 	void handleMode(Client& client, std::vector<std::string> tokens);
 
-	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
+	Channel* findChannel(std::string newChannel);
 	void printChannelList() const;
 
 // Server message to client
+	Channel*	setActiveChannel(std::string buffer);
 	void		sendMsg(Client& client, std::string& msg);
 	void		sendTopic(Client& client, Channel& channel);
 	void		sendNoTopic(Client& client, Channel& channel);
