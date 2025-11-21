@@ -1,5 +1,6 @@
 #pragma once
 
+#define MSG_SIZE 512
 #define MAX_CHANNELS_PER_CLIENT 5 //recheck CHANLIMIT IN RP_SUPPORT
 
 #define L_MODE 'l'

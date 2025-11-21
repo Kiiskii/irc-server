@@ -92,6 +92,7 @@ class Channel
 		void			removeChanop(std::string opNick);
 		bool			hasInvitedClient(Client* client);
 		bool			isValidModeCmd(std::string modeStr, Client& client);
+		std::string		truncateTopic(std::string name);
 
 };
 

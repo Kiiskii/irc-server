@@ -2,27 +2,50 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-static bool	isValidTopic(std::string name)
+/**  If <topic> is an empty string, the topic for the channel will be cleared. 
+ * If the <topic> param is provided but the same as the previous topic (ie. it is unchanged), servers MAY notify the author and/or other users anyway.
+ * 
+*/
+std::string Channel::truncateTopic(std::string tokens)
 {
+	std::string newTopic;
+	if (tokens[0] == ':')
+		newTopic = tokens.substr(1, tokens.length() - 1);
+	else
+		newTopic = tokens;
 
-	return true;
+	int	topicLen = tokens.size();
+	int maxTopic = MSG_SIZE - this->getChannelName().size() - 10;
+	if (topicLen > maxTopic)
+	{
+		std::string truncateTopic = newTopic.substr(0, maxTopic);
+		return truncateTopic;
+	}
+	return newTopic;
 }
 
 
-/** @brief if the t_mode is on, only chanop can set/remove topic */
-bool Channel::setTopic(std::string buffer, Client& client)
+/** @brief if the t_mode is on, only chanop can set/remove topic 
+ *	@note If <topic> is an empty string, the topic for the channel will be cleared. --> cannot test
+*/
+bool Channel::setTopic(std::string tokens, Client& client)
 {
 	Server& server = client._myServer;
 	
-	std::cout << "im here setting chan name: " << buffer << std::endl;
+	// std::cout << "im here setting chan name: " << tokens << std::endl;
+	if (tokens.empty())
+	{
+		_topic = "";
+		return true;
+	}
+	std::string newTopic = this->truncateTopic(tokens);
+
 	if (this->isModeActive(T_MODE) && !client.isOps(*this))
 	{
 		server.sendClientErr(ERR_CHANOPRIVSNEEDED, client, this, {});
 		return false; 
 	}
-	unsigned long topicPos = buffer.find_first_of(':');
-	std::string newTopic = buffer.substr(topicPos + 1, 
-							buffer.length() - topicPos -1);
+
 	_topic = newTopic;
 	
 	this->setTopicSetter(client);
@@ -32,7 +55,7 @@ bool Channel::setTopic(std::string buffer, Client& client)
 	return true;
 }
 
-/** @note what to do when having too many params for topic ?? */
+/** @brief */
 void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 {
 	Channel* channelPtr;
