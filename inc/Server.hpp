@@ -54,6 +54,7 @@ public:
 	void handleClient();
 	void handleCommand(Server &server, Client &client, std::string &line);
 	void attemptRegister(Client &client);
+	void disconnectClient(Client &client);
 
 /*Commands such as user, pass nick, might be best to create a separate place for commands*/
 	void handleJoin(Client* client, std::vector<std::string> tokens);

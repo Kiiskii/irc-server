@@ -176,6 +176,7 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		std::cout << "mode comd: [" << line << "]" << std::endl;
 		client.changeMode(line, server);
 	}
+//invalid command?
 }
 
 int Server::getEpollfd() const

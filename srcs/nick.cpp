@@ -1,11 +1,14 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-/*Nickname rules, characters and length*/
+/*
+- Case insensitivity? Is Karoliina considered the same as KAROLIINA?
+- Do we need to have max length?
+- What about control characters?
+- Also we may want to add if size is bigger than 1 check to the regex match if statement, in case person gives a nick name that is divided by space (separate tokens)
+*/
 void Server::nick(Client &client, std::vector<std::string> tokens)
 {
-	//so first one cannot have digits but the second one can... also added the underscore
-	//this needs further investigation
 	std::regex pattern(R"(^[A-Za-z\[\]{}\\|_][A-Za-z0-9\[\]{}\\|_]*$)");
 	std::string oldnick = client.getNick();
 	if (tokens.size() == 0)
@@ -20,6 +23,7 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		send(client.getClientFd(), message.c_str(), message.size(), 0);	
 		return ;
 	}
+	/*Can we make this into a more reusable util function*/
 	for (size_t i = 0; i < getClientInfo().size(); i++)
 	{
 		if (getClientInfo()[i]->getNick() == tokens[0])
@@ -30,10 +34,13 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		}
 	}
 	client.setNick(tokens[0]);
-	if (client.getClientState() == REGISTERED) // if new nick given, we need to broadcast a message
+	if (client.getClientState() == REGISTERED)
 	{
 		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
-		send(client.getClientFd(), message.c_str(), message.size(), 0);			
+		send(client.getClientFd(), message.c_str(), message.size(), 0);	
 	}
-	attemptRegister(client);
+	if (client.getClientState() != REGISTERED)
+	{
+		attemptRegister(client);
+	}
 }
