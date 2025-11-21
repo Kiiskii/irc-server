@@ -37,7 +37,8 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 	if (client.getClientState() == REGISTERED)
 	{
 		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
-		send(client.getClientFd(), message.c_str(), message.size(), 0);	
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		//we need to broadcast this info to all the channels...
 	}
 	if (client.getClientState() != REGISTERED)
 	{

@@ -22,7 +22,6 @@
 
 // #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 
-
 //#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
