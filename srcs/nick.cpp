@@ -4,11 +4,19 @@
 #define NICKLEN 30
 
 /*
-- Case insensitivity? Is Karoliina considered the same as KAROLIINA?
-- Do we need to have max length?
+- What is considered as a good nick length
 - What about control characters?
-- Also we may want to add if size is bigger than 1 check to the regex match if statement, in case person gives a nick name that is divided by space (separate tokens)
 */
+std::string transformToLowercase(std::string string)
+{
+	transform(string.begin(), string.end(), string.begin(), [](char c)
+	{
+		return tolower(c);
+	});
+	return string;
+}
+
+
 void Server::nick(Client &client, std::vector<std::string> tokens)
 {
 	std::regex pattern(R"(^[A-Za-z\[\]{}\\|_][A-Za-z0-9\[\]{}\\|_]*$)");
@@ -28,7 +36,7 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 	/*Can we make this into a more reusable util function*/
 	for (size_t i = 0; i < getClientInfo().size(); i++)
 	{
-		if (getClientInfo()[i]->getNick() == tokens[0])
+		if (transformToLowercase(getClientInfo()[i]->getNick()) == transformToLowercase(tokens[0]))
 		{
 			std::string message = ERR_NICKNAMEINUSE(getServerName(), getTarget(client), tokens[0]);
 			send(client.getClientFd(), message.c_str(), message.size(), 0);
