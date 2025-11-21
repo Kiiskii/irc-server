@@ -10,7 +10,7 @@
 bool Client::removeClient(Server& server, std::string& clientString, std::string& channelString)
 {
 	Client* c = nullptr;
-	Channel* chann = setActiveChannel(channelString);
+	Channel* chann = server.setActiveChannel(channelString);
 	if (!chann) {
 		std::cout << "Channel does not exist." << std::endl;
 		return false;

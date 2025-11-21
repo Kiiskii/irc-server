@@ -70,7 +70,7 @@ class Client
 		std::string makeUser();
 		
 		// TOPIC
-		Channel*	setActiveChannel(std::string buffer);
+		//Channel*	setActiveChannel(std::string buffer);
 		void		askTopic(std::string buffer);
 
 		// MODE
