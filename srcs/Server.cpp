@@ -6,7 +6,6 @@ Server::~Server()
 {
 	for (auto chan : _channelInfo)
 		delete chan;
-	
 }
 
 /* @def check if the channel exists

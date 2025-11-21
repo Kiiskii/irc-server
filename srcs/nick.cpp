@@ -1,6 +1,8 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
+#define NICKLEN 30
+
 /*
 - Case insensitivity? Is Karoliina considered the same as KAROLIINA?
 - Do we need to have max length?
@@ -17,7 +19,7 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;			
 	}
-	if (std::regex_match(tokens[0], pattern) == false)
+	if (std::regex_match(tokens[0], pattern) == false || tokens[0].length() > NICKLEN)
 	{
 		std::string message = ERR_ERRONEUSNICKNAME(getServerName(), getTarget(client), tokens[0]);
 		send(client.getClientFd(), message.c_str(), message.size(), 0);	

@@ -3,6 +3,7 @@
 
 /*
 - Double check the issue with possible hanging client
+- Delete client..?
 */
 std::vector<Client*>::iterator Server::iterateClients(Server &server, Client &client)
 {
@@ -14,12 +15,13 @@ std::vector<Client*>::iterator Server::iterateClients(Server &server, Client &cl
 	return _clientInfo.end();
 }
 
-//delete client?
 void Server::disconnectClient(Client &client)
 {
 	auto it = iterateClients(*this, client);
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client.getClientFd(), NULL);
 	close(client.getClientFd());
 	getClientInfo().erase(it);
+	delete &client;
 }
 
 void Server::pass(Client &client, std::vector<std::string> tokens)
@@ -49,3 +51,4 @@ void Server::pass(Client &client, std::vector<std::string> tokens)
 		attemptRegister(client);
 	}
 }
+
