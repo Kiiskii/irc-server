@@ -33,24 +33,44 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 	for (auto param : params)
 		p += param + " ";
 	s = ":" + prefix + " " + std::to_string(code) + " " + target 
-		+ (p.empty() ? "" : " " + p)
+		+ (p.empty() ? " " : " " + p)
 		+ (trailing.empty() ? "" : ":" + trailing)
 		+ "\r\n";
-	std::cout << "make s: " << s << std::endl;
+	// std::cout << ": " << s << std::endl;
 	return s;
 }
 
+/** @note not consider the case of local channel start with '&' ?? 
+ * case insensitive ??
+*/
+bool	isValidChanName(std::string name)
+{
+	std::regex chanNameRegex("^#[^ \\x07,]+$");
+
+	if (!std::regex_match(name, chanNameRegex))
+	{
+		std::cout << "Bad channel names\n";
+		return false;
+	}
+	return true;
+}
 
 void	printVector(std::vector<std::string> tokens)
 {
 	std::cout << "vector memebers: " << std::endl;
 
+	if (tokens.empty())
+	{
+		std::cout << "empty tokens\n";
+		return;
+	}
 	for (auto token : tokens)
 	{
 		std::cout << "[" <<  token << "] ";
 	}
 	std::cout << std::endl;
 }
+
 std::string getTarget(Client &client)
 {
 	std::string target;

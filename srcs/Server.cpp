@@ -11,14 +11,14 @@ Server::~Server()
 
 /* @def check if the channel exists
 	@return ptr to channel if exist else return after the end of vector */
-std::vector<Channel*>::iterator Server::isChannelExisting(std::string newChannel) 
+Channel* Server::findChannel(std::string newChannel) 
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end(); ++it)
 	{
 		if ((*it)->getChannelName() == newChannel)
-			return it;
+			return *it;
 	}
-	return _channelInfo.end();
+	return nullptr;
 }
 
 void Server::printChannelList() const
@@ -158,22 +158,22 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	}
 	if (command == "JOIN")
 	{
-		std::cout << "join comd: [" << line << "]" << std::endl;
+		std::cout << "\njoin comd: [" << line << "]" << std::endl;
+
 		printVector(tokens);
-		server.handleJoin(&client, tokens);
-		// std::cout << "JOIN CMd \n";
+		server.handleJoin(client, tokens);
 	}
 	if (command == "TOPIC")
 	{
-		std::cout << "topic comd: [" << line << "]" << std::endl;
+		std::cout << "\ntopic comd: [" << line << "]" << std::endl;
 		printVector(tokens);
 		server.handleTopic(client, tokens);
 	}
-	if (line.find("MODE") != std::string::npos)
+	if (command == "MODE")
 	{
-		line = ft_trimString(line);
-		std::cout << "mode comd: [" << line << "]" << std::endl;
-		client.changeMode(line, server);
+		std::cout << "\nmode comd: [" << line << "]" << std::endl;
+		printVector(tokens);
+		server.handleMode(client, tokens);
 	}
 //invalid command?
 }
@@ -208,8 +208,45 @@ std::vector<Channel*>& Server::getChannelInfo()
 	return _channelInfo;
 }
 
+/** @return remove the # from the token and return pointer to existing channel, 
+ * otherwhile nullpointer */
+Channel* Server::setActiveChannel(std::string buffer)
+{
+	std::string	channelName;
 
+	size_t hashPos = buffer.find("#");
+	if (hashPos == std::string::npos)
+		return nullptr;
+	
+	size_t chanEndPos = buffer.find(' ', hashPos);
+	if (chanEndPos == std::string::npos)
+		chanEndPos = buffer.length();
 
+	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
+	std::cout << "channelName: [" << channelName << "]" << std::endl;
+
+	return this->findChannel(channelName);
+	// for (auto chan : this->_channelInfo)
+	// {
+	// 	if (chan && chan->getChannelName() == channelName)
+	// 		return chan;
+	// 	else
+	// 	{
+	// 		std::cout << "this channel does not exist in server" << std::endl;
+	// 		this->_channelInfo
+	// 		std::string server = this->_myServer.getServerName(),
+	// 			nick = this->getNick();
+	
+	// 		std::string msg = makeNumericReply(server, ERR_NOTONCHANNEL, nick, {"#" + channelName}, "You're not on that channel");
+	// 		if (send(this->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
+	// 		{
+	// 			std::cout << "joinmsg: failed to send\n";
+	// 			return nullptr;
+	// 		}
+	// 	}
+	// }
+	// return nullptr;
+}
 
 
 

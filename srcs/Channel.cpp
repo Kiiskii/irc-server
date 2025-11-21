@@ -19,12 +19,12 @@ Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
 	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
-
-std::ostream& operator<<(std::ostream& os, const Channel& channel){
-	os << "channel name is: " << channel.getChannelName() 
-		<< ", its topic is: " << channel.getTopic();
-	return os;
-}
+// to remove
+// std::ostream& operator<<(std::ostream& os, const Channel& channel){
+// 	os << "channel name is: " << channel.getChannelName() 
+// 		<< ", its topic is: " << channel.getTopic();
+// 	return os;
+// }
 
 std::string Channel::getChannelName() const
 {
@@ -69,15 +69,13 @@ std::string	Channel::printUser() const
 	for (auto it : _ops)
 	{
 		if (!it){ std::cout << "no iterator exist\n"; continue;}
-		std::cout << "OP PTR=" << it << std::endl;
-   		std::cout << "NICK=" << it->getNick() << std::endl;
 		returnStr += "@" + (*it).getNick() + " ";
 	}
 	for (auto it : _halfOps)
 		returnStr += "%" + (*it).getNick() + " ";
 	for (auto it : _voices)
 		returnStr += "+" + (*it).getNick() + " ";
-	std::cout << "print user not break: " << returnStr << std::endl;
+	// std::cout << "print user not break: " << returnStr << std::endl;
 	return returnStr;
 }
 
@@ -98,17 +96,19 @@ void Channel::addChanop(Client* chanop)
 
 void	Channel::removeChanop(std::string opNick)
 {
-	for (auto op : _ops)
+	for (auto it  = _ops.begin(); it != _ops.end();)
 	{
-		if (op->getNick() == opNick)
-			_ops.erase(op);
+		if ((*it)->getNick() == opNick)
+			it = _ops.erase(it);
+		else
+			++it;
 	}
 }
 
 
 std::unordered_set<Client*>&	Channel::getOps()
 {
-	std::cout << "operators list: \n";
+	std::cout << "@CHANOPS list: \n";
 	if (!_ops.empty())
 	{
 		for (auto op : _ops)
@@ -142,8 +142,10 @@ void Channel::removeMode(char key)
 
 std::map<char, std::string> Channel::getMode() const
 {
-	for (auto it : _mode)
+	std::cout << "active mode saved size: " << _mode.size() << std::endl;
+	for (auto& it : _mode)
 	{
+		// if (!it) { std::cout << "this mode cannot access/n"; continue; }
 		std::cout << "existing mode: key and param: [" << it.first << ", " << it.second << "]" << std::endl;
 	}
 	return _mode;

@@ -57,24 +57,29 @@ public:
 	void disconnectClient(Client &client);
 
 /*Commands such as user, pass nick, might be best to create a separate place for commands*/
-	void handleJoin(Client* client, std::vector<std::string> tokens);
-	void handleTopic(Client& client, std::vector<std::string> tokens);
 	void pass(Client &client, std::vector<std::string> tokens);
 	void nick(Client &client, std::vector<std::string> tokens);
 	void user(Client &client, std::vector<std::string> tokens);
 	void ping(Client &client, std::vector<std::string> tokens);
 	std::vector<Client*>::iterator 	iterateClients(Server &server, Client &client);
 	std::vector<Channel*>::iterator isChannelExisting(std::string newChannel);
+	void handleJoin(Client& client, std::vector<std::string> tokens);
+	void handleTopic(Client& client, std::vector<std::string> tokens);
+	void handleMode(Client& client, std::vector<std::string> tokens);
+
+	Channel* findChannel(std::string newChannel);
 	void printChannelList() const;
 
 // Server message to client
+	bool 		mappingChannelKey(std::vector<std::string> tokens, Client& client, 
+					std::map<std::string, std::string>& channelKeyMap);
+	Channel*	setActiveChannel(std::string buffer);
 	void		sendMsg(Client& client, std::string& msg);
 	void		sendTopic(Client& client, Channel& channel);
-	void		sendNoTopic(Client& client, Channel& channel);
-	void		sendTopicAndNames(Client& client, Channel& channel);
 	void		sendJoinSuccessMsg( Client& client, Channel& channel);
+	void		sendNameReply(Client& client, Channel& channel);
 	void		broadcastChannelMsg(std::string& msg, Channel& channel);
-	void		sendClientErr(int num, Client& client, Channel& channel, 
+	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
 
 	

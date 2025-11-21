@@ -65,7 +65,7 @@ class Channel
 
 		// setters
 		void		setChannelName(std::string channelName);
-		void		setTopic(std::string newTopic, Client& client, Server& server);
+		bool		setTopic(std::string newTopic, Client& clientset);
 		void		addUser(Client* newClient);
 		void		removeUser(std::string userNick);
 		void		setChanKey(std::string newKey);
@@ -76,14 +76,13 @@ class Channel
 
 		// channel public method
 		bool		isClientOnChannel( Client& client);
-		channelMsg	canClientJoinChannel( Client& client, 
-						std::string clientKey, Server& server);
+		channelMsg	canClientJoinChannel( Client& client, std::string clientKey);
 
 
 		// mode
-		void			setMode(std::string buffer, Client* client, Server& server);
-		bool			isModeActive(char mode, std::string& key);
+		void			setMode(std::string& modeStr, std::vector<std::string> args, Client& client);
 		bool			isModeActive(char mode);
+		bool			isModeActive(char mode, std::string& key);
 		channelMsg		handleInviteOnly(bool add, std::string& args);
 		channelMsg		handleTopicRestriction(bool add, std::string& args);
 		channelMsg		handleChannelKey(bool add, std::string& args);
@@ -91,11 +90,10 @@ class Channel
 		channelMsg		handleChannelLimit(bool add, std::string& args);
 		void			addChanop(Client* chanop);
 		void			removeChanop(std::string opNick);
-		// bool			isValidChanName(std::string name);
 		bool			hasInvitedClient(Client* client);
+		bool			isValidModeCmd(std::string modeStr, Client& client);
+		std::string		truncateTopic(std::string name);
 
 };
-
-std::ostream& operator<<(std::ostream& os, const Channel& channel);
 
 
