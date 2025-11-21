@@ -1,11 +1,13 @@
 #pragma once
 
+#define MSG_SIZE 512
 #define MAX_CHANNELS_PER_CLIENT 5 //recheck CHANLIMIT IN RP_SUPPORT
 
 #define L_MODE 'l'
 #define I_MODE 'i'
 #define T_MODE 't'
 #define K_MODE 'k'
+#define O_MODE 'o'
 
 
 #define RPL_NOTOPIC 331

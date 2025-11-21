@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 /**
- * @brief send message to the joining member, does it go to all members??
+ * @brief send message to the joining member
  */
 void	Server::sendMsg(Client& client, std::string& msg)
 {
@@ -10,7 +10,7 @@ void	Server::sendMsg(Client& client, std::string& msg)
 		std::cout << "joinmsg: failed to send\n";
 		return;
 	}
-	std::cout << "msg sent: " << msg << std::endl;
+	// std::cout << "msg sent: " << msg << std::endl;
 }
 
 /**
@@ -18,7 +18,6 @@ void	Server::sendMsg(Client& client, std::string& msg)
  */
 void Server::broadcastChannelMsg(std::string& msg, Channel& channel)
 {
-	std::cout << "broadcast msg: " << std::endl;
 	for (Client* user : channel.getUserList())
 		this->sendMsg(*user, msg);
 	//recheck does this send to the joining memeber itself
@@ -34,25 +33,16 @@ void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 {
 	std::string	user = client.makeUser();
 
+	this->sendTopic(client, channel);
 	// send JOIN msg
 	std::string joinMsg = user + " JOIN #" + channel.getChannelName() 
 			+ " " + std::to_string(RPL_TOPIC) + " \r\n";
-	this->sendMsg(client, joinMsg);
-	this->sendTopicAndNames(client, channel);
+	this->broadcastChannelMsg(joinMsg, channel);
+	this->sendNameReply(client, channel);
 }
 
-void	Server::sendNoTopic(Client& client, Channel& channel)
-{
-	this->sendClientErr(RPL_NOTOPIC, client, channel, {});
-}
-
+/** @brief send topic or no topic */
 void	Server::sendTopic(Client& client, Channel& channel)
-{
-	this->sendClientErr(RPL_TOPIC, client, channel, {});
-	this->sendClientErr(RPL_TOPICWHOTIME, client, channel, {});
-}
-
-void	Server::sendTopicAndNames(Client& client, Channel& channel)
 {
 	std::string	server = this->getServerName(),
 				nick = client.getNick(),
@@ -60,35 +50,32 @@ void	Server::sendTopicAndNames(Client& client, Channel& channel)
 
 	// send topic / no_topic
 	if (channel.getTopic().empty())
-		this->sendNoTopic(client, channel);
+		this->sendClientErr(RPL_NOTOPIC, client, &channel, {});
 	else
-		this->sendTopic(client, channel);
-
-	// send name list and end of list
-	std::string nameReplyMsg = makeNumericReply(server, RPL_NAMREPLY, nick,  {"=", "#"+ chanName}, channel.printUser() );
-	
-	this->sendMsg(client, nameReplyMsg);
-	// std::cout << "SENT NAMEPLY\n";
-	
-	std::string endOfNamesMsg = makeNumericReply(server, RPL_ENDOFNAMES, 
-		nick, {"#" + chanName},	"End of /NAMES list.");
-	this->sendMsg(client, endOfNamesMsg);
-	// std::cout << "SENT ENDOFNAMES\n";
+	{
+		this->sendClientErr(RPL_TOPIC, client, &channel, {});
+		this->sendClientErr(RPL_TOPICWHOTIME, client, &channel, {});
+	}
 }
 
+/** @brief send list of users in channel */
+void	Server::sendNameReply(Client& client, Channel& channel)
+{
+	std::string	server = this->getServerName(),
+				nick = client.getNick(),
+				chanName = channel.getChannelName();
 
-void Server::sendClientErr(int num, Client& client, Channel& channel, std::vector<std::string> otherArgs)
+	this->sendClientErr(RPL_NAMREPLY, client, &channel, {});
+	this->sendClientErr(RPL_ENDOFNAMES, client, &channel, {});
+}
+
+void Server::sendClientErr(int num, Client& client, Channel* channel, std::vector<std::string> otherArgs)
 {
 	std::string server = this->getServerName(),
 				nick = client.getNick(),
-				chanName = channel.getChannelName(),
-				msg, arg;
-
-	if (!otherArgs.empty())
-	{
-		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
-		// if (otherArgs.size() == 1) {command = otherArgs[0]; };
-	}
+				chanName, msg, arg;
+	if (channel)
+		chanName = channel->getChannelName();
 	
 	switch (num)
 	{
@@ -101,8 +88,11 @@ void Server::sendClientErr(int num, Client& client, Channel& channel, std::vecto
 		break;
 
 	case ERR_UNKNOWNMODE:
+	{
+		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
 		msg = makeNumericReply(server, num, nick, {arg}, "is unknown mode char to me");
 		break;
+	}
 
 	case ERR_CHANNELISFULL:
 		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+l)");
@@ -120,9 +110,12 @@ void Server::sendClientErr(int num, Client& client, Channel& channel, std::vecto
 		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "You're not channel operator");
 		break;
 
-	case ERR_NOSUCHCHANNEL: //cannot dereference the nullptr, so this segfault. what now??
+	case ERR_NOSUCHCHANNEL:
+	{
+		if (otherArgs.size() == 1) {chanName = otherArgs[0]; };
 		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
 		break;
+	}
 
 	
 
@@ -132,12 +125,24 @@ void Server::sendClientErr(int num, Client& client, Channel& channel, std::vecto
 		break;
 	
 	case RPL_TOPIC:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, channel.getTopic());
+		msg = makeNumericReply(server, num, nick, {"#" + chanName}, channel->getTopic());
 		break;
 
 	case RPL_TOPICWHOTIME:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName, channel.getTopicSetter()->getNick(), std::to_string(channel.getTopicTimestamp())}, "");
+		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
+			channel->getTopicSetter()->getNick(), 
+			std::to_string(channel->getTopicTimestamp())}, "");
 		break;
+
+	case RPL_NAMREPLY:
+		msg = makeNumericReply(server, RPL_NAMREPLY, nick,  {"=", "#"+ chanName}, channel->printUser());
+		break;
+
+	case RPL_ENDOFNAMES:
+		msg = makeNumericReply(server, RPL_ENDOFNAMES, nick, {"#" + chanName},	"End of /NAMES list.");
+		break;
+
+	// duplicate
 
 	case 461:
 		msg = ERR_NEEDMOREPARAMS(server, nick, "MODE"); // need fix

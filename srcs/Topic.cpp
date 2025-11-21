@@ -2,34 +2,60 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-static bool	isValidChanName(std::string name)
+/**  If <topic> is an empty string, the topic for the channel will be cleared. 
+ * If the <topic> param is provided but the same as the previous topic (ie. it is unchanged), servers MAY notify the author and/or other users anyway.
+ * 
+*/
+std::string Channel::truncateTopic(std::string tokens)
 {
-	return true;
+	std::string newTopic;
+	if (tokens[0] == ':')
+		newTopic = tokens.substr(1, tokens.length() - 1);
+	else
+		newTopic = tokens;
+
+	int	topicLen = tokens.size();
+	int maxTopic = MSG_SIZE - this->getChannelName().size() - 10;
+	if (topicLen > maxTopic)
+	{
+		std::string truncateTopic = newTopic.substr(0, maxTopic);
+		return truncateTopic;
+	}
+	return newTopic;
 }
 
 
-/** @brief if the t_mode is on, only chanop can set/remove topic */
-void Channel::setTopic(std::string buffer, Client& client)
+/** @brief if the t_mode is on, only chanop can set/remove topic 
+ *	@note If <topic> is an empty string, the topic for the channel will be cleared. --> cannot test
+*/
+bool Channel::setTopic(std::string tokens, Client& client)
 {
 	Server& server = client._myServer;
-	// not test this yet
+	
+	// std::cout << "im here setting chan name: " << tokens << std::endl;
+	if (tokens.length() == 1) //there is only ":"
+	{
+		_topic = "";
+		return true;
+	}
+	std::string newTopic = this->truncateTopic(tokens);
+
 	if (this->isModeActive(T_MODE) && !client.isOps(*this))
 	{
-		server.sendClientErr(ERR_CHANOPRIVSNEEDED, client, *this, {});
-		return; 
+		server.sendClientErr(ERR_CHANOPRIVSNEEDED, client, this, {});
+		return false; 
 	}
-	unsigned long topicPos = buffer.find_first_of(':');
-	std::string newTopic = buffer.substr(topicPos + 1, 
-							buffer.length() - topicPos -1);
+
 	_topic = newTopic;
 	
 	this->setTopicSetter(client);
 	time_t timestamp;
 	time(&timestamp);
 	this->setTopicTimestamp(timestamp);
+	return true;
 }
 
-/** @note what to do when having too many params for topic ?? */
+/** @brief */
 void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 {
 	Channel* channelPtr;
@@ -45,30 +71,27 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 	if (tokens.size() > 0)
 	{
 		channelName = tokens[0];
-		if (!isValidChanName(channelName)) //Work in progress
+
+		if (!isValidChanName(channelName))
+		{
+			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, {channelName});
 			return;
+		}
 		channelPtr = this->setActiveChannel(channelName);
-		// if not on any channel, return do nothing
+		// if channel not exist, send error
 		if (channelPtr == nullptr)
 		{
-			std::string msg = makeNumericReply(this->getServerName(), ERR_NOSUCHCHANNEL, client.getNick(), {"#" + channelName}, "No such channel");
-			this->sendMsg(client, msg);
+			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, {channelName});
 			return;
 		}
 		if (!channelPtr->isClientOnChannel(client))
 		{
-			std::cout << "in here\n";
-			this->sendClientErr(ERR_NOTONCHANNEL, client, *channelPtr, {});
+			this->sendClientErr(ERR_NOTONCHANNEL, client, channelPtr, {});
 			return;
 		}
 		tokens.erase(tokens.begin(), tokens.begin() + 1);
-		if (tokens.empty()) // ask TOPIC
-		{
-			if (channelPtr && channelPtr->getTopic().empty())
-				this->sendNoTopic(client, *channelPtr);
-			else if (channelPtr && !channelPtr->getTopic().empty())
-				this->sendTopic(client, *channelPtr);
-		}
+		if (tokens.empty() && channelPtr) // ask TOPIC
+			this->sendTopic(client, *channelPtr);
 		else // set TOPIC
 		{
 			std::string topicStr;
@@ -76,11 +99,11 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 			{
 				if (i == tokens.size() - 1)
 					topicStr += tokens[i];
-				topicStr += tokens[i] + " ";
+				else
+					topicStr += tokens[i] + " ";
 			}
-			std::cout << "im here setting chan name: " << topicStr << std::endl;
-			channelPtr->setTopic(topicStr, client);
-			// std::cout << "im here sending chan name: " << tokens[1] << std::endl;
+			if (!channelPtr->setTopic(topicStr, client))
+				return ;
 			this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
 		}
 	}
