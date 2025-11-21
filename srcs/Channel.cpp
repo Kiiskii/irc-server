@@ -96,10 +96,12 @@ void Channel::addChanop(Client* chanop)
 
 void	Channel::removeChanop(std::string opNick)
 {
-	for (auto op : _ops)
+	for (auto it  = _ops.begin(); it != _ops.end();)
 	{
-		if (op->getNick() == opNick)
-			_ops.erase(op);
+		if ((*it)->getNick() == opNick)
+			it = _ops.erase(it);
+		else
+			++it;
 	}
 }
 

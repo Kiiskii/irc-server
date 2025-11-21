@@ -54,6 +54,7 @@ channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 	else if (!add && active)
 	{
 		this->removeMode(O_MODE);
+		std::cout << "prepare to remove chanop\n";
 		this->removeChanop(args); // recheck whitespace??
 		return SET_MODE_OK;
 	}

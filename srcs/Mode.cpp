@@ -131,6 +131,7 @@ void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Cl
 				server.sendClientErr(461, client, this, {});
 				break;
 			}
+			std::cout << "size of arg" << argsVec.size() << std::endl;
 			params = argsVec.front();
 			argsVec.erase(argsVec.begin());
 		}

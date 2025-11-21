@@ -33,7 +33,7 @@ bool Channel::setTopic(std::string tokens, Client& client)
 	Server& server = client._myServer;
 	
 	// std::cout << "im here setting chan name: " << tokens << std::endl;
-	if (tokens.empty())
+	if (tokens.length() == 1) //there is only ":"
 	{
 		_topic = "";
 		return true;
