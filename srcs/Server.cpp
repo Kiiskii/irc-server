@@ -124,9 +124,11 @@ void Server::attemptRegister(Client &client)
 - When exactly do we return and when should we disconnect?
 - Right now you can give PASS, NICK and USER in any order but we may want to change it to PASS first, then NICK/USER in any order
 */
-void Server::handleCommand(Server &server, Client &client, std::string &line)
+//void Server::handleCommand(Server &server, Client &client, std::string &line)
+void Server::handleCommand(Server &server, Client &client, std::vector<std::string> &tokens)
 {
 	/*Attempting to use stringstream to iterate over the string and then use a vector that contains the tokens*/
+	/*
 	std::istringstream stream(line);
 	std::string command;
 	stream >> command; //handling the command separately
@@ -136,7 +138,9 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	{
 		tokens.push_back(token);
 	}
-	std::cout << "Fd is: " << client.getClientFd() << " and cmd and args: " << line << std::endl;
+	*/
+	std::string command = tokens[0];
+	//std::cout << "Fd is: " << client.getClientFd() << " and cmd and args: " << line << std::endl;
 	if (command == "PASS")
 	{
 		pass(client, tokens);
@@ -157,20 +161,20 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	}
 	if (command == "JOIN")
 	{
-		std::cout << "\njoin comd: [" << line << "]" << std::endl;
+		//std::cout << "\njoin comd: [" << line << "]" << std::endl;
 
 		printVector(tokens);
 		server.handleJoin(client, tokens);
 	}
 	if (command == "TOPIC")
 	{
-		std::cout << "\ntopic comd: [" << line << "]" << std::endl;
+		//std::cout << "\ntopic comd: [" << line << "]" << std::endl;
 		printVector(tokens);
 		server.handleTopic(client, tokens);
 	}
 	if (command == "MODE")
 	{
-		std::cout << "\nmode comd: [" << line << "]" << std::endl;
+		//std::cout << "\nmode comd: [" << line << "]" << std::endl;
 		printVector(tokens);
 		server.handleMode(client, tokens);
 	}
