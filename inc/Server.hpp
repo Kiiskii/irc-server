@@ -63,6 +63,7 @@ public:
 	void handleJoin(Client& client, std::vector<std::string> tokens);
 	void handleTopic(Client& client, std::vector<std::string> tokens);
 	void handleMode(Client& client, std::vector<std::string> tokens);
+	void handleInvite(Client& client, std::vector<std::string> tokens);
 
 	Channel* findChannel(std::string newChannel);
 	void printChannelList() const;
