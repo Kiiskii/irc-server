@@ -138,6 +138,7 @@ void Client::receive(Server &server, Client &c, int clientIndex)
 void Client::parseMessage(Server &server, Client &c, const std::string &line)
 {
 	std::vector<std::string> msg;
+	std::string command;
 
 	size_t i = 0;
 	const size_t n = line.size();
@@ -158,10 +159,12 @@ void Client::parseMessage(Server &server, Client &c, const std::string &line)
 		return ;
 
 	//out.command = line.substr(cmdStart, i - cmdStart);
-	msg.push_back(line.substr(cmdStart, i - cmdStart));
+	//msg.push_back(line.substr(cmdStart, i - cmdStart) + ' ');
+	command = line.substr(cmdStart, i - cmdStart);
+	//msg.push_back(line.substr(cmdStart, i - cmdStart));
 
 	// do we want to normalize to uppercase here?
-	for (char &c : msg[0])
+	for (char &c : command)
 		c = std::toupper(static_cast<unsigned char>(c));
 
 	// parameters
@@ -184,16 +187,19 @@ void Client::parseMessage(Server &server, Client &c, const std::string &line)
 			size_t paramStart = i;
 
 			i = line.find(' ', i);
-			msg.push_back(line.substr(paramStart, i - paramStart) + ' ');
+			//msg.push_back(line.substr(paramStart, i - paramStart) + ' ');
+			msg.push_back(line.substr(paramStart, i - paramStart));
 		}
 		++j;
 	}
 	//if (!msg.empty() && msg.back() == ' ')
 	//	msg.pop_back();
 	std::cout << "MSG TOKENIZED: " << std::endl;
-	for (auto it:msg.end())
-		std::cout << it << std::endl;
-	server.handleCommand(server, c, msg);
+	std::cout << "Command: " << command << ", ";
+	for (auto it:msg)
+		std::cout << it << " / ";
+	std::cout << std::endl;
+	server.handleCommand(server, c, command, msg);
 }
 
 bool	Client::isOps(Channel& channel)

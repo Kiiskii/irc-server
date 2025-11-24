@@ -125,7 +125,7 @@ void Server::attemptRegister(Client &client)
 - Right now you can give PASS, NICK and USER in any order but we may want to change it to PASS first, then NICK/USER in any order
 */
 //void Server::handleCommand(Server &server, Client &client, std::string &line)
-void Server::handleCommand(Server &server, Client &client, std::vector<std::string> &tokens)
+void Server::handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens)
 {
 	/*Attempting to use stringstream to iterate over the string and then use a vector that contains the tokens*/
 	/*
@@ -139,7 +139,7 @@ void Server::handleCommand(Server &server, Client &client, std::vector<std::stri
 		tokens.push_back(token);
 	}
 	*/
-	std::string command = tokens[0];
+	//std::string command = tokens[0];
 	//std::cout << "Fd is: " << client.getClientFd() << " and cmd and args: " << line << std::endl;
 	if (command == "PASS")
 	{

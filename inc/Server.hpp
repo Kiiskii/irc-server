@@ -53,7 +53,7 @@ public:
 	void handleNewClient();
 	void handleClient();
 	//void handleCommand(Server &server, Client &client, std::string &line);
-	void handleCommand(Server &server, Client &client, std::vector<std::string> &tokens);
+	void handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens);
 	void attemptRegister(Client &client);
 	void disconnectClient(Client &client);
 
