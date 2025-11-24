@@ -10,6 +10,25 @@ bool	Channel::hasInvitedClient(Client* client)
 	return false;
 }
 
+static bool isValidInvitation(std::vector<std::string>& tokens, Client& client)
+{
+	if (tokens.size() < 2)
+	{
+		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");
+		client.getServer().sendMsg(client, msg);
+		return false;
+	}
+	std::string nickName = tokens[0];
+	std::string chanName = tokens[1];
+	
+	if (!client.getServer().findChannel(chanName))
+		
+
+
+
+	return true;
+}
+
 /** @brief The INVITE command is used to invite a user to a channel. The parameter 
  * <nickname> is the nickname of the person to be invited to the target channel <channel>.
  * The target channel SHOULD exist (at least one user is on it). Otherwise, the server
@@ -20,5 +39,13 @@ bool	Channel::hasInvitedClient(Client* client)
  */
 void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 {
+
+
+	if (!isValidInvitation(tokens, client))
+		return;
+
 	
+
 }
+
+

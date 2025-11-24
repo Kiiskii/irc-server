@@ -9,7 +9,7 @@ Server::~Server()
 }
 
 /* @def check if the channel exists
-	@return ptr to channel if exist else return after the end of vector */
+	@return ptr to channel if exist else return nullptr */
 Channel* Server::findChannel(std::string newChannel) 
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end(); ++it)
