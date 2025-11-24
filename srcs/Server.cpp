@@ -206,6 +206,16 @@ std::vector<Channel*>& Server::getChannelInfo()
 	return _channelInfo;
 }
 
+void Server::removeChannel(Channel* chann)
+{
+	for (auto it = _channelInfo.begin(); it != _channelInfo.end();) {
+		if ((*it) == chann)
+			it = _channelInfo.erase(it);
+		else
+			++it;
+	}
+}
+
 /** @return remove the # from the token and return pointer to existing channel, 
  * otherwhile nullpointer */
 Channel* Server::setActiveChannel(std::string buffer)

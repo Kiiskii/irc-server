@@ -77,8 +77,9 @@ class Client
 		void		changeMode(std::string buffer, Server& server);
 
 		// KICK & PART
-		void		kickClient(std::string &line, Server &server);
-		bool		removeClient(Server& server, std::string& clientString, std::string& channelString);
+		void		kickClient(Server &server, std::vector<std::string>& params);
+		//void		kickClient(std::string &line, Server &server);
+		//bool		removeClient(Server& server, std::string& clientString, std::string& channelString);
 		void		removeChannel(Channel* chann);
 	
 
