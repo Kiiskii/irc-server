@@ -19,12 +19,12 @@ bool Channel::isValidModeCmd(std::string modeStr, Client& client)
 		if (validChars.find(modeStr[i]) == std::string::npos)
 		{
 			std::string str(1, static_cast<char>(modeStr[i])); //check this chararacter
-			client._myServer.sendClientErr(ERR_UNKNOWNMODE, client, this, {str});
+			client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, {str});
 			return false;
 		}
 	}
 	std::cout << "DOES NOT match regex pattern for mode\n";
-	client._myServer.sendClientErr(ERR_UNKNOWNMODE, client, this, {});
+	client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, {});
 	return false;
 }
 
@@ -83,7 +83,7 @@ static void restrictRemoveKeyMode(std::string& executedMode, std::string& execut
 
 void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Client& client)
 {
-	Server&	server = client._myServer;
+	Server&	server = client.getServer();
 
 	std::cout << "mode are: [" << modeStr << "]" << " and args. ";
 	printVector(argsVec);

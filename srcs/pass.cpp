@@ -1,6 +1,29 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
+/*
+- Double check the issue with possible hanging client
+- Delete client..?
+*/
+std::vector<Client*>::iterator Server::iterateClients(Server &server, Client &client)
+{
+	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)
+	{
+		if ((*it)->getClientFd() == client.getClientFd())
+			return it;
+	}
+	return _clientInfo.end();
+}
+
+void Server::disconnectClient(Client &client)
+{
+	auto it = iterateClients(*this, client);
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client.getClientFd(), NULL);
+	close(client.getClientFd());
+	getClientInfo().erase(it);
+	delete &client;
+}
+
 void Server::pass(Client &client, std::vector<std::string> tokens)
 {
 	if (client.getClientState() == REGISTERED)
@@ -9,23 +32,23 @@ void Server::pass(Client &client, std::vector<std::string> tokens)
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;	
 	}
-	if (tokens.size() == 0)
+	else if (tokens.size() == 0)
 	{
 		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "PASS");
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
-		return ;			
+		disconnectClient(client);
 	}
-	if (tokens[0].compare(_pass) == 0)
+	else if (tokens[0].compare(_pass) != 0)
+	{
+		std::string message = ERR_PASSWDMISMATCH(getServerName(), getTarget(client));
+		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		disconnectClient(client);
+	}
+	else
 	{
 		std::cout << "Password matched!" << std::endl;
 		client.setClientState(REGISTERING);
 		attemptRegister(client);
 	}
-	else
-	{
-		std::string message = ERR_PASSWDMISMATCH(getServerName(), getTarget(client));
-		send(client.getClientFd(), message.c_str(), message.size(), 0);					
-	}	
-
-
 }
+
