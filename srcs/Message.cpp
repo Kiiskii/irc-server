@@ -118,20 +118,24 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	}
 
 	case ERR_NOSUCHNICK:
+	{
 		if (otherArgs.size() == 1) 
 		{ 
 			arg = otherArgs[0];
 			msg = makeNumericReply(server, num,	nick, {arg}, "No such nick/channel");
 		};
 		break;
+	}
 
 	case ERR_USERONCHANNEL:
+	{
 		if (otherArgs.size() == 1) 
 		{ 
 			arg = otherArgs[0];
 			msg = makeNumericReply(server, num,	nick, {arg ,"#" + chanName}, "is already on channel");
 		};
 		break;
+	}
 
 	
 
@@ -151,12 +155,22 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 
 	case RPL_NAMREPLY:
-		msg = makeNumericReply(server, RPL_NAMREPLY, nick,  {"=", "#"+ chanName}, channel->printUser());
+		msg = makeNumericReply(server, num, nick,  {"=", "#"+ chanName}, channel->printUser());
 		break;
 
 	case RPL_ENDOFNAMES:
-		msg = makeNumericReply(server, RPL_ENDOFNAMES, nick, {"#" + chanName},	"End of /NAMES list.");
+		msg = makeNumericReply(server, num, nick, {"#" + chanName},	"End of /NAMES list.");
 		break;
+
+	case RPL_INVITING:
+	{
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			msg = makeNumericReply(server, num,	nick, {arg ,"#" + chanName}, "");
+		};
+		break;
+	}
 
 	// duplicate
 

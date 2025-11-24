@@ -9,12 +9,15 @@
 #define K_MODE 'k'
 #define O_MODE 'o'
 
-
+/* REPLIES */
 #define RPL_NOTOPIC 331
 #define RPL_TOPIC 332
 #define RPL_NAMREPLY 353
 #define RPL_TOPICWHOTIME 333
 #define RPL_ENDOFNAMES 366
+#define RPL_INVITING 341
+
+/* ERRORS */
 #define ERR_NOSUCHCHANNEL 403
 #define ERR_TOOMANYCHANNELS 405
 #define ERR_UNKNOWNMODE 472
@@ -25,6 +28,7 @@
 #define ERR_INVITEONLYCHAN 473
 #define ERR_NOSUCHNICK 401
 #define ERR_USERONCHANNEL 443
+
 
 // #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 

@@ -40,7 +40,6 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
 		client.getServer().sendClientErr(ERR_NOSUCHNICK, client, chann, {nickName});
 		return false;
 	}
-	chann->addInvitedUser(invitedClient);
 	if (!chann->isClientOnChannel(client))
 	{
 		client.getServer().sendClientErr(ERR_NOTONCHANNEL, client, chann, {});
@@ -57,7 +56,11 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
 		client.getServer().sendClientErr(ERR_USERONCHANNEL, client, chann, {invitedClient->getNick()});
 		return false;
 	}
-	
+	chann->addInvitedUser(invitedClient);
+	std::string	inviteMsg = client.makeUser() + " INVITE " + invitedClient->getNick() 
+			+ " #" + chann->getChannelName() + " \r\n";
+	client.getServer().sendMsg(*invitedClient, inviteMsg);
+	client.getServer().sendClientErr(RPL_INVITING, client, chann, {invitedClient->getNick()});
 	return true;
 }
 
@@ -75,11 +78,11 @@ void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 	if (!isValidInvitation(tokens, client, chann))
 	{
 		std::cout << "INVALID invitation\n";
-
 		return;
 	}
 
 	std::cout << "send invitation\n";
+
 
 }
 

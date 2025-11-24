@@ -20,19 +20,7 @@ void Server::channelMessage(channelMsg msg, args ...moreArgs)
 		client = std::get<0>(tupleArgs);
 
 	if constexpr (nArgs > 1)
-		channel = std::get<1>(tupleArgs);
-
-	if constexpr (nArgs > 2)
-	{
-		mode = std::get<2>(tupleArgs);
-		modeStr += mode; 
-	}
-
-	if constexpr (nArgs > 3)
-	{
-		params = std::get<3>(tupleArgs);
-		modeStr += " " + params;
-	}
+		channel = std::get<1>(tupleArgs);	
 
 	std::string server = client->getServer().getServerName(),
 				nick = client->getNick(),
@@ -63,6 +51,17 @@ void Server::channelMessage(channelMsg msg, args ...moreArgs)
 
 	case SET_MODE_OK:
 	{
+		if constexpr (nArgs > 2)
+		{
+			mode = std::get<2>(tupleArgs);
+			modeStr += mode; 
+		}
+
+		if constexpr (nArgs > 3)
+		{
+			params = std::get<3>(tupleArgs);
+			modeStr += " " + params;
+		}
 		std::string	modeMsg = client->makeUser() + " MODE #" + 
 			channel->getChannelName() + " " + modeStr + " \r\n";
 		this->broadcastChannelMsg(modeMsg, *channel);
