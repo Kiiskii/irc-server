@@ -15,8 +15,8 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 
 	if (tokens.empty())
 	{
-		std::string msg = ERR_NEEDMOREPARAMS(client._myServer.getServerName(), client.getNick(), "JOIN");
-		client._myServer.sendMsg(client, msg);
+		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "JOIN");
+		client.getServer().sendMsg(client, msg);
 		return false;
 	}
 	
@@ -59,7 +59,7 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 /** @brief check if the channel key matches the key that client inputs */
 channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
-	Server& server = client._myServer;
+	Server& server = client.getServer();
 	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
 	if (this->isClientOnChannel(client))
 	{

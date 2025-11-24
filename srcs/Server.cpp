@@ -6,7 +6,6 @@ Server::~Server()
 {
 	for (auto chan : _channelInfo)
 		delete chan;
-	
 }
 
 /* @def check if the channel exists
@@ -106,7 +105,6 @@ void Server::handleClient()
 
 void Server::attemptRegister(Client &client)
 {
-//wonder if we can give the alrdy registered feedback here
 	if (client.getClientState() != REGISTERING)
 		return;
 	if (client.getNick().empty() || client.getUserName().empty())
@@ -117,6 +115,7 @@ void Server::attemptRegister(Client &client)
 	std::cout << "User set: " << client.getUserName() << std::endl;
 	std::cout << "Real name set: " << client.getRealName() << std::endl;
 	std::cout << "Host set: " << client.getHostName() << std::endl;
+	std::cout << "Nick set: " << client.getNick() << std::endl;
 	std::cout << "Server set: " << getServerName() << std::endl;
 	std::cout << "We got all the info!" << std::endl;
 }
@@ -124,7 +123,6 @@ void Server::attemptRegister(Client &client)
 /*
 - When exactly do we return and when should we disconnect?
 - Right now you can give PASS, NICK and USER in any order but we may want to change it to PASS first, then NICK/USER in any order
-- Also right now I'm not handling any disconnections at all
 */
 void Server::handleCommand(Server &server, Client &client, std::string &line)
 {
@@ -151,6 +149,8 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 	{
 		user(client, tokens);
 	}
+	if (client.getClientState() != REGISTERED)
+		return;
 	if (command == "PING")
 	{
 		ping(client, tokens);
@@ -180,6 +180,7 @@ void Server::handleCommand(Server &server, Client &client, std::string &line)
 		printVector(tokens);
 		server.handleInvite(client, tokens);
 	}
+//invalid command?
 }
 
 int Server::getEpollfd() const
