@@ -103,6 +103,7 @@ void Server::handleClient()
 
 }
 
+//review this..
 void Server::attemptRegister(Client &client)
 {
 	if (client.getClientState() != REGISTERING)
@@ -112,6 +113,21 @@ void Server::attemptRegister(Client &client)
 	client.setClientState(REGISTERED);
 	std::string message = RPL_WELCOME(_name, client.getNick());
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	message = RPL_YOURHOST(_name, client.getNick(), "1.1");
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	message = RPL_CREATED(_name, client.getNick(), "today");
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	message = RPL_MYINFO(_name, client.getNick(), "1.1", "o", "itkol"); //first refers to user mode, the second channel mode
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	std::string str, str1, str2, str3, str4;
+	str = "LINELEN=" + std::to_string(MSG_SIZE);
+	str1 = "USERLEN=" + std::to_string(USERLEN);
+	str2 = "NICKLEN=" + std::to_string(NICKLEN);
+	str3 = "CHANLIMIT=" + std::to_string(MAX_CHANNELS_PER_CLIENT);
+	str4 = "CHANMODES=" + std::string(CHANMODES);
+	message = RPL_ISUPPORT(_name, client.getNick(), str, str1, str2, str3, str4); // is this the best way to do this...
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	//check if we need something else, message of the day??
 	std::cout << "User set: " << client.getUserName() << std::endl;
 	std::cout << "Real name set: " << client.getRealName() << std::endl;
 	std::cout << "Host set: " << client.getHostName() << std::endl;

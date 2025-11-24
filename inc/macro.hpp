@@ -1,6 +1,9 @@
 #pragma once
 
 #define MSG_SIZE 512
+#define NICKLEN 15
+#define USERLEN 15
+#define CHANMODES "i, t, k, o, l"
 #define MAX_CHANNELS_PER_CLIENT 5 //recheck CHANLIMIT IN RP_SUPPORT
 
 #define L_MODE 'l'
@@ -32,7 +35,7 @@
 #define RPL_YOURHOST(servername, nickname, version) ":" + servername + " 002 " + nickname + " :Your host is " + servername + ", running version " + version + "\r\n"
 #define RPL_CREATED(servername, nickname, datetime) ":" + servername + " 003 " + nickname + " :This server was created " + datetime + "\r\n"
 #define RPL_MYINFO(servername, nickname, version, umodes, cmodes) ":" + servername + " 004 " + nickname + " " + servername + " " + version + " " + umodes + " " + cmodes + "\r\n"
-#define RPL_ISUPPORT(servername, nickname, tokens) ":" + servername + " 005 " + nickname + " " + tokens + " :are supported by this server\r\n"
+#define RPL_ISUPPORT(servername, nickname, linelen, ulen, nlen, climit, cmodes) ":" + servername + " 005 " + nickname + " " + linelen + " " + ulen + " " + nlen + " " + climit + " " + cmodes + " :are supported by this server\r\n"
 
 #define RPL_PONG(token) "PONG " + token + "\r\n"
 #define NEW_NICK(oldnick, user, host, newnick) ":" + oldnick + "!" + user + "@" + host + " NICK " + newnick + "\r\n"
