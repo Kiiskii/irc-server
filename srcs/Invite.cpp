@@ -10,22 +10,54 @@ bool	Channel::hasInvitedClient(Client* client)
 	return false;
 }
 
-static bool isValidInvitation(std::vector<std::string>& tokens, Client& client)
+static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, Channel* chann)
 {
+	std::cout << "token size: " << tokens.size() << std::endl;
 	if (tokens.size() < 2)
 	{
 		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");
 		client.getServer().sendMsg(client, msg);
 		return false;
 	}
+	if (!isValidChanName(tokens[1]))
+	{
+		std::cout << "invalid channel name\n";
+		return false;
+	}
 	std::string nickName = tokens[0];
-	std::string chanName = tokens[1];
+	std::string chanName = tokens[1].substr(tokens[1].find("#") + 1, tokens[1].length() - 1);
+	std::cout << "AFTER #, channel name: " << chanName << std::endl;
+
+	chann = client.getServer().findChannel(chanName);
+	if (!chann)
+	{
+		client.getServer().sendClientErr(ERR_NOSUCHCHANNEL, client, chann, {chanName}); 
+		return false;
+	}
+	Client * invitedClient = client.getServer().findClient(nickName);
+	if (!invitedClient)
+	{
+		client.getServer().sendClientErr(ERR_NOSUCHNICK, client, chann, {nickName});
+		return false;
+	}
+	chann->addInvitedUser(invitedClient);
+	if (!chann->isClientOnChannel(client))
+	{
+		client.getServer().sendClientErr(ERR_NOTONCHANNEL, client, chann, {});
+		return false;
+	}
+	if (chann->isModeActive(I_MODE) && !client.isOps(*chann))
+	{
+		client.getServer().sendClientErr(ERR_CHANOPRIVSNEEDED, client, chann, {});
+		return false;
+	}
+
+	if (chann->isClientOnChannel(*invitedClient))
+	{
+		client.getServer().sendClientErr(ERR_USERONCHANNEL, client, chann, {invitedClient->getNick()});
+		return false;
+	}
 	
-	if (!client.getServer().findChannel(chanName))
-		
-
-
-
 	return true;
 }
 
@@ -39,12 +71,15 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client)
  */
 void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 {
+	Channel* chann = nullptr;
+	if (!isValidInvitation(tokens, client, chann))
+	{
+		std::cout << "INVALID invitation\n";
 
-
-	if (!isValidInvitation(tokens, client))
 		return;
+	}
 
-	
+	std::cout << "send invitation\n";
 
 }
 

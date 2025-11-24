@@ -69,8 +69,9 @@ public:
 	void handleMode(Client& client, std::vector<std::string> tokens);
 	void handleInvite(Client& client, std::vector<std::string> tokens);
 
-	Channel* findChannel(std::string newChannel);
-	void printChannelList() const;
+	Channel*	findChannel(std::string newChannel);
+	void		printChannelList() const;
+	Client*		findClient(std::string nickName);
 
 // Server message to client
 	bool 		mappingChannelKey(std::vector<std::string> tokens, Client& client, 

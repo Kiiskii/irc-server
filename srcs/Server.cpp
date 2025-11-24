@@ -234,28 +234,14 @@ Channel* Server::setActiveChannel(std::string buffer)
 	std::cout << "channelName: [" << channelName << "]" << std::endl;
 
 	return this->findChannel(channelName);
-	// for (auto chan : this->_channelInfo)
-	// {
-	// 	if (chan && chan->getChannelName() == channelName)
-	// 		return chan;
-	// 	else
-	// 	{
-	// 		std::cout << "this channel does not exist in server" << std::endl;
-	// 		this->_channelInfo
-	// 		std::string server = this->_myServer.getServerName(),
-	// 			nick = this->getNick();
-	
-	// 		std::string msg = makeNumericReply(server, ERR_NOTONCHANNEL, nick, {"#" + channelName}, "You're not on that channel");
-	// 		if (send(this->getClientFd(), msg.c_str(), msg.size(), 0) < 0)
-	// 		{
-	// 			std::cout << "joinmsg: failed to send\n";
-	// 			return nullptr;
-	// 		}
-	// 	}
-	// }
-	// return nullptr;
 }
 
-
-
-
+Client*	Server::findClient(std::string nickName)
+{
+	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)
+	{
+		if ((*it)->getNick() == nickName)
+			return *it;
+	}
+	return nullptr;
+}

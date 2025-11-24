@@ -23,6 +23,8 @@
 #define ERR_CHANOPRIVSNEEDED 482
 #define ERR_CHANNELISFULL 471
 #define ERR_INVITEONLYCHAN 473
+#define ERR_NOSUCHNICK 401
+#define ERR_USERONCHANNEL 443
 
 // #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 

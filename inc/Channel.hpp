@@ -67,6 +67,7 @@ class Channel
 		void		setChannelName(std::string channelName);
 		bool		setTopic(std::string newTopic, Client& clientset);
 		void		addUser(Client* newClient);
+		void		addInvitedUser(Client* newClient);
 		void		removeUser(std::string userNick);
 		void		setChanKey(std::string newKey);
 		void 		addMode(char key, std::string param);

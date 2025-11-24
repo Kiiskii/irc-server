@@ -181,7 +181,8 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	}
 	else 
 	{
-		std::cout << "message doesn't have channel # \n"; return;
+		// std::cout << "message doesn't have channel # \n"; 
+		return;
 	}
 
 	// validate the command here, need to fix this??

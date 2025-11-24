@@ -117,6 +117,22 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
+	case ERR_NOSUCHNICK:
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			msg = makeNumericReply(server, num,	nick, {arg}, "No such nick/channel");
+		};
+		break;
+
+	case ERR_USERONCHANNEL:
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			msg = makeNumericReply(server, num,	nick, {arg ,"#" + chanName}, "is already on channel");
+		};
+		break;
+
 	
 
 	//RPL	

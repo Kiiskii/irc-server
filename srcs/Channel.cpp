@@ -156,6 +156,11 @@ void Channel::addUser(Client* newClient)
 	_userList.push_back(newClient);
 }
 
+void Channel::addInvitedUser(Client* newClient)
+{
+	_invitedUser.insert(newClient);
+}
+
 void	Channel::removeUser(std::string userNick)
 {
 	for (auto it  = _userList.begin(); it != _userList.end();)

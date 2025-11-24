@@ -194,11 +194,11 @@ void Client::parseMessage(Server &server, Client &c, const std::string &line)
 	}
 	//if (!msg.empty() && msg.back() == ' ')
 	//	msg.pop_back();
-	std::cout << "MSG TOKENIZED: " << std::endl;
-	std::cout << "Command: " << command << ", ";
-	for (auto it:msg)
-		std::cout << it << " / ";
-	std::cout << std::endl;
+	// std::cout << "MSG TOKENIZED: " << std::endl;
+	// std::cout << "Command: " << command << ", ";
+	// for (auto it:msg)
+	// 	std::cout << it << " / ";
+	// std::cout << std::endl;
 	server.handleCommand(server, c, command, msg);
 }
 
