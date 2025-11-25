@@ -30,6 +30,12 @@
 // #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 
 //#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
+// RPL_MOTDSTART (375) 
+//   "<client> :- <server> Message of the day - "
+// RPL_MOTD (372) 
+//   "<client> :<line of the motd>"
+// RPL_ENDOFMOTD (376) 
+//   "<client> :End of /MOTD command."
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
 #define RPL_YOURHOST(servername, nickname, version) ":" + servername + " 002 " + nickname + " :Your host is " + servername + ", running version " + version + "\r\n"

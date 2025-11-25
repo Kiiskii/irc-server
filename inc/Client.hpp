@@ -32,11 +32,11 @@ class Client
 		std::vector<Channel*>	_joinedChannels{};
 		enum ClientState		_clientState = NONE;
 		class Server			&_myServer;	
-		std::string				_input;
+//		std::string				_input;
 
 	
 	public:
-
+		std::string				_input; // this needs to be private
 //		int auth_step = 0;
 		std::string recvBuffer;
 		
@@ -64,8 +64,7 @@ class Client
 		void		addJoinedChannel(Channel* chan);
 
 		// message parsing
-		void receive(Server &server, Client &c);
-		void parseMessage(Server &server, Client &c, const std::string &line);
+
 
 		// other
 		bool		isOps(Channel& channel);

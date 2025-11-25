@@ -1,13 +1,6 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-
-
-/*
-- Could these functions be divided better
-- What about control characters?
-- If you just write nick, we get no nickname given...
-*/
 std::string transformToLowercase(std::string string)
 {
 	transform(string.begin(), string.end(), string.begin(), [](char c)

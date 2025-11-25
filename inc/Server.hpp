@@ -57,6 +57,9 @@ public:
 	void attemptRegister(Client &client);
 	void disconnectClient(Client &client);
 
+	void receive(Client &c);
+	void parseMessage(Client &c, const std::string &line);
+
 /*Commands such as user, pass nick, might be best to create a separate place for commands*/
 	void pass(Client &client, std::vector<std::string> tokens);
 	void nick(Client &client, std::vector<std::string> tokens);
