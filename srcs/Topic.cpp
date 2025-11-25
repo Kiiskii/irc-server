@@ -104,7 +104,10 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 			}
 			if (!channelPtr->setTopic(topicStr, client))
 				return ;
-			this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
+			// this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
+			std::string	returnMsg = client.makeUser() + " TOPIC #" + 
+			channelPtr->getChannelName() +" :" + channelPtr->getTopic() + "\r\n";
+			this->broadcastChannelMsg(returnMsg, *channelPtr);
 		}
 	}
 }
