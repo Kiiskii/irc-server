@@ -85,8 +85,8 @@ void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Cl
 {
 	Server&	server = client.getServer();
 
-	std::cout << "mode are: [" << modeStr << "]" << " and args. ";
-	printVector(argsVec);
+	// std::cout << "mode are: [" << modeStr << "]" << " and args. ";
+	// printVector(argsVec);
 
 	std::string params, modeStatus, executedMode, executedArgs;
 	bool		addMode = true;
@@ -136,20 +136,34 @@ void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Cl
 			argsVec.erase(argsVec.begin());
 		}
 		else
+		{
 			server.sendClientErr(ERR_UNKNOWNMODE, client, this, {});
+			continue;
+		}
 		// this only handle the _mode mapping, not action with client yet
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (msgEnum == SET_MODE_OK)
 		{
-			std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
+			// std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
 			combineExecutedMode(executedMode, mode, addMode);
 			executedArgs += (params.empty() ? "" : params + " ");
 		}
-		// if cannot set a mode, what to do here?
 
 	}
 	restrictRemoveKeyMode(executedMode, executedArgs);
-	server.channelMessage(msgEnum, &client, this, executedMode, executedArgs);
+	server.sendSetModeMsg(client, *this, executedMode, executedArgs);
+}
+
+void Server::sendSetModeMsg(Client& client, Channel& channel, std::string& executedMode, std::string& executedArgs)
+{
+	std::string modeStr;
+	if (!executedMode.empty())
+		modeStr += executedMode;
+	if (!executedArgs.empty())
+		modeStr += " " + executedArgs;
+	std::string	modeMsg = client.makeUser() + " MODE #" + 
+			channel.getChannelName() + " " + modeStr + " \r\n";
+	this->broadcastChannelMsg(modeMsg, channel);
 }
 
 /** @brief mode applied: itkol */
@@ -176,20 +190,28 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 		// if not on any channel, return do nothing
 		if (channelPtr == nullptr) 
 		{
-			std::cout << "null ptr \n";	return; 
+			std::cout << "null ptr \n";	
+			return; 
 		}
 	}
 	else 
 	{
-		std::cout << "message doesn't have channel # \n"; return;
+		// std::cout << "message doesn't have channel # \n"; 
+		return;
 	}
 
 	// validate the command here, need to fix this??
-	if (channelPtr->isValidModeCmd(modeStr, client) == false)
+	if (!channelPtr->isValidModeCmd(modeStr, client))
 		return;
 
+	if (!client.isOps(*channelPtr))
+	{
+		client.getServer().sendClientErr(ERR_CHANOPRIVSNEEDED, client, channelPtr, {});
+		return ;
+	}
+
 	channelPtr->setMode(modeStr, modeParams, client);
-	channelPtr->getMode(); //=> to print the mode active, remove later
+	// channelPtr->getMode(); //=> to print the mode active, remove later
 	// std::cout << "print mode ok: " << std::endl;
-	channelPtr->getOps();
+	// channelPtr->getOps();
 }	
