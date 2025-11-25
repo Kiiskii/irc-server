@@ -120,12 +120,18 @@ void Server::attemptRegister(Client &client)
 	message = RPL_MYINFO(_name, client.getNick(), "1.1", "o", "itkol"); //first refers to user mode, the second channel mode
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
 	std::string str, str1, str2, str3, str4;
-	str = "LINELEN=" + std::to_string(MSG_SIZE);
-	str1 = "USERLEN=" + std::to_string(USERLEN);
-	str2 = "NICKLEN=" + std::to_string(NICKLEN);
-	str3 = "CHANLIMIT=" + std::to_string(MAX_CHANNELS_PER_CLIENT);
-	str4 = "CHANMODES=" + std::string(CHANMODES);
-	message = RPL_ISUPPORT(_name, client.getNick(), str, str1, str2, str3, str4); // is this the best way to do this...
+	std::vector<std::string> info = 
+	{
+	"LINELEN=" + std::to_string(MSG_SIZE),
+	"USERLEN=" + std::to_string(USERLEN),
+	"NICKLEN=" + std::to_string(NICKLEN),
+	"CHANLIMIT=" + std::to_string(MAX_CHANNELS_PER_CLIENT),
+	"CHANMODES=" + std::string(CHANMODES)
+	};
+	std::string infoPack;
+	for (int i = 0; i < info.size(); i++)
+		infoPack = infoPack + info[i] + " ";
+	message = RPL_ISUPPORT(_name, client.getNick(), infoPack); // is this the best way to do this...
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
 	//check if we need something else, message of the day??
 	std::cout << "User set: " << client.getUserName() << std::endl;
