@@ -2,7 +2,8 @@
 #include "utils.hpp"
 
 /*
-- Max length for real name? IRC horse mentions max length for user name
+- Max length for user name? But where do we get user info
+- Right now we are removing the :, does it need to be so?
 */
 void Server::user(Client &client, std::vector<std::string> tokens)
 {
@@ -12,32 +13,20 @@ void Server::user(Client &client, std::vector<std::string> tokens)
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;	
 	}
-	if (tokens.size() < 4)
-	{
-		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "USER");
-		send(client.getClientFd(), message.c_str(), message.size(), 0);
-		return ;			
-	}
-	std::string realname = "";
-	if (tokens[3].find(":") != std::string::npos)
+	if (tokens.size() == 4 && tokens[3].size() != 0 && tokens[3].find(":") != std::string::npos)
 	{
 		tokens[3].erase(0, tokens[3].find(":") + 1);		
 	}
-	for (int i = 3; i < tokens.size(); i++)
-	{
-		realname = realname + tokens[i];
-		if (i != tokens.size() - 1)
-		{
-			realname = realname + " ";
-		}
-	}
-	if (tokens[0].empty() || realname.empty())
+	if (tokens.size() < 4 || tokens[0].empty() || tokens[3].empty())
 	{
 		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "USER");
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
 		return ;			
 	}
-	client.setUserName(tokens[0]);
-	client.setRealName(realname);
+	if (tokens[0].size() > USERLEN)
+		client.setUserName(tokens[0].substr(0, USERLEN));
+	else
+		client.setUserName(tokens[0]);
+	client.setRealName(tokens[3]);
 	attemptRegister(client);
 }

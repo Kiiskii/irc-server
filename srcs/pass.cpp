@@ -15,15 +15,7 @@ std::vector<Client*>::iterator Server::iterateClients(Server &server, Client &cl
 	return _clientInfo.end();
 }
 
-void Server::disconnectClient(Client &client)
-{
-	auto it = iterateClients(*this, client);
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client.getClientFd(), NULL);
-	close(client.getClientFd());
-	getClientInfo().erase(it);
-	delete &client;
-}
-
+//do we disconnect???
 void Server::pass(Client &client, std::vector<std::string> tokens)
 {
 	if (client.getClientState() == REGISTERED)

@@ -28,6 +28,19 @@ void Server::printChannelList() const
 	}
 }
 
+void Server::disconnectClient(Client &client)
+{
+	//this should remove the client from the channel
+	auto it = iterateClients(*this, client);
+	if (it == _clientInfo.end())
+		return ;
+	Client* ptr = *it;
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, ptr->getClientFd(), NULL);
+	close(ptr->getClientFd());
+	getClientInfo().erase(it);
+	delete ptr;
+}
+
 //missing the error checks
 void Server::setupServerDetails(Server &server, int argc, char *argv[])
 {
@@ -103,6 +116,119 @@ void Server::handleClient()
 
 }
 
+void Server::parseMessage(Client &c, const std::string &line)
+{
+	std::vector<std::string> msg;
+	std::string command;
+
+	size_t i = 0;
+	const size_t n = line.size();
+
+	// skip leading spaces
+	i = line.find_first_not_of(' ', i);
+
+	// possibly deal with empty string?
+	// if (i == n) return false;
+
+	// command
+	size_t cmdStart = i;
+
+	i = line.find(' ', i);
+
+	// no command
+	if (cmdStart == i)
+		return ;
+
+	//out.command = line.substr(cmdStart, i - cmdStart);
+	//msg.push_back(line.substr(cmdStart, i - cmdStart) + ' ');
+	command = line.substr(cmdStart, i - cmdStart);
+	//msg.push_back(line.substr(cmdStart, i - cmdStart));
+
+	// do we want to normalize to uppercase here?
+	for (char &c : command)
+		c = std::toupper(static_cast<unsigned char>(c));
+
+	// parameters
+	int j = 1;
+	while (i < n) {
+		// skip spaces before next parameter
+		i = line.find_first_not_of(' ', i);
+		if (i >= n)
+			break ;
+
+		if (line[i] == ':') {
+			// handle trailing after ':', trailing should always be last parameter?
+			//++i;
+			std::string trailing = line.substr(i);
+			msg.push_back(trailing);
+			break ;
+		}
+		else {
+			// read middle param until space
+			size_t paramStart = i;
+
+			i = line.find(' ', i);
+			//msg.push_back(line.substr(paramStart, i - paramStart) + ' ');
+			msg.push_back(line.substr(paramStart, i - paramStart));
+		}
+		++j;
+	}
+	//if (!msg.empty() && msg.back() == ' ')
+	//	msg.pop_back();
+	std::cout << "MSG TOKENIZED: " << std::endl;
+	std::cout << "Command: " << command << ", ";
+	for (auto it:msg)
+		std::cout << it << " / ";
+	std::cout << std::endl;
+	handleCommand(*this, c, command, msg);
+}
+
+//these should be under Server class
+void Server::receive(Client &c)
+{
+	// Recieve data from the client
+	char buffer[512];
+	ssize_t bytes = 1;
+
+	//outMsg.clear();
+	
+	// DO WE USE MSG_DONTWAIT OR 0???
+	while (bytes > 0) {
+		bytes = recv(c.getClientFd(), buffer, sizeof(buffer), MSG_DONTWAIT);
+		// Errorhandling
+		if (bytes < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK)
+				break ;
+			std::cout << "Failed to recieve from client: " << c.getClientFd() << std::endl;
+			disconnectClient(c);
+			break ;
+		}
+		else if (bytes == 0) {
+/*Cleaner way to handle this rather than sending in index*/
+			std::cout << "Client fd " << c.getClientFd() << " disconnected" << std::endl;
+			disconnectClient(c);
+			break ;
+		}
+		// Buffer recieved data
+		else {
+			c._input.append(buffer, bytes);
+			// Check if message if complete
+			while (true) {
+				size_t newline = c._input.find("\r\n");
+				if (newline == c._input.npos)
+					break ;
+				auto begin = c._input.begin();
+				auto end = c._input.begin() + newline;
+				parseMessage(c, std::string(begin, end));
+				c._input.erase(0, newline + 2);
+			}
+		}
+	}
+}
+
+/*
+- Missing message of the day
+- Additional info to put here?*/
 void Server::attemptRegister(Client &client)
 {
 	if (client.getClientState() != REGISTERING)
@@ -112,6 +238,40 @@ void Server::attemptRegister(Client &client)
 	client.setClientState(REGISTERED);
 	std::string message = RPL_WELCOME(_name, client.getNick());
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	message = RPL_YOURHOST(_name, client.getNick(), "1.1");
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	message = RPL_CREATED(_name, client.getNick(), "today");
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	message = RPL_MYINFO(_name, client.getNick(), "1.1", "o", "itkol");
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	std::vector<std::string> info = 
+	{
+	"LINELEN=" + std::to_string(MSG_SIZE),
+	"USERLEN=" + std::to_string(USERLEN),
+	"NICKLEN=" + std::to_string(NICKLEN),
+	"CHANLIMIT=" + std::to_string(MAX_CHANNELS_PER_CLIENT),
+	"CHANMODES=" + std::string(CHANMODES)
+	};
+	std::string infoPack;
+	for (int i = 0; i < info.size(); i++)
+		infoPack = infoPack + info[i] + " ";
+	message = RPL_ISUPPORT(_name, client.getNick(), infoPack);
+	send(client.getClientFd(), message.c_str(), message.size(), 0);
+
+
+std::string ft_irc_ascii = 
+".----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. \n"
+"| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n"
+"| |  _________   | || |  _________   | || |              | || |     _____    | || |  _______     | || |     ______   | |\n"
+"| | |_   ___  |  | || | |  _   _  |  | || |              | || |    |_   _|   | || | |_   __ \\    | || |   .' ___  |  | |\n"
+"| |   | |_  \\_|  | || | |_/ | | \\_|  | || |              | || |      | |     | || |   | |__) |   | || |  / .'   \\_|  | |\n"
+"| |   |  _|      | || |     | |      | || |              | || |      | |     | || |   |  __ /    | || |  | |         | |\n"
+"| |  _| |_       | || |    _| |_     | || |              | || |     _| |_    | || |  _| |  \\ \\_  | || |  \\ `.___.'\\  | |\n"
+"| | |_____|      | || |   |_____|    | || |   _______    | || |    |_____|   | || | |____| |___| | || |   `._____.'  | |\n"
+"| |              | || |              | || |  |_______|   | || |              | || |              | || |              | |\n"
+"| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n"
+" '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'\n";
+	send(client.getClientFd(), ft_irc_ascii.c_str(), ft_irc_ascii.size(), 0);
 	std::cout << "User set: " << client.getUserName() << std::endl;
 	std::cout << "Real name set: " << client.getRealName() << std::endl;
 	std::cout << "Host set: " << client.getHostName() << std::endl;
@@ -141,6 +301,12 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	*/
 	//std::string command = tokens[0];
 	//std::cout << "Fd is: " << client.getClientFd() << " and cmd and args: " << line << std::endl;
+	// if (command == "CAP")
+    // {
+    //     std::string reply = ":" + server._name + " CAP * LS :multi-prefix\r\n";
+    //     send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+    //     return ;
+    // }
 	if (command == "PASS")
 	{
 		pass(client, tokens);

@@ -1,12 +1,6 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-#define NICKLEN 30
-
-/*
-- What is considered as a good nick length
-- What about control characters?
-*/
 std::string transformToLowercase(std::string string)
 {
 	transform(string.begin(), string.end(), string.begin(), [](char c)
@@ -15,7 +9,6 @@ std::string transformToLowercase(std::string string)
 	});
 	return string;
 }
-
 
 void Server::nick(Client &client, std::vector<std::string> tokens)
 {

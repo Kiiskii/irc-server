@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 				Client &c = *server.getClientInfo()[clientIndex]; // this was changed
 
 				std::string msg;
-				c.receive(server, c, clientIndex);
+				server.receive(c);
 
 				//std::cout << "Message recieved: [" << msg << "]:" << std::endl;
 				//server.handleCommand(server, c, msg);
