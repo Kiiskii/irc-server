@@ -9,11 +9,6 @@
  * @brief MODE <#channel> <+/-modestring> [<mode arguments>...] */ 
 bool Channel::isValidModeCmd(std::string modeStr, Client& client)
 {
-	if (!client.isOps(*this))
-	{
-		client.getServer().sendClientErr(ERR_CHANOPRIVSNEEDED, client, this, {});
-		return false;
-	}
 	std::regex modeRegex("^[+-][iklot]+([+-][iklot]+)*$");
 	if (std::regex_match(modeStr, modeRegex))
 		return true;
@@ -195,7 +190,8 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 		// if not on any channel, return do nothing
 		if (channelPtr == nullptr) 
 		{
-			std::cout << "null ptr \n";	return; 
+			std::cout << "null ptr \n";	
+			return; 
 		}
 	}
 	else 
@@ -207,6 +203,12 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	// validate the command here, need to fix this??
 	if (!channelPtr->isValidModeCmd(modeStr, client))
 		return;
+
+	if (!client.isOps(*channelPtr))
+	{
+		client.getServer().sendClientErr(ERR_CHANOPRIVSNEEDED, client, channelPtr, {});
+		return ;
+	}
 
 	channelPtr->setMode(modeStr, modeParams, client);
 	// channelPtr->getMode(); //=> to print the mode active, remove later

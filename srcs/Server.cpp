@@ -231,7 +231,7 @@ Channel* Server::setActiveChannel(std::string buffer)
 		chanEndPos = buffer.length();
 
 	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
-	std::cout << "channelName: [" << channelName << "]" << std::endl;
+	// std::cout << "channelName: [" << channelName << "]" << std::endl;
 
 	return this->findChannel(channelName);
 }
