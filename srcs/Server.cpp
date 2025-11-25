@@ -157,6 +157,12 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	*/
 	//std::string command = tokens[0];
 	//std::cout << "Fd is: " << client.getClientFd() << " and cmd and args: " << line << std::endl;
+	if (command == "CAP")
+    {
+        std::string reply = ":" + server._name + " CAP * LS :multi-prefix\r\n";
+        send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+        return ;
+    }
 	if (command == "PASS")
 	{
 		pass(client, tokens);

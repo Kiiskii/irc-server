@@ -3,7 +3,7 @@
 #define MSG_SIZE 512
 #define NICKLEN 15
 #define USERLEN 15
-#define CHANMODES "i, t, k, o, l"
+#define CHANMODES "itkol"
 #define MAX_CHANNELS_PER_CLIENT 5 //recheck CHANLIMIT IN RP_SUPPORT
 
 #define L_MODE 'l'

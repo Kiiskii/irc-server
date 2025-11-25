@@ -18,10 +18,13 @@ std::vector<Client*>::iterator Server::iterateClients(Server &server, Client &cl
 void Server::disconnectClient(Client &client)
 {
 	auto it = iterateClients(*this, client);
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client.getClientFd(), NULL);
-	close(client.getClientFd());
+	if (it == _clientInfo.end())
+		return ;
+	Client* ptr = *it;
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, ptr->getClientFd(), NULL);
+	close(ptr->getClientFd());
 	getClientInfo().erase(it);
-	delete &client;
+	delete ptr;
 }
 
 void Server::pass(Client &client, std::vector<std::string> tokens)

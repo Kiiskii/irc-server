@@ -64,7 +64,7 @@ class Client
 		void		addJoinedChannel(Channel* chan);
 
 		// message parsing
-		void receive(Server &server, Client &c, int clientIndex);
+		void receive(Server &server, Client &c);
 		void parseMessage(Server &server, Client &c, const std::string &line);
 
 		// other

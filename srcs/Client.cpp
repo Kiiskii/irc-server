@@ -93,7 +93,8 @@ std::string Client::makeUser()
 		+ this->getUserName() + "@" + this->getHostName();
 }
 
-void Client::receive(Server &server, Client &c, int clientIndex)
+//these should be under Server class
+void Client::receive(Server &server, Client &c)
 {
 	// Recieve data from the client
 	char buffer[512];
@@ -109,13 +110,13 @@ void Client::receive(Server &server, Client &c, int clientIndex)
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break ;
 			std::cout << "Failed to recieve from client: " << getClientFd() << std::endl;
+			server.disconnectClient(*this);
 			break ;
 		}
 		else if (bytes == 0) {
 /*Cleaner way to handle this rather than sending in index*/
 			std::cout << "Client fd " << getClientFd() << " disconnected" << std::endl;
-			close(getClientFd());
-			server.getClientInfo().erase(server.getClientInfo().begin() + clientIndex);
+			server.disconnectClient(*this);
 			break ;
 		}
 		// Buffer recieved data
