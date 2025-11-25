@@ -19,12 +19,6 @@ Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
 	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
-// to remove
-// std::ostream& operator<<(std::ostream& os, const Channel& channel){
-// 	os << "channel name is: " << channel.getChannelName() 
-// 		<< ", its topic is: " << channel.getTopic();
-// 	return os;
-// }
 
 std::string Channel::getChannelName() const
 {
@@ -64,7 +58,7 @@ void	Channel::setTopicSetter(Client& setter)
 
 std::string	Channel::printUser() const
 {
-	std::cout << "USER LIST: " << std::endl;//
+	// std::cout << "USER LIST: " << std::endl;//
 	std::string returnStr = "";
 	for (auto it : _ops)
 	{
@@ -109,15 +103,6 @@ void	Channel::removeChanop(std::string opNick)
 
 std::unordered_set<Client*>&	Channel::getOps()
 {
-	std::cout << "@CHANOPS list: \n";
-	if (!_ops.empty())
-	{
-		for (auto op : _ops)
-		{
-			std::cout << op->getNick() << ", ";
-		}
-		std::cout << "\n";
-	}
 	return _ops;
 }
 

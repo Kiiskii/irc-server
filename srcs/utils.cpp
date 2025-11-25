@@ -1,13 +1,5 @@
 #include "utils.hpp"
 
-std::string ft_trimString(std::string msg)
-{
-    std::string leadingTrim = msg.substr(msg.find_first_not_of(" \a\b\t\n\\v\f\r"), msg.length() - msg.find_first_not_of(" \a\b\t\n\\v\f\r"));
-    std::string trailingTrim = leadingTrim.substr(0, leadingTrim.find_last_not_of(" \a\b\t\n\\v\f\r") + 1);
-    return trailingTrim;
-}
-
-
 /** @brief split string into tokens using delimiter */
 std::vector<std::string> splitString(std::string buffer, char delimiter)
 {
@@ -81,4 +73,17 @@ std::string getTarget(Client &client)
 	else
 		target = client.getNick();
 	return target;
+}
+
+void	printOps(Channel& channel)
+{
+	std::cout << "@CHANOPS list: \n";
+	if (!channel.getOps().empty())
+	{
+		for (auto op : channel.getOps())
+		{
+			std::cout << op->getNick() << ", ";
+		}
+		std::cout << "\n";
+	}
 }

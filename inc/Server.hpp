@@ -87,9 +87,5 @@ public:
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
 
-	
-	// template <typename ...args>
-	// void		channelMessage(channelMsg msg, args ...moreArgs);
-
 };
 
