@@ -161,25 +161,25 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	if (command == "JOIN")
 	{
-		// std::cout << "\njoin comd: [" << line << "]" << std::endl;
-		// printVector(tokens);
+		std::cout << "[" << command << "]" << std::endl;
+		printVector(tokens);
 		server.handleJoin(client, tokens);
 	}
 	if (command == "TOPIC")
 	{
-		// std::cout << "\ntopic comd: [" << line << "]" << std::endl;
-		// printVector(tokens);
+		std::cout << "[" << command << "]" << std::endl;
+		printVector(tokens);
 		server.handleTopic(client, tokens);
 	}
 	if (command == "MODE")
 	{
-		// std::cout << "\nmode comd: [" << line << "]" << std::endl;
-		// printVector(tokens);
+		std::cout << "[" << command << "]" << std::endl;
+		printVector(tokens);
 		server.handleMode(client, tokens);
 	}
 	if (command == "INVITE")
 	{
-		std::cout << "\ninvite comd: [" << command << "]" << std::endl;
+		std::cout << "[" << command << "]" << std::endl;
 		printVector(tokens);
 		server.handleInvite(client, tokens);
 	}

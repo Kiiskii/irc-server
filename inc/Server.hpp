@@ -80,15 +80,16 @@ public:
 	void		sendMsg(Client& client, std::string& msg);
 	void		sendTopic(Client& client, Channel& channel);
 	void		sendJoinSuccessMsg( Client& client, Channel& channel);
+	void		sendSetModeMsg(Client& client, Channel& channel, 
+					std::string& executedMode, std::string& executedArgs);
 	void		sendNameReply(Client& client, Channel& channel);
 	void		broadcastChannelMsg(std::string& msg, Channel& channel);
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
 
 	
-	template <typename ...args>
-	void		channelMessage(channelMsg msg, args ...moreArgs);
+	// template <typename ...args>
+	// void		channelMessage(channelMsg msg, args ...moreArgs);
 
 };
 
-#include "Server.tpp"

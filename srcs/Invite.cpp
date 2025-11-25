@@ -10,7 +10,8 @@ bool	Channel::hasInvitedClient(Client* client)
 	return false;
 }
 
-static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, Channel* chann)
+static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
+	Channel*& chann, Client*& invitedClient)
 {
 	std::cout << "token size: " << tokens.size() << std::endl;
 	if (tokens.size() < 2)
@@ -34,7 +35,8 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
 		client.getServer().sendClientErr(ERR_NOSUCHCHANNEL, client, chann, {chanName}); 
 		return false;
 	}
-	Client * invitedClient = client.getServer().findClient(nickName);
+
+	invitedClient = client.getServer().findClient(nickName);
 	if (!invitedClient)
 	{
 		client.getServer().sendClientErr(ERR_NOSUCHNICK, client, chann, {nickName});
@@ -56,11 +58,7 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
 		client.getServer().sendClientErr(ERR_USERONCHANNEL, client, chann, {invitedClient->getNick()});
 		return false;
 	}
-	chann->addInvitedUser(invitedClient);
-	std::string	inviteMsg = client.makeUser() + " INVITE " + invitedClient->getNick() 
-			+ " #" + chann->getChannelName() + " \r\n";
-	client.getServer().sendMsg(*invitedClient, inviteMsg);
-	client.getServer().sendClientErr(RPL_INVITING, client, chann, {invitedClient->getNick()});
+
 	return true;
 }
 
@@ -75,14 +73,29 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
 void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 {
 	Channel* chann = nullptr;
-	if (!isValidInvitation(tokens, client, chann))
+	Client* invitedClient = nullptr;
+
+	if (!isValidInvitation(tokens, client, chann, invitedClient))
 	{
 		std::cout << "INVALID invitation\n";
 		return;
 	}
 
 	std::cout << "send invitation\n";
-
+	//if valid invitation then send msg
+	chann->addInvitedUser(invitedClient);
+	if (invitedClient)
+	{
+		std::string	inviteMsg = client.makeUser() + " INVITE " + invitedClient->getNick() 
+				+ " #" + chann->getChannelName() + " \r\n";
+		this->sendMsg(*invitedClient, inviteMsg);
+		this->sendClientErr(RPL_INVITING, client, chann, 
+			{invitedClient->getNick()});
+	}
+	else
+	{
+		std::cout << "null invited cient\n";
+	}
 
 }
 

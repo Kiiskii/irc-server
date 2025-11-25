@@ -60,10 +60,10 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
 	Server& server = client.getServer();
-	std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
+	// std::cout << "client has join " << client.getJoinedChannels().size() << " channels \n";
 	if (this->isClientOnChannel(client))
 	{
-		std::cout << "client is already on channel\n";
+		// std::cout << "client is already on channel\n";
 		return ALREADY_ON_CHAN;
 	}
 
@@ -85,7 +85,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	{
 		int limit = std::stoi(chanLimit);
 		std::cout << "mode L active and limit set for channel is " << limit << std::endl;
-		if (this->_userList.size() >= limit && !this->hasInvitedClient(&client)) //invitation will bypass the limit of channel
+		if (this->_userList.size() >= limit && !this->hasInvitedClient(&client))
 		{
 			server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
 			return NO_MSG;
@@ -137,11 +137,17 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 			channelPtr->addUser(&client);
 			if (channelPtr->getUserList().size() == 1)
 				channelPtr->addChanop(&client); // there is only 1 user ->ops
-			this->channelMessage(result, &client, channelPtr);
+			// this->channelMessage(result, &client, channelPtr);
+			this->sendJoinSuccessMsg(client, *channelPtr);
+		}
+		else if (result == ALREADY_ON_CHAN)
+		{
+			this->sendTopic(client, *channelPtr);
+			this->sendNameReply(client, *channelPtr);
 		}
 		
-		std::cout << "[" << channelPtr->printUser() << "]" << std::endl; //remove
-		channelPtr->getOps(); //remove
+		// std::cout << "[" << channelPtr->printUser() << "]" << std::endl; //remove
+		// channelPtr->getOps(); //remove
 	}
 
 }

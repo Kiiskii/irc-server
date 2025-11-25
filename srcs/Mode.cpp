@@ -9,6 +9,11 @@
  * @brief MODE <#channel> <+/-modestring> [<mode arguments>...] */ 
 bool Channel::isValidModeCmd(std::string modeStr, Client& client)
 {
+	if (!client.isOps(*this))
+	{
+		client.getServer().sendClientErr(ERR_CHANOPRIVSNEEDED, client, this, {});
+		return false;
+	}
 	std::regex modeRegex("^[+-][iklot]+([+-][iklot]+)*$");
 	if (std::regex_match(modeStr, modeRegex))
 		return true;
@@ -85,8 +90,8 @@ void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Cl
 {
 	Server&	server = client.getServer();
 
-	std::cout << "mode are: [" << modeStr << "]" << " and args. ";
-	printVector(argsVec);
+	// std::cout << "mode are: [" << modeStr << "]" << " and args. ";
+	// printVector(argsVec);
 
 	std::string params, modeStatus, executedMode, executedArgs;
 	bool		addMode = true;
@@ -136,20 +141,34 @@ void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Cl
 			argsVec.erase(argsVec.begin());
 		}
 		else
+		{
 			server.sendClientErr(ERR_UNKNOWNMODE, client, this, {});
+			continue;
+		}
 		// this only handle the _mode mapping, not action with client yet
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (msgEnum == SET_MODE_OK)
 		{
-			std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
+			// std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
 			combineExecutedMode(executedMode, mode, addMode);
 			executedArgs += (params.empty() ? "" : params + " ");
 		}
-		// if cannot set a mode, what to do here?
 
 	}
 	restrictRemoveKeyMode(executedMode, executedArgs);
-	server.channelMessage(msgEnum, &client, this, executedMode, executedArgs);
+	server.sendSetModeMsg(client, *this, executedMode, executedArgs);
+}
+
+void Server::sendSetModeMsg(Client& client, Channel& channel, std::string& executedMode, std::string& executedArgs)
+{
+	std::string modeStr;
+	if (!executedMode.empty())
+		modeStr += executedMode;
+	if (!executedArgs.empty())
+		modeStr += " " + executedArgs;
+	std::string	modeMsg = client.makeUser() + " MODE #" + 
+			channel.getChannelName() + " " + modeStr + " \r\n";
+	this->broadcastChannelMsg(modeMsg, channel);
 }
 
 /** @brief mode applied: itkol */
@@ -186,7 +205,7 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	}
 
 	// validate the command here, need to fix this??
-	if (channelPtr->isValidModeCmd(modeStr, client) == false)
+	if (!channelPtr->isValidModeCmd(modeStr, client))
 		return;
 
 	channelPtr->setMode(modeStr, modeParams, client);
