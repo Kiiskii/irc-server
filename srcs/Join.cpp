@@ -85,7 +85,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	{
 		int limit = std::stoi(chanLimit);
 		std::cout << "mode L active and limit set for channel is " << limit << std::endl;
-		if (this->_userList.size() >= limit)
+		if (this->_userList.size() >= limit && !this->hasInvitedClient(&client)) //invitation will bypass the limit of channel
 		{
 			server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
 			return NO_MSG;
@@ -139,6 +139,9 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 				channelPtr->addChanop(&client); // there is only 1 user ->ops
 			this->channelMessage(result, &client, channelPtr);
 		}
+		
+		std::cout << "[" << channelPtr->printUser() << "]" << std::endl; //remove
+		channelPtr->getOps(); //remove
 	}
-	// this->printChannelList(); //print all the channel on server
+
 }

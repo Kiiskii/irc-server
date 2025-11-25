@@ -64,7 +64,7 @@ void	Channel::setTopicSetter(Client& setter)
 
 std::string	Channel::printUser() const
 {
-	// std::cout << "ENTER PRINT USER: " << std::endl;
+	std::cout << "USER LIST: " << std::endl;//
 	std::string returnStr = "";
 	for (auto it : _ops)
 	{
@@ -75,7 +75,8 @@ std::string	Channel::printUser() const
 		returnStr += "%" + (*it).getNick() + " ";
 	for (auto it : _voices)
 		returnStr += "+" + (*it).getNick() + " ";
-	// std::cout << "print user not break: " << returnStr << std::endl;
+	for (auto it : _userList)
+		returnStr += (*it).getNick() + " ";
 	return returnStr;
 }
 
