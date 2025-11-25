@@ -327,27 +327,33 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	if (command == "JOIN")
 	{
-		std::cout << "[" << command << "]" << std::endl;
-		printVector(tokens);
+		// std::cout << "[" << command << "]" << std::endl;
+		// printVector(tokens);
 		server.handleJoin(client, tokens);
 	}
 	if (command == "TOPIC")
 	{
-		std::cout << "[" << command << "]" << std::endl;
-		printVector(tokens);
+		// std::cout << "[" << command << "]" << std::endl;
+		// printVector(tokens);
 		server.handleTopic(client, tokens);
 	}
 	if (command == "MODE")
 	{
-		std::cout << "[" << command << "]" << std::endl;
-		printVector(tokens);
+		// std::cout << "[" << command << "]" << std::endl;
+		// printVector(tokens);
 		server.handleMode(client, tokens);
 	}
 	if (command == "INVITE")
 	{
+		// std::cout << "[" << command << "]" << std::endl;
+		// printVector(tokens);
+		server.handleInvite(client, tokens);
+	}
+	if (command == "PRIVMSG")
+	{
 		std::cout << "[" << command << "]" << std::endl;
 		printVector(tokens);
-		server.handleInvite(client, tokens);
+		server.handlePrivmsg(client, tokens);
 	}
 //invalid command?
 }
