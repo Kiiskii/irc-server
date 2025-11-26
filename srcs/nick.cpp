@@ -36,12 +36,15 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 			return ;
 		}
 	}
+	// RFC-style implementations track “which clients share any channel” and send a single NICK to each.
+	//Right now there's a bug that if you change a nick and if some channels have multiple shared channels with you, the nick change will be broadcast multiple times.
+	//Also it will get broadcasted to you twice.. So need to find a way to check it only once.
 	client.setNick(tokens[0]);
 	if (client.getClientState() == REGISTERED)
 	{
-		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());
-		send(client.getClientFd(), message.c_str(), message.size(), 0);
-		//we need to broadcast this info to all the channels...
+		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());	
+		for (Channel* channel : client.getJoinedChannels())
+			this->broadcastChannelMsg(message, *channel);
 	}
 	if (client.getClientState() != REGISTERED)
 	{
