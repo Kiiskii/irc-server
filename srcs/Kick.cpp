@@ -1,6 +1,7 @@
 #include "Client.hpp"
 #include "Server.hpp"
 #include "utils.hpp"
+#include "macro.hpp"
 
 // ensure that the user kicking is an operator before kicking (to be implemented)
 // remove channel from clients joinedChannels list
@@ -11,30 +12,51 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 {
 	std::string channelString = params[0];
 	std::string clientString = params[1];
-	Client* c = nullptr;
+	std::string error;
+
+	// check that there is correct amount of params
+	if (params.size() < 3) {
+		error = ERR_NEEDMOREPARAMS(server.getServerName(), getNick(), "KICK");
+		server.sendMsg(*this, error);
+		return ;
+	}
+
+	// check that channel exists
 	Channel* chann = server.setActiveChannel(channelString);
 	if (!chann) {
-		std::cout << "Channel does not exist." << std::endl;
+		server.sendClientErr(ERR_NOSUCHCHANNEL, *this, chann, {channelString});
 		return ;
 	}
-	for (auto it:chann->getUserList()) {
-		if ((*it).getNick() == clientString) {
-			c = it;
-			break ;
-		}
+
+	// check if client kicking is on the channel
+	Client* cli = checkClientExistence(server.getClientInfo(), this->getNick());
+	if (!cli) {
+		server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
 	}
-	if (!c) {
-		std::cout << "User not found in channel." << std::endl;
+
+	// check that client getting kicked is on the server
+	Client* cliServer = checkClientExistence(server.getClientInfo(), clientString);
+	if (!cliServer) {
+		server.sendClientErr(ERR_NOSUCHNICK, *this, chann, {clientString});
 		return ;
 	}
+
+	// check that client getting kicked is on the channel
+	Client* cliChannel = checkClientExistence(chann->getUserList(), clientString);
+	if (!cliChannel) {
+		server.sendClientErr(ERR_USERNOTINCHANNEL, *this, chann, {clientString});
+		return ;
+	}
+
+	// remove user from channelList and channel from client channelList
 	chann->removeUser(clientString);
-	c->removeChannel(chann);
+	cliChannel->removeChannel(chann);
+
+	// if channel is empty after this, remove it from servers list of channels
 	auto ite = chann->getUserList();
-	std::cout << server.getChannelInfo().size() << std::endl;
 	if (ite.empty()) {
 		server.removeChannel(chann);
 	}
-	std::cout << server.getChannelInfo().size() << std::endl;
 	return ;
 }
 

@@ -127,6 +127,20 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "You're not channel operator");
 		break;
 
+	case ERR_USERNOTINCHANNEL:
+	{
+		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
+		msg = makeNumericReply(server, num, nick, {arg,"#" + chanName}, "They aren't on that channel");
+		break ;
+	}
+
+	case ERR_NOSUCHNICK:
+	{
+		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
+		msg = makeNumericReply(server, num, nick, {arg}, "No such nick/channel");
+		break ;
+	}
+
 	case ERR_NOSUCHCHANNEL:
 	{
 		if (otherArgs.size() == 1) 
