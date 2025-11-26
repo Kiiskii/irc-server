@@ -177,11 +177,12 @@ void Server::parseMessage(Client &c, const std::string &line)
 	}
 	//if (!msg.empty() && msg.back() == ' ')
 	//	msg.pop_back();
-	std::cout << "MSG TOKENIZED: " << std::endl;
-	std::cout << "Command: " << command << ", ";
-	for (auto it:msg)
-		std::cout << it << " / ";
-	std::cout << std::endl;
+	
+	// std::cout << "" << std::endl;
+	// std::cout << "Command: " << command << ", ";
+	// for (auto it:msg)
+	// 	std::cout << it << " / ";
+	// std::cout << std::endl;
 	handleCommand(*this, c, command, msg);
 }
 
