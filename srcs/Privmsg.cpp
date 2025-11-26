@@ -18,6 +18,16 @@ static bool isValidPrivmsg(Client& client, std::vector<std::string>& tokens)
 	return true;
 }
 
+static std::string makePrivMsgToChan(std::string& token, Client& client, Channel& chan)
+{
+	return client.makeUser() + " PRIVMSG #" +  chan.getChannelName() + " " + token + " \r\n";
+}
+
+static std::string makePrivMsgToClient(std::string& token, Client& client,Client& partner)
+{
+	return client.makeUser() + " PRIVMSG " + partner.getNick() + " " + token + " \r\n";;
+}
+
 void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
 {
 	if (!isValidPrivmsg(client, tokens))
@@ -33,12 +43,10 @@ void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
 			std::cout << "channel not found" << std::endl;
 			return;
 		}
-		msg = tokens[1];
-		if (msg[0] == ':')
-			msg = msg.substr(1, msg.length() - 1) + " \r\n";
+		msg = makePrivMsgToChan(tokens[1], client, *chan);
 		std::cout << "channel name: [" << chan->getChannelName() << "]"<< std::endl;
 		std::cout << "msg: [" << msg << "]" << std::endl;
-		this->broadcastChannelMsg(tokens[1], *chan);
+		this->broadcastChannelMsg(msg, *chan, client);
 
 	}
 	else // send privmsg to client
@@ -46,14 +54,15 @@ void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
 		Client* partner = this->findClient(target);
 		if (!partner)
 		{
-			std::cout << "channel not found" << std::endl;
+			std::cout << "client not found" << std::endl;
 			return;
 		}
-		msg = tokens[1];
-		if (msg[0] == ':')
-			msg = msg.substr(1, msg.length() - 1) + " \r\n";
+		// msg = tokens[1];
+		// if (msg[0] == ':')
+		// 	msg = msg.substr(1, msg.length() - 1) + " \r\n";
+		msg = makePrivMsgToClient(tokens[1], client, *partner);
 		std::cout << "client name: [" << client.getNick() << "]"<< std::endl;
 		std::cout << "msg: [" << msg << "]" << std::endl;
-		this->sendMsg(*partner, tokens[1]);
+		this->sendMsg(*partner, msg);
 	}
 }

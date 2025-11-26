@@ -89,6 +89,7 @@ public:
 					std::string& executedMode, std::string& executedArgs);
 	void		sendNameReply(Client& client, Channel& channel);
 	void		broadcastChannelMsg(std::string& msg, Channel& channel);
+	void 		broadcastChannelMsg(std::string& msg, Channel& channel, Client& client);
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
 

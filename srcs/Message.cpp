@@ -17,13 +17,26 @@ void	Server::sendMsg(Client& client, std::string& msg)
 }
 
 /**
- * @brief send message to all member on channels and the joining member itself
+ * @brief send message to all member on channels and the sender itself
  */
 void Server::broadcastChannelMsg(std::string& msg, Channel& channel)
 {
 	for (Client* user : channel.getUserList())
 		this->sendMsg(*user, msg);
 	//recheck does this send to the joining memeber itself
+}
+
+/**
+ * @brief send message to all member on channels EXCEPT the sender itself
+ */
+void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& client)
+{
+	for (Client* user : channel.getUserList())
+	{
+		if (user->getNick() != client.getNick())
+			this->sendMsg(*user, msg);
+	}
+
 }
 
 /** 
