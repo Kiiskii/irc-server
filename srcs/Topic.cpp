@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include "Server.hpp"
+#include "Channel.hpp"
 #include "utils.hpp"
 
 /**  If <topic> is an empty string, the topic for the channel will be cleared. 
@@ -72,7 +73,7 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 	{
 		channelName = tokens[0];
 
-		if (!isValidChanName(channelName))
+		if (!utils::isValidChanName(channelName))
 		{
 			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, {channelName});
 			return;

@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include "Server.hpp"
+#include "Channel.hpp"
 #include "utils.hpp"
 
 /** @brief validate the channel name and create a map of <channel name - key> 
@@ -23,13 +24,13 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 	std::vector<std::string> channelList;
 	std::vector<std::string> keyList;
 	if (tokens[0].find(",") != std::string::npos)
-		channelList = splitString(tokens[0], ',');
+		channelList = utils::splitString(tokens[0], ',');
 	else
 		channelList.push_back(tokens[0]);
 	if (tokens.size() > 1) //has key
 	{
 		if (tokens[1].find(",") != std::string::npos)
-			keyList = splitString(tokens[1], ',');
+			keyList = utils::splitString(tokens[1], ',');
 		else
 			keyList.push_back(tokens[1]);
 	}
@@ -41,7 +42,7 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 	// add to map
 	for (size_t i = 0; i < channelList.size(); ++i)
 	{
-		if (isValidChanName(channelList[i]))
+		if (utils::isValidChanName(channelList[i]))
 		{
 			channelList[i].erase(0, 1); // remove the hash
 			channelKeyMap.insert({channelList[i], keyList[i]});

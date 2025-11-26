@@ -1,6 +1,9 @@
 #include "Server.hpp"
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "utils.hpp"
+
+using namespace utils;
 
 static bool isValidPrivmsg(Client& client, std::vector<std::string>& tokens) 
 {

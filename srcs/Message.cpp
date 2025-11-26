@@ -1,4 +1,7 @@
+#include "Client.hpp"
 #include "Server.hpp"
+#include "Channel.hpp"
+#include "utils.hpp"
 
 /**
  * @brief send message to the joining member

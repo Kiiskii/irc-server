@@ -1,4 +1,6 @@
 #include "Server.hpp"
+#include "Channel.hpp"
+#include "Client.hpp"
 #include "utils.hpp"
 
 /* @note rememeber to check all on-heap allocated memory, such as chan */
@@ -352,7 +354,7 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	if (command == "PRIVMSG")
 	{
 		std::cout << "[" << command << "]" << std::endl;
-		printVector(tokens);
+		utils::printVector(tokens);
 		server.handlePrivmsg(client, tokens);
 	}
 //invalid command?
