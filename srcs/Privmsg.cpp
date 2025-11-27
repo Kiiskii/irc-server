@@ -52,7 +52,7 @@ void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
 	std::vector<std::string> targets;
 
 	if (tokens[0].find(",") != std::string::npos)
-		targets = splitString(tokens[0], ',');
+		targets = ft_splitString(tokens[0], ',');
 	else
 		targets.push_back(tokens[0]);
 

@@ -36,8 +36,6 @@
 #define ERR_NOTEXTTOSEND 412
 
 
-// #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
-
 //#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 // RPL_MOTDSTART (375) 
 //   "<client> :- <server> Message of the day - "

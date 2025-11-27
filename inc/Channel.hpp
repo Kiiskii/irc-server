@@ -39,8 +39,8 @@ class Channel
 		std::unordered_set<Client*>	_halfOps; 
 		std::unordered_set<Client*>	_voices;
 		std::unordered_set<Client*>	_invitedUser;
-		std::vector<Client*> 		_userList; //who in channel
-		std::map<char, std::string>	_mode; //active mode: itkol
+		std::vector<Client*> 		_userList;
+		std::map<char, std::string>	_mode;
 		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
 		time_t						_topicSetTimestamp;
 		Client*						_topicSetter;
@@ -64,21 +64,20 @@ class Channel
 
 
 		// setters
-		void		setChannelName(std::string channelName);
-		bool		setTopic(std::string newTopic, Client& clientset);
-		void		addUser(Client* newClient);
-		void		addInvitedUser(Client* newClient);
-		void		removeUser(std::string userNick);
-		void		setChanKey(std::string newKey);
-		void 		addMode(char key, std::string param);
-		void		removeMode(char key);
-		void		setTopicTimestamp(time_t timestamp);
-		void		setTopicSetter(Client& setter);
+		void			setChannelName(std::string channelName);
+		bool			setTopic(std::string newTopic, Client& clientset);
+		void			addUser(Client* newClient);
+		void			addInvitedUser(Client* newClient);
+		void			removeUser(std::string userNick);
+		void			setChanKey(std::string newKey);
+		void 			addMode(char key, std::string param);
+		void			removeMode(char key);
+		void			setTopicTimestamp(time_t timestamp);
+		void			setTopicSetter(Client& setter);
 
 		// channel public method
-		bool		isClientOnChannel( Client& client);
-		channelMsg	canClientJoinChannel( Client& client, std::string clientKey);
-
+		bool			isClientOnChannel( Client& client);
+		channelMsg		canClientJoinChannel( Client& client, std::string clientKey);
 
 		// mode
 		void			setMode(std::string& modeStr, std::vector<std::string> args, Client& client);

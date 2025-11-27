@@ -4,6 +4,15 @@
 
 using namespace utils;
 
+std::string utils::ft_stringToLower(std::string str)
+{
+	for (size_t i = 0; i < str.length(); i++)
+	{
+		str[i] = static_cast<char>(std::tolower(static_cast<char>(str[i])));
+	}
+	return str;
+}
+
 std::string utils::ft_trimString(std::string msg)
 {
     std::string leadingTrim = msg.substr(msg.find_first_not_of(" \a\b\t\n\\v\f\r"), msg.length() - msg.find_first_not_of(" \a\b\t\n\\v\f\r"));
@@ -12,7 +21,7 @@ std::string utils::ft_trimString(std::string msg)
 }
 
 /** @brief split string into tokens using delimiter */
-std::vector<std::string> utils::splitString(std::string buffer, char delimiter)
+std::vector<std::string> utils::ft_splitString(std::string buffer, char delimiter)
 {
 	std::cout << "buffer :[" << buffer << "]" << std::endl;
 

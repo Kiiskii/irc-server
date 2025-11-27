@@ -24,13 +24,13 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 	std::vector<std::string> channelList;
 	std::vector<std::string> keyList;
 	if (tokens[0].find(",") != std::string::npos)
-		channelList = utils::splitString(tokens[0], ',');
+		channelList = utils::ft_splitString(tokens[0], ',');
 	else
 		channelList.push_back(tokens[0]);
 	if (tokens.size() > 1) //has key
 	{
 		if (tokens[1].find(",") != std::string::npos)
-			keyList = utils::splitString(tokens[1], ',');
+			keyList = utils::ft_splitString(tokens[1], ',');
 		else
 			keyList.push_back(tokens[1]);
 	}

@@ -12,8 +12,9 @@ namespace utils {
 	void		printVector(std::vector<std::string> tokens); //to remove
 	void		printOps(Channel& channel); //to remove
 
-	std::vector<std::string>	splitString(std::string buffer, char delimiter);
+	std::vector<std::string>	ft_splitString(std::string buffer, char delimiter);
 	std::string ft_trimString(std::string msg);
+	std::string ft_stringToLower(std::string str);
 	
 	bool		isValidChanName(std::string name);
 
