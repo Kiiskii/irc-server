@@ -33,6 +33,7 @@
 #define ERR_USERONCHANNEL 443
 #define ERR_CANNOTSENDTOCHAN 404
 #define ERR_NORECIPIENT 411
+#define ERR_NOTEXTTOSEND 412
 
 
 // #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed

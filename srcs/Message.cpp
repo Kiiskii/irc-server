@@ -167,6 +167,9 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		msg = makeNumericReply(server, num,	nick, {}, "No recipient given");
 		break;
 	
+	case ERR_NOTEXTTOSEND:
+		msg = makeNumericReply(server, num,	nick, {}, "No text to send");
+		break;
 
 	//RPL	
 	case RPL_NOTOPIC:
@@ -204,9 +207,15 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	// duplicate
 
 	case 461:
-		msg = ERR_NEEDMOREPARAMS(server, nick, "MODE"); // need fix
-		// msg = makeNumericReply(server, num, nick, otherArgs, "Not enough parameters");
+	{
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			msg = ERR_NEEDMOREPARAMS(server, nick, arg);
+			// msg = makeNumericReply(server, num, nick, otherArgs, "Not enough parameters");
+		};
 		break;	
+	}
 	
 	
 	
