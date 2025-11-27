@@ -1,4 +1,6 @@
+#include "Client.hpp"
 #include "Server.hpp"
+#include "Channel.hpp"
 #include "utils.hpp"
 
 /*

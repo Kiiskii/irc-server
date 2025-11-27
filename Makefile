@@ -3,11 +3,29 @@ FLAGS = -std=c++20
 
 OBJS_DIR = obj
 HDRS_DIR = inc/
+SRCS_DIR = srcs/
 HDRS = -I$(HDRS_DIR)
 
 NAME = ircserv
-SRCS = srcs/main.cpp srcs/Server.cpp srcs/Client.cpp  srcs/utils.cpp srcs/Join.cpp srcs/Topic.cpp srcs/Mode.cpp srcs/ModeHandlers.cpp srcs/Channel.cpp srcs/Invite.cpp \
-srcs/pass.cpp srcs/nick.cpp srcs/user.cpp srcs/ping.cpp srcs/Message.cpp
+# SRCS = $(wildcard $(SRCS_DIR)*.cpp)
+
+SRCS = $(SRCS_DIR)main.cpp \
+		$(SRCS_DIR)Server.cpp \
+		$(SRCS_DIR)Client.cpp \
+		$(SRCS_DIR)utils.cpp \
+		$(SRCS_DIR)Join.cpp \
+		$(SRCS_DIR)Topic.cpp \
+		$(SRCS_DIR)Mode.cpp \
+		$(SRCS_DIR)ModeHandlers.cpp \
+		$(SRCS_DIR)Channel.cpp \
+		$(SRCS_DIR)Invite.cpp \
+		$(SRCS_DIR)pass.cpp \
+		$(SRCS_DIR)nick.cpp \
+		$(SRCS_DIR)user.cpp \
+		$(SRCS_DIR)ping.cpp \
+		$(SRCS_DIR)Message.cpp \
+		$(SRCS_DIR)Privmsg.cpp
+
 
 OBJS = $(patsubst srcs/%.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 

@@ -20,7 +20,7 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client,
 		client.getServer().sendMsg(client, msg);
 		return false;
 	}
-	if (!isValidChanName(tokens[1]))
+	if (!utils::isValidChanName(tokens[1]))
 	{
 		std::cout << "invalid channel name\n";
 		return false;

@@ -1,4 +1,7 @@
+#include "Client.hpp"
 #include "Server.hpp"
+#include "Channel.hpp"
+#include "utils.hpp"
 
 /**
  * @brief send message to the joining member
@@ -14,13 +17,26 @@ void	Server::sendMsg(Client& client, std::string& msg)
 }
 
 /**
- * @brief send message to all member on channels and the joining member itself
+ * @brief send message to all member on channels and the sender itself
  */
 void Server::broadcastChannelMsg(std::string& msg, Channel& channel)
 {
 	for (Client* user : channel.getUserList())
 		this->sendMsg(*user, msg);
 	//recheck does this send to the joining memeber itself
+}
+
+/**
+ * @brief send message to all member on channels EXCEPT the sender itself
+ */
+void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& client)
+{
+	for (Client* user : channel.getUserList())
+	{
+		if (user->getNick() != client.getNick())
+			this->sendMsg(*user, msg);
+	}
+
 }
 
 /** 
@@ -89,8 +105,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case ERR_UNKNOWNMODE:
 	{
-		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
-		msg = makeNumericReply(server, num, nick, {arg}, "is unknown mode char to me");
+		if (otherArgs.size() == 1) 
+		{
+			arg = otherArgs[0]; 
+			msg = makeNumericReply(server, num, nick, {arg}, "is unknown mode char to me");
+		};
 		break;
 	}
 
@@ -112,8 +131,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case ERR_NOSUCHCHANNEL:
 	{
-		if (otherArgs.size() == 1) {chanName = otherArgs[0]; };
-		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
+		if (otherArgs.size() == 1) 
+		{
+			chanName = otherArgs[0]; 
+			msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
+		};
 		break;
 	}
 
@@ -137,7 +159,17 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
+	case ERR_CANNOTSENDTOCHAN:
+		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "Cannot send to channel");
+		break;
 	
+	case ERR_NORECIPIENT:
+		msg = makeNumericReply(server, num,	nick, {}, "No recipient given");
+		break;
+	
+	case ERR_NOTEXTTOSEND:
+		msg = makeNumericReply(server, num,	nick, {}, "No text to send");
+		break;
 
 	//RPL	
 	case RPL_NOTOPIC:
@@ -175,9 +207,15 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	// duplicate
 
 	case 461:
-		msg = ERR_NEEDMOREPARAMS(server, nick, "MODE"); // need fix
-		// msg = makeNumericReply(server, num, nick, otherArgs, "Not enough parameters");
+	{
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			msg = ERR_NEEDMOREPARAMS(server, nick, arg);
+			// msg = makeNumericReply(server, num, nick, otherArgs, "Not enough parameters");
+		};
 		break;	
+	}
 	
 	
 	
