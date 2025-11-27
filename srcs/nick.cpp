@@ -3,6 +3,9 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
+/*
+Considered as done but cleanup needed
+*/
 std::string transformToLowercase(std::string string)
 {
 	transform(string.begin(), string.end(), string.begin(), [](char c)
@@ -28,7 +31,6 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		send(client.getClientFd(), message.c_str(), message.size(), 0);	
 		return ;
 	}
-	/*Can we make this into a more reusable util function*/
 	for (size_t i = 0; i < getClientInfo().size(); i++)
 	{
 		if (transformToLowercase(getClientInfo()[i]->getNick()) == transformToLowercase(tokens[0]))
@@ -38,18 +40,40 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 			return ;
 		}
 	}
-	// RFC-style implementations track “which clients share any channel” and send a single NICK to each.
-	//Right now there's a bug that if you change a nick and if some channels have multiple shared channels with you, the nick change will be broadcast multiple times.
-	//Also it will get broadcasted to you twice.. So need to find a way to check it only once.
 	client.setNick(tokens[0]);
 	if (client.getClientState() == REGISTERED)
 	{
+		std::vector<int> uniqueClients;
 		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());	
 		for (Channel* channel : client.getJoinedChannels())
-			this->broadcastChannelMsg(message, *channel);
+		{
+			for (Client* user : channel->getUserList())
+			{
+				if (auto it = find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end())
+				{
+					uniqueClients.push_back(user->getClientFd());
+					send(user->getClientFd(), message.c_str(), message.size(), 0);
+				}
+			}
+		}
 	}
 	if (client.getClientState() != REGISTERED)
 	{
 		attemptRegister(client);
 	}
 }
+
+//do we want to use unordered map...
+	// 	if (client.getClientState() == REGISTERED)
+	// {
+	// 	std::unordered_map<int, Client*> uniqueClients;
+	// 	std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());	
+	// 	for (Channel* channel : client.getJoinedChannels())
+	// 	{
+	// 		for (Client* user : channel->getUserList())
+	// 		{
+	// 			if (auto it = find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end());
+	// 				uniqueClients.insert({user->getClientFd(), user});
+	// 		}
+	// 	}
+	// }
