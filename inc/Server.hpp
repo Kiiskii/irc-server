@@ -92,6 +92,7 @@ public:
 	void 		broadcastChannelMsg(std::string& msg, Channel& channel, Client& client);
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
+	
 
 };
 

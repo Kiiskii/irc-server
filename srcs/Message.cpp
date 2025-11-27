@@ -105,8 +105,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case ERR_UNKNOWNMODE:
 	{
-		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
-		msg = makeNumericReply(server, num, nick, {arg}, "is unknown mode char to me");
+		if (otherArgs.size() == 1) 
+		{
+			arg = otherArgs[0]; 
+			msg = makeNumericReply(server, num, nick, {arg}, "is unknown mode char to me");
+		};
 		break;
 	}
 
@@ -128,8 +131,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case ERR_NOSUCHCHANNEL:
 	{
-		if (otherArgs.size() == 1) {chanName = otherArgs[0]; };
-		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
+		if (otherArgs.size() == 1) 
+		{
+			chanName = otherArgs[0]; 
+			msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
+		};
 		break;
 	}
 
@@ -153,6 +159,13 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
+	case ERR_CANNOTSENDTOCHAN:
+		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "Cannot send to channel");
+		break;
+	
+	case ERR_NORECIPIENT:
+		msg = makeNumericReply(server, num,	nick, {}, "No recipient given");
+		break;
 	
 
 	//RPL	

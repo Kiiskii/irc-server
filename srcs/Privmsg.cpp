@@ -7,13 +7,24 @@ using namespace utils;
 
 static bool isValidPrivmsg(Client& client, std::vector<std::string>& tokens) 
 {
+	if (tokens.size() == 1)
+	{
+		if (tokens[0].find(":") != std::string::npos)
+		{
+			client.getServer().sendClientErr(ERR_NORECIPIENT, client, nullptr, {});
+			return;
+		}
+		else
+		{
+			
+		}
+	}
 	if (tokens.size() < 2)
 	{
 		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "PRIVMSG");
 		client.getServer().sendMsg(client, msg);
 		return false;
 	}
-
 
 	return true;
 }
@@ -40,12 +51,20 @@ void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
 		Channel* chan = this->setActiveChannel(target);
 		if (!chan)
 		{
-			std::cout << "channel not found" << std::endl;
+			this->sendClientErr(ERR_NOSUCHNICK, client, nullptr, {target});
+			// std::cout << "channel not found" << std::endl;
 			return;
 		}
+		
+		if (!chan->isClientOnChannel(client))
+		{
+			this->sendClientErr(ERR_CANNOTSENDTOCHAN, client, chan, {});
+			return;
+		}
+
 		msg = makePrivMsgToChan(tokens[1], client, *chan);
-		std::cout << "channel name: [" << chan->getChannelName() << "]"<< std::endl;
-		std::cout << "msg: [" << msg << "]" << std::endl;
+		// std::cout << "channel name: [" << chan->getChannelName() << "]"<< std::endl;
+		// std::cout << "msg: [" << msg << "]" << std::endl;
 		this->broadcastChannelMsg(msg, *chan, client);
 
 	}
@@ -54,7 +73,8 @@ void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
 		Client* partner = this->findClient(target);
 		if (!partner)
 		{
-			std::cout << "client not found" << std::endl;
+			this->sendClientErr(ERR_NOSUCHNICK, client, nullptr, {target});
+			// std::cout << "client not found" << std::endl;
 			return;
 		}
 		// msg = tokens[1];

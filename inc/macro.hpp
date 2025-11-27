@@ -31,6 +31,8 @@
 #define ERR_INVITEONLYCHAN 473
 #define ERR_NOSUCHNICK 401
 #define ERR_USERONCHANNEL 443
+#define ERR_CANNOTSENDTOCHAN 404
+#define ERR_NORECIPIENT 411
 
 
 // #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
