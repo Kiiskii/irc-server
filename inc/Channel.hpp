@@ -47,7 +47,7 @@ class Channel
 		
 	public:
 
-		Channel();
+		Channel() = delete;
 		~Channel() = default;
 		Channel(std::string newChannel);
 

@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Client.hpp"
 #include "utils.hpp"
 
 /*

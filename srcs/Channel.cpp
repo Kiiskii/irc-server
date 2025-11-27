@@ -2,14 +2,14 @@
 #include "Client.hpp"
 
 /// mode is set to +nt for now: n - no external message, t - topic restriction
-Channel::Channel() : _channelName(""), _topic("")
-{
-	_modeHandlers['i'] = &Channel::handleInviteOnly;
-	_modeHandlers['t'] = &Channel::handleTopicRestriction; // user
-	_modeHandlers['k'] = &Channel::handleChannelKey; //channel
-	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
-	_modeHandlers['l'] = &Channel::handleChannelLimit;
-}
+// Channel::Channel() : _channelName(""), _topic("")
+// {
+// 	_modeHandlers['i'] = &Channel::handleInviteOnly;
+// 	_modeHandlers['t'] = &Channel::handleTopicRestriction; // user
+// 	_modeHandlers['k'] = &Channel::handleChannelKey; //channel
+// 	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
+// 	_modeHandlers['l'] = &Channel::handleChannelLimit;
+// }
 
 Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 {

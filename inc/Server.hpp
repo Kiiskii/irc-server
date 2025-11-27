@@ -11,6 +11,7 @@
 #include <sys/types.h> 
 #include <fcntl.h>
 #include <sys/epoll.h>
+#include <map>
 
 #include "Enum.hpp"
 #include "utils.hpp"
@@ -71,6 +72,7 @@ public:
 	void handleTopic(Client& client, std::vector<std::string> tokens);
 	void handleMode(Client& client, std::vector<std::string> tokens);
 	void handleInvite(Client& client, std::vector<std::string> tokens);
+	void handlePrivmsg(Client& client, std::vector<std::string> tokens);
 
 	Channel*	findChannel(std::string newChannel);
 	void		printChannelList() const;
@@ -87,8 +89,10 @@ public:
 					std::string& executedMode, std::string& executedArgs);
 	void		sendNameReply(Client& client, Channel& channel);
 	void		broadcastChannelMsg(std::string& msg, Channel& channel);
+	void 		broadcastChannelMsg(std::string& msg, Channel& channel, Client& client);
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
+	
 
 };
 

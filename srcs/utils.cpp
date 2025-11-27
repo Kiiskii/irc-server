@@ -1,7 +1,18 @@
 #include "utils.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
+
+using namespace utils;
+
+std::string utils::ft_trimString(std::string msg)
+{
+    std::string leadingTrim = msg.substr(msg.find_first_not_of(" \a\b\t\n\\v\f\r"), msg.length() - msg.find_first_not_of(" \a\b\t\n\\v\f\r"));
+    std::string trailingTrim = leadingTrim.substr(0, leadingTrim.find_last_not_of(" \a\b\t\n\\v\f\r") + 1);
+    return trailingTrim;
+}
 
 /** @brief split string into tokens using delimiter */
-std::vector<std::string> splitString(std::string buffer, char delimiter)
+std::vector<std::string> utils::splitString(std::string buffer, char delimiter)
 {
 	std::cout << "buffer :[" << buffer << "]" << std::endl;
 
@@ -35,7 +46,7 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 /** @note not consider the case of local channel start with '&' ?? 
  * case insensitive ??
 */
-bool	isValidChanName(std::string name)
+bool	utils::isValidChanName(std::string name)
 {
 	std::regex chanNameRegex("^#[^ \\x07,]+$");
 
@@ -47,7 +58,7 @@ bool	isValidChanName(std::string name)
 	return true;
 }
 
-void	printVector(std::vector<std::string> tokens)
+void	utils::printVector(std::vector<std::string> tokens)
 {
 	std::cout << "vector memebers: " << std::endl;
 
@@ -75,7 +86,7 @@ std::string getTarget(Client &client)
 	return target;
 }
 
-void	printOps(Channel& channel)
+void	utils::printOps(Channel& channel)
 {
 	std::cout << "@CHANOPS list: \n";
 	if (!channel.getOps().empty())
