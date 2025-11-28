@@ -32,7 +32,7 @@ void Server::printChannelList() const
 
 void Server::disconnectClient(Client &client)
 {
-	//this should remove the client from the channel
+	//this should remove the client from the channel as well
 	auto it = iterateClients(*this, client);
 	if (it == _clientInfo.end())
 		return ;
@@ -43,19 +43,24 @@ void Server::disconnectClient(Client &client)
 	delete ptr;
 }
 
-//missing the error checks
 void Server::setupServerDetails(Server &server, int argc, char *argv[])
 {
 	if (argc != 3)
 	{
-		std::cout << "Argument count wrong" << std::endl;
+		std::cerr << INPUT_FORMAT << std::endl;
 		exit (1);
 	}
-	//also need to validate password and port (also set rules for the password, max length??)
-	//need to remove ./ from the server name, could just have ircserv as the default name
+	//could just have ircserv as the default name rather than getting it here...
 	_name = argv[0];
 	_name.erase(0, _name.find_last_of("/") + 1);
-	_port = std::stoi(argv[1]);
+	try
+	{	_port = std::stoi(argv[1]); }
+	catch (const std::invalid_argument&) //also this catches strings but doesnt catch 6667a for example
+	{ 
+		std::cerr << ERR_PORT << std::endl;
+		exit (1);
+	}
+	//also should have a check for valid port nbr
 	_pass = argv[2];
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
@@ -78,17 +83,20 @@ void Server::setupSocket()
 		std::cout << "We are listening" << std::endl;
 }
 
-//errors missing
+//What does it mean if epoll_ctl fails?
 void Server::setupEpoll()
 {
 	_epollFd = epoll_create1(0);
+	if (_epollFd == -1)
+	{
+		//failed to open an epoll file descriptor
+	}
 	_event.events = EPOLLIN;
 	_event.data.fd = _serverFd;
 	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event);
 }
 
-//Here we removed send because even though the client has connected, it doesnt mean they have registered
-//Error messages...
+//I believe accept needs to be protected but investigate the rest because I'm not sure in which scenario they would fail
 /*Handling a new client
 - struct sockaddr_in clientAddrress holds the client's IP address and port.
 - Calling accept fills the struct with the info (previously this was marked as NULL but then we wouldn't have stored IP anywhere)
@@ -103,6 +111,10 @@ void Server::handleNewClient()
 	struct sockaddr_in clientAddress;
 	socklen_t addressLength = sizeof(clientAddress);
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
+	if (newClient->getClientFd() == -1)
+	{
+		//failed to accept a connection on a socket...
+	}
 	char *clientIP = inet_ntoa(clientAddress.sin_addr);
 	newClient->setHostName(clientIP);
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
@@ -145,20 +157,22 @@ void Server::attemptRegister(Client &client)
 		infoPack = infoPack + info[i] + " ";
 	message = RPL_ISUPPORT(_name, client.getNick(), infoPack);
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
-
-
+//needs \r\n both
 std::string ft_irc_ascii = 
-".----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. \n"
-"| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n"
-"| |  _________   | || |  _________   | || |              | || |     _____    | || |  _______     | || |     ______   | |\n"
-"| | |_   ___  |  | || | |  _   _  |  | || |              | || |    |_   _|   | || | |_   __ \\    | || |   .' ___  |  | |\n"
-"| |   | |_  \\_|  | || | |_/ | | \\_|  | || |              | || |      | |     | || |   | |__) |   | || |  / .'   \\_|  | |\n"
-"| |   |  _|      | || |     | |      | || |              | || |      | |     | || |   |  __ /    | || |  | |         | |\n"
-"| |  _| |_       | || |    _| |_     | || |              | || |     _| |_    | || |  _| |  \\ \\_  | || |  \\ `.___.'\\  | |\n"
-"| | |_____|      | || |   |_____|    | || |   _______    | || |    |_____|   | || | |____| |___| | || |   `._____.'  | |\n"
-"| |              | || |              | || |  |_______|   | || |              | || |              | || |              | |\n"
-"| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n"
-" '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'\n";
+":" + getServerName() + " 375 " + client.getNick() + " :- " + getServerName() + " Message of the day -\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + ".----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. \n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _________   | || |  _________   | || |              | || |     _____    | || |  _______     | || |     ______   | |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_   ___  |  | || | |  _   _  |  | || |              | || |    |_   _|   | || | |_   __ \\    | || |   .' ___  |  | |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   | |_  \\_|  | || | |_/ | | \\_|  | || |              | || |      | |     | || |   | |__) |   | || |  / .'   \\_|  | |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   |  _|      | || |     | |      | || |              | || |      | |     | || |   |  __ /    | || |  | |         | |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _| |_       | || |    _| |_     | || |              | || |     _| |_    | || |  _| |  \\ \\_  | || |  \\ `.___.'\\  | |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_____|      | || |   |_____|    | || |   _______    | || |    |_____|   | || | |____| |___| | || |   `._____.'  | |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| |              | || |              | || |  |_______|   | || |              | || |              | || |              | |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + "| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n"
+":" + getServerName() + " 372 " + client.getNick() + " :" + " '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'\n"
+":" + getServerName() + " 372 " + client.getNick() + " :Created by Karoliina Hiidenheimo, Trang Pham and Anton Kiiski.\n"
+":" + getServerName() + " 376 " + client.getNick() + " :End of /MOTD command.\n";
 	send(client.getClientFd(), ft_irc_ascii.c_str(), ft_irc_ascii.size(), 0);
 	std::cout << "User set: " << client.getUserName() << std::endl;
 	std::cout << "Real name set: " << client.getRealName() << std::endl;
