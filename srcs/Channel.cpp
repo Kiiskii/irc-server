@@ -30,20 +30,29 @@ std::string Channel::getTopic() const
 	return _topic;
 }
 
-
 std::vector<Client*>&	Channel::getUserList() 
 {
 	return _userList;
 }
 
-time_t	Channel::getTopicTimestamp()
+std::string	Channel::getTopicTimestamp()
 {
-	return _topicSetTimestamp;
+	return ctime(&_topicSetTimestamp);
 }
 
-void	Channel::setTopicTimestamp(time_t timestamp)
+void	Channel::setTopicTimestamp()
 {
-	_topicSetTimestamp = timestamp;
+	_topicSetTimestamp = time(NULL);
+}
+
+void	Channel::setChannelCreationTimestamp()
+{
+	_channelCreationTimestamp = time(NULL);
+}
+
+std::string	Channel::getChannelCreationTimestamp()
+{
+	return ctime(&_channelCreationTimestamp);
 }
 
 Client*	Channel::getTopicSetter()

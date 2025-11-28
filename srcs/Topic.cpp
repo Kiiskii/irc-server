@@ -50,9 +50,9 @@ bool Channel::setTopic(std::string tokens, Client& client)
 	_topic = newTopic;
 	
 	this->setTopicSetter(client);
-	time_t timestamp;
-	time(&timestamp);
-	this->setTopicTimestamp(timestamp);
+	// time_t timestamp;
+	// time(&timestamp);
+	this->setTopicTimestamp();
 	return true;
 }
 

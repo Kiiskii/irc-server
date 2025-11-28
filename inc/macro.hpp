@@ -34,6 +34,7 @@
 #define ERR_CANNOTSENDTOCHAN 404
 #define ERR_NORECIPIENT 411
 #define ERR_NOTEXTTOSEND 412
+#define RPL_CREATIONTIME 329
 
 
 //#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed

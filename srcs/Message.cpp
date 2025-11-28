@@ -43,7 +43,7 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
  * @brief if no topic set when client joins the channel, do not send back the topic.
  * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
  * currently joined the channel, including the current client( multiple RPL_NAMREPLY 
- * and 1 RPL_ENDOFNAMES). 
+ * and 1 RPL_ENDOFNAMES) and the channel creation timestamp. 
  */
 void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 {
@@ -55,7 +55,9 @@ void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 			+ " " + std::to_string(RPL_TOPIC) + " \r\n";
 	this->broadcastChannelMsg(joinMsg, channel);
 	this->sendNameReply(client, channel);
+	this->sendClientErr(RPL_CREATIONTIME, client, &channel, {});
 }
+
 
 /** @brief send topic or no topic */
 void	Server::sendTopic(Client& client, Channel& channel)
@@ -171,6 +173,7 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		msg = makeNumericReply(server, num,	nick, {}, "No text to send");
 		break;
 
+	
 	//RPL	
 	case RPL_NOTOPIC:
 		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "No topic is set");
@@ -182,12 +185,12 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case RPL_TOPICWHOTIME:
 		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
-			channel->getTopicSetter()->getNick(), 
-			std::to_string(channel->getTopicTimestamp())}, "");
+			channel->getTopicSetter()->getNick(), channel->getTopicTimestamp()}, "");
 		break;
 
 	case RPL_NAMREPLY:
-		msg = makeNumericReply(server, num, nick,  {"=", "#"+ chanName}, channel->printUser());
+		msg = makeNumericReply(server, num, nick,  {"=", "#"+ chanName}, 
+			channel->printUser());
 		break;
 
 	case RPL_ENDOFNAMES:
@@ -203,6 +206,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		};
 		break;
 	}
+
+	case RPL_CREATIONTIME:
+		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
+			channel->getChannelCreationTimestamp()}, "");
+		break;
 
 	// duplicate
 

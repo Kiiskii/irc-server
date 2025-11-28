@@ -80,6 +80,8 @@ public:
 	bool 		mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 					std::map<std::string, std::string>& channelKeyMap);
 	Channel*	setActiveChannel(std::string buffer);
+	Channel*	createChannel(std::string chanName);
+
 	void		sendMsg(Client& client, std::string& msg);
 	void		sendTopic(Client& client, Channel& channel);
 	void		sendJoinSuccessMsg( Client& client, Channel& channel);

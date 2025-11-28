@@ -44,6 +44,7 @@ class Channel
 		std::map<char, channelMsg (Channel::*)(bool, std::string&)> _modeHandlers;
 		time_t						_topicSetTimestamp;
 		Client*						_topicSetter;
+		time_t						_channelCreationTimestamp;
 		
 	public:
 
@@ -58,7 +59,8 @@ class Channel
 		std::string					getChanKey() const;
 		std::map<char,std::string>	getMode() const;
 		std::string					printUser() const;
-		time_t						getTopicTimestamp();
+		std::string					getTopicTimestamp();
+		std::string					getChannelCreationTimestamp();
 		Client*						getTopicSetter();
 		std::unordered_set<Client*>&	getOps();
 
@@ -72,8 +74,9 @@ class Channel
 		void			setChanKey(std::string newKey);
 		void 			addMode(char key, std::string param);
 		void			removeMode(char key);
-		void			setTopicTimestamp(time_t timestamp);
+		void			setTopicTimestamp();
 		void			setTopicSetter(Client& setter);
+		void			setChannelCreationTimestamp();
 
 		// channel public method
 		bool			isClientOnChannel( Client& client);
