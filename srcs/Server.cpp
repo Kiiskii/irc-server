@@ -336,8 +336,8 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	if (command == "MODE")
 	{
-		// std::cout << "[" << command << "]" << std::endl;
-		// printVector(tokens);
+		std::cout << "[" << command << "]" << std::endl;
+		utils::printVector(tokens);
 		server.handleMode(client, tokens);
 	}
 	if (command == "INVITE")

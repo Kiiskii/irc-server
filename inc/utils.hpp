@@ -15,6 +15,7 @@ namespace utils {
 	std::vector<std::string>	ft_splitString(std::string buffer, char delimiter);
 	std::string ft_trimString(std::string msg);
 	std::string ft_stringToLower(std::string str);
+	std::string extractChannelName(std::string str);
 	
 	bool		isValidChanName(std::string name);
 

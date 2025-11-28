@@ -4,9 +4,12 @@
 #include "utils.hpp"
 #include "macro.hpp"
 
+using namespace utils;
 
-/** @note this check only for mode applied to channel, not sure about users mode
- * @brief MODE <#channel> <+/-modestring> [<mode arguments>...] */ 
+/** 
+ * @brief MODE <#channel> <+/-modestring> [<mode arguments>...]
+ * this function checks whether all the modes are valid 
+ * and return which mode is not valid*/ 
 bool Channel::isValidModeCmd(std::string modeStr, Client& client)
 {
 	std::regex modeRegex("^[+-][iklot]+([+-][iklot]+)*$");
@@ -18,13 +21,11 @@ bool Channel::isValidModeCmd(std::string modeStr, Client& client)
 	{
 		if (validChars.find(modeStr[i]) == std::string::npos)
 		{
-			std::string str(1, static_cast<char>(modeStr[i])); //check this chararacter
-			client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, {str});
+			std::string unknowMode(1, modeStr[i]);
+			client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, {unknowMode});
 			return false;
 		}
 	}
-	std::cout << "DOES NOT match regex pattern for mode\n";
-	client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, {});
 	return false;
 }
 
@@ -83,11 +84,7 @@ static void restrictRemoveKeyMode(std::string& executedMode, std::string& execut
 
 void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Client& client)
 {
-	Server&	server = client.getServer();
-
-	// std::cout << "mode are: [" << modeStr << "]" << " and args. ";
-	// printVector(argsVec);
-
+	Server&		server = client.getServer();
 	std::string params, modeStatus, executedMode, executedArgs;
 	bool		addMode = true;
 	channelMsg	msgEnum;
@@ -131,24 +128,28 @@ void Channel::setMode(std::string& modeStr, std::vector<std::string> argsVec, Cl
 				server.sendClientErr(461, client, this, {});
 				break;
 			}
-			std::cout << "size of arg" << argsVec.size() << std::endl;
+			// std::cout << "size of arg" << argsVec.size() << std::endl;
 			params = argsVec.front();
 			argsVec.erase(argsVec.begin());
 		}
 		else
 		{
-			server.sendClientErr(ERR_UNKNOWNMODE, client, this, {});
-			continue;
+			std::string unknowMode(1, mode);
+			// printf("%s", unknowMode.c_str());
+			client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, {unknowMode});
+			return ;
+			// server.sendClientErr(ERR_UNKNOWNMODE, client, this, {});
+			// continue;
 		}
 		// this only handle the _mode mapping, not action with client yet
 		msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 		if (msgEnum == SET_MODE_OK)
 		{
-			// std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
+			std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
 			combineExecutedMode(executedMode, mode, addMode);
 			executedArgs += (params.empty() ? "" : params + " ");
 		}
-
+		std::cout << " executedMode: [" << mode << "] and executedArgs: [" << params << "]\n";
 	}
 	restrictRemoveKeyMode(executedMode, executedArgs);
 	server.sendSetModeMsg(client, *this, executedMode, executedArgs);
@@ -173,34 +174,38 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	std::string	nameStr, modeStr;
 	std::vector<std::string> modeParams;
 
-	if (tokens.size() > 0)
-		nameStr = tokens[0];
-	if (tokens.size() > 1)
-		modeStr = tokens[1];
+	if (tokens.size() < 2)
+		return;
+	nameStr = tokens[0];
+	modeStr = tokens[1];
 	if (tokens.size() > 2)
 	{
 		tokens.erase(tokens.begin(), tokens.begin() + 2);
 		modeParams = tokens;
 	}
 
-	// ONLY work on channel mode, so always have channel??
+	// set channel
 	if (nameStr.find("#") != std::string::npos)
 	{
-		channelPtr = this->setActiveChannel(nameStr);
-		// if not on any channel, return do nothing
-		if (channelPtr == nullptr) 
+		channelPtr = this->findChannel(utils::extractChannelName(nameStr));
+		if (!channelPtr) 
 		{
-			std::cout << "null ptr \n";	
+			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, 
+				{utils::extractChannelName(nameStr)});
 			return; 
 		}
 	}
 	else 
 	{
-		// std::cout << "message doesn't have channel # \n"; 
+		// this->sendClientErr(ERR_NOTONCHANNEL, client, nullptr, {});
 		return;
 	}
 
-	// validate the command here, need to fix this??
+	std::cout << "name str: " << channelPtr->getChannelName() << " and modestr " << modeStr << "\nparams are: " ; 
+	utils::printVector(tokens);
+
+	
+
 	if (!channelPtr->isValidModeCmd(modeStr, client))
 		return;
 

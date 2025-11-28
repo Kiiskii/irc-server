@@ -107,3 +107,21 @@ void	utils::printOps(Channel& channel)
 		std::cout << "\n";
 	}
 }
+
+std::string utils::extractChannelName(std::string buffer)
+{
+	std::string	channelName;
+	
+	size_t hashPos = buffer.find("#");
+	if (hashPos == std::string::npos)
+		return nullptr;
+	
+	size_t chanEndPos = buffer.find(' ', hashPos);
+	if (chanEndPos == std::string::npos)
+		chanEndPos = buffer.length();
+
+	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
+		std::cout << "channelName: [" << channelName << "]" << std::endl;
+	return channelName;
+
+}
