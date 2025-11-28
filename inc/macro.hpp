@@ -60,6 +60,8 @@
 #define ERR_NEEDMOREPARAMS(servername, nickname, command) ":" + servername + " 461 " + nickname + " " + command + " :Not enough parameters\r\n"
 #define ERR_PASSWDMISMATCH(servername, nickname) ":" + servername + " 464 " + nickname + " :Password incorrect\r\n"
 #define ERR_ALREADYREGISTERED(servername, nickname) ":" + servername + " 462 " + nickname + " :You may not register\r\n"
+#define ERR_UNKNOWNCOMMAND(servername, nickname, command) ":" + servername + " 421 " + nickname + " " + command + " :Unknown command\r\n"
+#define ERR_INPUTTOOLONG(servername, nickname) ":" + servername + " 417 " + nickname + " :Input line was too long\r\n"
 
 //should this also have the servername and nickname?
 #define ERR_GENERIC(servername, nickname, reason) ":" + servername + " " + nickname + " :" + reason + "\r\n"
