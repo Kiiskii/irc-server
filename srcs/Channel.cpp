@@ -35,9 +35,10 @@ std::vector<Client*>&	Channel::getUserList()
 	return _userList;
 }
 
+/** @note <creationtime> is a unix timestamp */
 std::string	Channel::getTopicTimestamp()
 {
-	return ctime(&_topicSetTimestamp);
+	return std::to_string(_topicSetTimestamp);
 }
 
 void	Channel::setTopicTimestamp()
@@ -52,7 +53,7 @@ void	Channel::setChannelCreationTimestamp()
 
 std::string	Channel::getChannelCreationTimestamp()
 {
-	return ctime(&_channelCreationTimestamp);
+	return std::to_string(_channelCreationTimestamp);
 }
 
 Client*	Channel::getTopicSetter()

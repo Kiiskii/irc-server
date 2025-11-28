@@ -36,7 +36,6 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
 		if (user->getNick() != client.getNick())
 			this->sendMsg(*user, msg);
 	}
-
 }
 
 /** 
@@ -49,13 +48,13 @@ void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 {
 	std::string	user = client.makeUser();
 
-	this->sendTopic(client, channel);
 	// send JOIN msg
-	std::string joinMsg = user + " JOIN #" + channel.getChannelName() 
-			+ " " + std::to_string(RPL_TOPIC) + " \r\n";
-	this->broadcastChannelMsg(joinMsg, channel);
+	std::string joinMsg = user + " JOIN #" + channel.getChannelName() + " \r\n";
+	this->sendMsg(client, joinMsg);
+	this->sendTopic(client, channel);
 	this->sendNameReply(client, channel);
 	this->sendClientErr(RPL_CREATIONTIME, client, &channel, {});
+	this->broadcastChannelMsg(joinMsg, channel, client);
 }
 
 
@@ -66,10 +65,7 @@ void	Server::sendTopic(Client& client, Channel& channel)
 				nick = client.getNick(),
 				chanName = channel.getChannelName();
 
-	// send topic / no_topic
-	if (channel.getTopic().empty())
-		this->sendClientErr(RPL_NOTOPIC, client, &channel, {});
-	else
+	if (!channel.getTopic().empty())
 	{
 		this->sendClientErr(RPL_TOPIC, client, &channel, {});
 		this->sendClientErr(RPL_TOPICWHOTIME, client, &channel, {});
@@ -224,8 +220,6 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		};
 		break;	
 	}
-	
-	
 	
 	default:
 		break;
