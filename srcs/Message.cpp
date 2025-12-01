@@ -208,6 +208,18 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 			channel->getChannelCreationTimestamp()}, "");
 		break;
 
+	case RPL_CHANNELMODEIS:
+	{
+		if (otherArgs.size() == 2)
+		{
+			std::string modeStr = otherArgs[0];
+			std::string modeArgs = otherArgs[1];
+			msg = makeNumericReply(server, num, nick, {"#" + chanName, modeStr, modeArgs}, 
+				"");
+		}
+		break;
+	}
+
 	// duplicate
 
 	case 461:

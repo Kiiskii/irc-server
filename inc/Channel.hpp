@@ -57,7 +57,7 @@ class Channel
 		std::string 				getTopic() const;
 		std::vector<Client*>&		getUserList() ;
 		std::string					getChanKey() const;
-		std::map<char,std::string>	getMode() const;
+		std::vector<std::string> 	getMode() const;
 		std::string					printUser() const;
 		std::string					getTopicTimestamp();
 		std::string					getChannelCreationTimestamp();
@@ -83,7 +83,7 @@ class Channel
 		channelMsg		canClientJoinChannel( Client& client, std::string clientKey);
 
 		// mode
-		void			setMode(std::string& modeStr, std::vector<std::string> args, Client& client);
+		bool			setMode(std::vector<std::string>& tokens, Client& client);
 		bool			isModeActive(char mode);
 		bool			isModeActive(char mode, std::string& key);
 		channelMsg		handleInviteOnly(bool add, std::string& args);

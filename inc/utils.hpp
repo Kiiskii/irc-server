@@ -16,8 +16,10 @@ namespace utils {
 	std::string ft_trimString(std::string msg);
 	std::string ft_stringToLower(std::string str);
 	std::string extractChannelName(std::string str);
-	
+	std::string setParamAndRemoveToken(std::vector<std::string>& tokens);
+
 	bool		isValidChanName(std::string name);
+
 
 	// messaging utils
 	std::string makePrivMsgToChan(std::string& token, Client& client, Channel& chan);

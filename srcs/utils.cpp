@@ -121,7 +121,16 @@ std::string utils::extractChannelName(std::string buffer)
 		chanEndPos = buffer.length();
 
 	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
-		std::cout << "channelName: [" << channelName << "]" << std::endl;
+	// std::cout << "channelName: [" << channelName << "]" << std::endl;
 	return channelName;
 
+}
+
+std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
+{
+	std::string params;
+
+	params = tokens.front();
+	tokens.erase(tokens.begin());
+	return params;
 }

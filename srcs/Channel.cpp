@@ -136,15 +136,22 @@ void Channel::removeMode(char key)
 	_mode.erase(key);
 }
 
-std::map<char, std::string> Channel::getMode() const
+std::vector<std::string> Channel::getMode() const
 {
-	std::cout << "active mode saved size: " << _mode.size() << std::endl;
+	// std::cout << "active mode saved size: " << _mode.size() << std::endl;
+	std::string modeStr = "+";
+	std::string modeArgs;
 	for (auto& it : _mode)
 	{
 		// if (!it) { std::cout << "this mode cannot access/n"; continue; }
-		std::cout << "existing mode: key and param: [" << it.first << ", " << it.second << "]" << std::endl;
+		// std::cout << "existing mode: key and param: [" << it.first << ", " << it.second << "]" << std::endl;
+		modeStr += it.first;
+		if (modeArgs.empty())
+			modeArgs += it.second;
+		else
+			modeArgs = " " + it.second;
 	}
-	return _mode;
+	return {modeStr, modeArgs};
 }
 
 void Channel::addUser(Client* newClient)
