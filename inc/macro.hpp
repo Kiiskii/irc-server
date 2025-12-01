@@ -47,7 +47,7 @@
 //   "<client> :End of /MOTD command."
 
 #define INPUT_FORMAT "Expected format: <./ircserv> <port number> <password>"
-#define ERR_PORT "Port number expected to be of numeric value"
+#define ERR_PORT "Port number expected to be of numeric value between numbers X and Y"
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
 #define RPL_YOURHOST(servername, nickname, version) ":" + servername + " 002 " + nickname + " :Your host is " + servername + ", running version " + version + "\r\n"

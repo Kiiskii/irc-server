@@ -43,24 +43,30 @@ void Server::disconnectClient(Client &client)
 	delete ptr;
 }
 
+/*We still need a valid port nbr check, also could as well just add the server name automatically rather than fetching it from the program*/
 void Server::setupServerDetails(Server &server, int argc, char *argv[])
 {
+	size_t pos;
 	if (argc != 3)
 	{
 		std::cerr << INPUT_FORMAT << std::endl;
 		exit (1);
 	}
-	//could just have ircserv as the default name rather than getting it here...
 	_name = argv[0];
 	_name.erase(0, _name.find_last_of("/") + 1);
 	try
-	{	_port = std::stoi(argv[1]); }
-	catch (const std::invalid_argument&) //also this catches strings but doesnt catch 6667a for example
+	{	_port = std::stoi(argv[1], &pos); }
+	catch (const std::exception&) //invalid argument ("abc") or out of range
 	{ 
 		std::cerr << ERR_PORT << std::endl;
 		exit (1);
 	}
-	//also should have a check for valid port nbr
+	std::string s = argv[1];
+	if (pos != s.length()) //trailing invalid characters
+	{
+		std::cerr << ERR_PORT << std::endl;
+		exit(1);
+	}
 	_pass = argv[2];
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
