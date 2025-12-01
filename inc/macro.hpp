@@ -19,6 +19,7 @@
 #define RPL_TOPICWHOTIME 333
 #define RPL_ENDOFNAMES 366
 #define RPL_INVITING 341
+#define RPL_CHANNELMODEIS 324
 
 /* ERRORS */
 #define ERR_NOSUCHCHANNEL 403
@@ -34,9 +35,8 @@
 #define ERR_CANNOTSENDTOCHAN 404
 #define ERR_NORECIPIENT 411
 #define ERR_NOTEXTTOSEND 412
+#define RPL_CREATIONTIME 329
 
-
-// #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 
 //#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
 // RPL_MOTDSTART (375) 

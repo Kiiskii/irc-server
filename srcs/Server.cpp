@@ -3,11 +3,13 @@
 #include "Client.hpp"
 #include "utils.hpp"
 
-/* @note rememeber to check all on-heap allocated memory, such as chan */
+/* @note rememeber to check all on-heap allocated memory, such as chan, client */
 Server::~Server()
 {
 	for (auto chan : _channelInfo)
 		delete chan;
+	for (auto client : _clientInfo)
+		delete client;
 }
 
 /* @def check if the channel exists
@@ -16,18 +18,10 @@ Channel* Server::findChannel(std::string newChannel)
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end(); ++it)
 	{
-		if ((*it)->getChannelName() == newChannel)
+		if (utils::ft_stringToLower((*it)->getChannelName()) == utils::ft_stringToLower(newChannel))
 			return *it;
 	}
 	return nullptr;
-}
-
-void Server::printChannelList() const
-{
-	for (auto i : _channelInfo)
-	{
-		std::cout << i << std::endl;
-	}
 }
 
 void Server::disconnectClient(Client &client)

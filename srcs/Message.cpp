@@ -36,26 +36,27 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
 		if (user->getNick() != client.getNick())
 			this->sendMsg(*user, msg);
 	}
-
 }
 
 /** 
  * @brief if no topic set when client joins the channel, do not send back the topic.
  * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
  * currently joined the channel, including the current client( multiple RPL_NAMREPLY 
- * and 1 RPL_ENDOFNAMES). 
+ * and 1 RPL_ENDOFNAMES) and the channel creation timestamp. 
  */
 void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 {
 	std::string	user = client.makeUser();
 
-	this->sendTopic(client, channel);
 	// send JOIN msg
-	std::string joinMsg = user + " JOIN #" + channel.getChannelName() 
-			+ " " + std::to_string(RPL_TOPIC) + " \r\n";
-	this->broadcastChannelMsg(joinMsg, channel);
+	std::string joinMsg = user + " JOIN #" + channel.getChannelName() + " \r\n";
+	this->sendMsg(client, joinMsg);
+	this->sendTopic(client, channel);
 	this->sendNameReply(client, channel);
+	this->sendClientErr(RPL_CREATIONTIME, client, &channel, {});
+	this->broadcastChannelMsg(joinMsg, channel, client);
 }
+
 
 /** @brief send topic or no topic */
 void	Server::sendTopic(Client& client, Channel& channel)
@@ -64,10 +65,7 @@ void	Server::sendTopic(Client& client, Channel& channel)
 				nick = client.getNick(),
 				chanName = channel.getChannelName();
 
-	// send topic / no_topic
-	if (channel.getTopic().empty())
-		this->sendClientErr(RPL_NOTOPIC, client, &channel, {});
-	else
+	if (!channel.getTopic().empty())
 	{
 		this->sendClientErr(RPL_TOPIC, client, &channel, {});
 		this->sendClientErr(RPL_TOPICWHOTIME, client, &channel, {});
@@ -171,6 +169,7 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		msg = makeNumericReply(server, num,	nick, {}, "No text to send");
 		break;
 
+	
 	//RPL	
 	case RPL_NOTOPIC:
 		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "No topic is set");
@@ -182,12 +181,12 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case RPL_TOPICWHOTIME:
 		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
-			channel->getTopicSetter()->getNick(), 
-			std::to_string(channel->getTopicTimestamp())}, "");
+			channel->getTopicSetter()->getNick(), channel->getTopicTimestamp()}, "");
 		break;
 
 	case RPL_NAMREPLY:
-		msg = makeNumericReply(server, num, nick,  {"=", "#"+ chanName}, channel->printUser());
+		msg = makeNumericReply(server, num, nick,  {"=", "#"+ chanName}, 
+			channel->printUser());
 		break;
 
 	case RPL_ENDOFNAMES:
@@ -204,6 +203,23 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
+	case RPL_CREATIONTIME:
+		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
+			channel->getChannelCreationTimestamp()}, "");
+		break;
+
+	case RPL_CHANNELMODEIS:
+	{
+		if (otherArgs.size() == 2)
+		{
+			std::string modeStr = otherArgs[0];
+			std::string modeArgs = otherArgs[1];
+			msg = makeNumericReply(server, num, nick, {"#" + chanName, modeStr, modeArgs}, 
+				"");
+		}
+		break;
+	}
+
 	// duplicate
 
 	case 461:
@@ -216,8 +232,6 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		};
 		break;	
 	}
-	
-	
 	
 	default:
 		break;

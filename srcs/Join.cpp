@@ -24,13 +24,13 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 	std::vector<std::string> channelList;
 	std::vector<std::string> keyList;
 	if (tokens[0].find(",") != std::string::npos)
-		channelList = utils::splitString(tokens[0], ',');
+		channelList = utils::ft_splitString(tokens[0], ',');
 	else
 		channelList.push_back(tokens[0]);
 	if (tokens.size() > 1) //has key
 	{
 		if (tokens[1].find(",") != std::string::npos)
-			keyList = utils::splitString(tokens[1], ',');
+			keyList = utils::ft_splitString(tokens[1], ',');
 		else
 			keyList.push_back(tokens[1]);
 	}
@@ -106,6 +106,15 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	return JOIN_OK;
 }
 
+Channel* Server::createChannel(std::string chanName)
+{
+	this->getChannelInfo().push_back(new Channel(chanName));
+	Channel* newChannel = this->getChannelInfo().back();
+	newChannel->setChannelCreationTimestamp();
+	return newChannel;
+}
+
+
 /** @note JOIN 0 will leave all the channels -> how?? 
  * regular channel: This channel is what’s referred to as a normal channel. Clients can join this channel, and the first client who joins a normal channel is made a channel operator, along with the appropriate channel membership prefix. On most servers, newly-created channels have then protected topic "+t" and no external messages "+n" modes enabled, but exactly what modes new channels are given is up to the server. 
 */
@@ -126,10 +135,11 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 		// check if the channel existschannel.
 		Channel* channelPtr = this->findChannel(channelName);
 		if (!channelPtr)
-		{
-			this->getChannelInfo().push_back(new Channel(channelName));
-			channelPtr = this->getChannelInfo().back();
-		}
+			channelPtr = this->createChannel(channelName);
+		// {
+		// 	this->getChannelInfo().push_back(new Channel(channelName));
+		// 	channelPtr = this->getChannelInfo().back();
+		// }
 
 		channelMsg result = channelPtr->canClientJoinChannel(client, clientKey);
 		if (result == JOIN_OK)
