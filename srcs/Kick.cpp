@@ -3,11 +3,6 @@
 #include "utils.hpp"
 #include "macro.hpp"
 
-// ensure that the user kicking is an operator before kicking (to be implemented)
-// remove channel from clients joinedChannels list
-// check that client getting kicked exists
-// remove client from channels userList
-
 void Client::kickClient(Server& server, std::vector<std::string>& params)
 {
 	std::string channelString = params[0];
@@ -34,6 +29,12 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 		server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
 	}
 
+	// check that client kicking is a channel operator
+	if (!cli->isOps(*chann)) {
+		server.sendClientErr(ERR_CHANOPRIVSNEEDED, *this, chann, {this->getNick()});
+		return ;
+	}
+
 	// check that client getting kicked is on the server
 	Client* cliServer = checkClientExistence(server.getClientInfo(), clientString);
 	if (!cliServer) {
@@ -48,6 +49,8 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 		return ;
 	}
 
+	server.sendKickMsg(cli->getNick(), clientString, params, *chann);
+
 	// remove user from channelList and channel from client channelList
 	chann->removeUser(clientString);
 	cliChannel->removeChannel(chann);
@@ -57,7 +60,6 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 	if (ite.empty()) {
 		server.removeChannel(chann);
 	}
-	return ;
 }
 
 /*

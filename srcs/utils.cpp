@@ -133,6 +133,8 @@ std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
 	params = tokens.front();
 	tokens.erase(tokens.begin());
 	return params;
+}
+
 Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 {
 	Client* c = nullptr;

@@ -100,3 +100,13 @@ bool	Client::isOps(Channel& channel)
 		return true;
 	return false;
 }
+
+void Client::removeChannel(Channel* chann)
+{
+	for (auto it = _joinedChannels.begin(); it != _joinedChannels.end();) {
+		if ((*it) == chann)
+			it = _joinedChannels.erase(it);
+		else
+			++it;
+	}
+}
