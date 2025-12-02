@@ -37,13 +37,15 @@ void Server::disconnectClient(Client &client)
 	if (it == _clientInfo.end())
 		return ;
 	Client* ptr = *it;
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, ptr->getClientFd(), NULL);
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, ptr->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
 	close(ptr->getClientFd());
 	getClientInfo().erase(it);
 	delete ptr;
 }
 
-/*We still need a valid port nbr check, also could as well just add the server name automatically rather than fetching it from the program*/
+/*Port is a 16-bit unsigned int, meaning valid range is 0-65535.
+However, ports under 1024 are privileged and require root privileges. In our program,
+we would get an error of failing to bind a server socket.*/
 void Server::setupServerDetails(Server &server, int argc, char *argv[])
 {
 	size_t pos;
@@ -62,7 +64,7 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 		exit (1);
 	}
 	std::string s = argv[1];
-	if (pos != s.length()) //trailing invalid characters
+	if (pos != s.length() || _port < 1024 || _port > 65535) //trailing invalid characters and if port out of range
 	{
 		std::cerr << ERR_PORT << std::endl;
 		exit(1);
@@ -71,38 +73,51 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
 
-//one function for setting up the socket?
-//missing error checks
+/*SO_REUSEADDR, allows a socket to bind to an address/port that is still in use. It also
+allows multiple sockets to bind to the same port. So opt here is basically a toggle of whether
+the socket reusing option is enabled or disabled*/
 void Server::setupSocket()
 {
 	_details.sin_family = AF_INET;
 	_details.sin_port = htons(_port);
 	_details.sin_addr.s_addr = INADDR_ANY;
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
-	/*SO_REUSEADDR, allows a socket to bind to an address/port that is still in use. It also
-	allows multiple sockets to bind to the same port. So opt here is basically a toggle of whether
-	the socket reusing option is enabled or disabled*/
+	if (_serverFd == -1) //happens when you hit ulimit -n or too many connections (open fds)
+	{
+		std::cerr << "Failed to create a socket" << std::endl;
+		exit (1);
+	}
 	int opt = 1;
 	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
-	bind (_serverFd, (struct sockaddr *)&_details, sizeof(_details));
-	if (listen(_serverFd, 1) == 0)
-		std::cout << "We are listening" << std::endl;
+	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1) //fails when port already in use (try port under 1024?)
+	{
+		std::cerr << "Failed to bind server socket" << std::endl;
+		exit (1);
+	}
+	if (listen(_serverFd, 1) == -1) //not so likely to fail
+	{
+		std::cerr << "Failed to listen on server socket" << std::endl;
+		exit (1);
+	}
 }
 
-//What does it mean if epoll_ctl fails?
 void Server::setupEpoll()
 {
 	_epollFd = epoll_create1(0);
-	if (_epollFd == -1)
+	if (_epollFd == -1) //again, too many epoll fds open, system limits, mem, try ulimit -n
 	{
-		//failed to open an epoll file descriptor
+		std::cerr << "Failed to create epoll instance" << std::endl;
+		exit (1);
 	}
 	_event.events = EPOLLIN;
 	_event.data.fd = _serverFd;
-	epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event);
+	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
+	{
+		std::cerr << "Failed to add file descriptor to epoll" << std::endl;
+		exit (1);
+	}
 }
 
-//I believe accept needs to be protected but investigate the rest because I'm not sure in which scenario they would fail
 /*Handling a new client
 - struct sockaddr_in clientAddrress holds the client's IP address and port.
 - Calling accept fills the struct with the info (previously this was marked as NULL but then we wouldn't have stored IP anywhere)
@@ -117,24 +132,29 @@ void Server::handleNewClient()
 	struct sockaddr_in clientAddress;
 	socklen_t addressLength = sizeof(clientAddress);
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
-	if (newClient->getClientFd() == -1)
+	if (newClient->getClientFd() == -1) //clients disconnect too quickly, fd exhaustion, race condition, try to connect and instantly close with ctrl C
 	{
-		//failed to accept a connection on a socket...
+		std::cerr << "Failed to accept new client" << std::endl;
+		exit (1);
 	}
 	char *clientIP = inet_ntoa(clientAddress.sin_addr);
 	newClient->setHostName(clientIP);
-	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 	_clientInfo.push_back(newClient);
 	fcntl(newClient->getClientFd(), F_SETFL, O_NONBLOCK);
 	struct epoll_event ev;
 	ev.events = EPOLLIN;
 	ev.data.fd = newClient->getClientFd();
-	epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev);
+	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
+	{
+		std::cerr << "Failed to add file descriptor to epoll" << std::endl;
+		exit (1);		
+	}
+	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }
 
 /*
 - Missing message of the day
-- Additional info to put here?*/
+- Additional info to put here, at least Trang added the channel length!*/
 void Server::attemptRegister(Client &client)
 {
 	if (client.getClientState() != REGISTERING)
