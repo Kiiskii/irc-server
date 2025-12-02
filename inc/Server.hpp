@@ -55,6 +55,7 @@ public:
 	void handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens);
 	void attemptRegister(Client &client);
 	void disconnectClient(Client &client);
+	void removeChannel(Channel* chann);
 
 	void 		receive(Client &c);
 	void 		parseMessage(Client &c, const std::string &line);
@@ -90,7 +91,7 @@ public:
 	void 		broadcastChannelMsg(std::string& msg, Channel& channel, Client& client);
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
-	
+	void		sendKickMsg(std::string oper, std::string client, std::vector<std::string>& params, Channel& channel);
 
 };
 

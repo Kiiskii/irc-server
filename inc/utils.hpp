@@ -31,3 +31,5 @@ std::string	makeNumericReply(std::string prefix, int code,
 	std::string target, std::vector<std::string> params, std::string trailing);
 
 std::string	getTarget(Client &client);
+
+Client* checkClientExistence(std::vector<Client*>& list, std::string nick);
