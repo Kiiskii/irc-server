@@ -86,8 +86,11 @@ void	Server::sendNameReply(Client& client, Channel& channel)
 void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::string>& params, Channel& channel)
 {
 	//check if a reason for kicking exists
+	for (auto it : params)
+		std::cout << " / " << it;
+	std::cout << std::endl;
 	std::string reason;
-	if (params.size() > 2) {
+	if (params[2].length() > 1) {
 		for (int i = 2; i < params.size(); ++i) {
 			reason += params[i];
 			if (i + 1 != params.size())
@@ -95,7 +98,8 @@ void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::
 		}
 	}
 	else
-		reason = params[3];
+		reason = oper;
+	std::cout << reason << std::endl;
 	std::string msg =	":" + oper + "!" + oper + "@localhost"
 						+ " KICK " + "#" + channel.getChannelName()
 						+ " " + client + " " + reason + "\r\n";
@@ -165,7 +169,7 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		if (otherArgs.size() == 1) 
 		{
 			chanName = otherArgs[0]; 
-			msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
+			msg = makeNumericReply(server, num,	nick, {chanName}, "No such channel");
 		};
 		break;
 	}

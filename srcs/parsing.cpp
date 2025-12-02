@@ -181,6 +181,10 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 		utils::printVector(tokens);
 		server.handlePrivmsg(client, tokens);
 	}
+	else if (command == "KICK")
+	{
+		client.kickClient(server, tokens);
+	}
 	else
 	{
 		std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);

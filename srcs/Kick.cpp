@@ -1,20 +1,22 @@
 #include "Client.hpp"
 #include "Server.hpp"
+#include "Channel.hpp"
 #include "utils.hpp"
 #include "macro.hpp"
 
 void Client::kickClient(Server& server, std::vector<std::string>& params)
 {
-	std::string channelString = params[0];
-	std::string clientString = params[1];
 	std::string error;
 
 	// check that there is correct amount of params
-	if (params.size() < 3) {
+	if (params.size() < 2) {
 		error = ERR_NEEDMOREPARAMS(server.getServerName(), getNick(), "KICK");
 		server.sendMsg(*this, error);
 		return ;
 	}
+
+	std::string channelString = params[0];
+	std::string clientString = params[1];
 
 	// check that channel exists
 	Channel* chann = server.setActiveChannel(channelString);
@@ -23,14 +25,21 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 		return ;
 	}
 
-	// check if client kicking is on the channel
-	Client* cli = checkClientExistence(server.getClientInfo(), this->getNick());
-	if (!cli) {
+	// do we need to check if client is on the server?
+	//Client* cli = checkClientExistence(server.getClientInfo(), this->getNick());
+	//if (!cli) {
+	//	server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
+	//	return ;
+	//}
+
+	// check if client kicking is on channel
+	if (!chann->isClientOnChannel(*this)) {
 		server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
+		return ;
 	}
 
 	// check that client kicking is a channel operator
-	if (!cli->isOps(*chann)) {
+	if (!this->isOps(*chann)) {
 		server.sendClientErr(ERR_CHANOPRIVSNEEDED, *this, chann, {this->getNick()});
 		return ;
 	}
@@ -49,7 +58,7 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 		return ;
 	}
 
-	server.sendKickMsg(cli->getNick(), clientString, params, *chann);
+	server.sendKickMsg(this->getNick(), clientString, params, *chann);
 
 	// remove user from channelList and channel from client channelList
 	chann->removeUser(clientString);
