@@ -6,6 +6,11 @@
 int main(int argc, char *argv[])
 {
 	Server server;
+	if (argc != 3)
+	{
+		std::cerr << INPUT_FORMAT << std::endl;
+		exit (1);
+	}
 	server.setupServerDetails(server, argc, argv);
 	server.setupSocket();
 	server.setupEpoll();
@@ -20,35 +25,19 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				//This could be connect with already existing client...
-				//char buffer[1024] = {0};
+				//make into its own function?
 				int clientFd = server.getEpollEvents()[i].data.fd;
 				int clientIndex = 0;
 				for (size_t i = 0; i < server.getClientInfo().size(); i++)
 				{
-					if (server.getClientInfo()[i]->getClientFd() == clientFd) // this was changed
+					if (server.getClientInfo()[i]->getClientFd() == clientFd)
 					{
 						clientIndex = i;
 						break;
 					}
 				}
-				Client &c = *server.getClientInfo()[clientIndex]; // this was changed
-
-				std::string msg;
+				Client &c = *server.getClientInfo()[clientIndex];
 				server.receive(c);
-
-				//std::cout << "Message recieved: [" << msg << "]:" << std::endl;
-				//server.handleCommand(server, c, msg);
-
-				//server.getClientInfo()[clientIndex].recieve();
-				//std::string msg;
-				//msg.server.getClientInfo()[clientIndex].recieve();
-				//if (recv(server.getClientInfo()[clientIndex].getClientFd(), buffer, sizeof(buffer), 0) <= 0)
-				//	std::cout << "Did we encounter a problem" << std::endl;
-				//std::cout << "Message that we received : [" << msg << "]" << std::endl;
-				//std::string evenBuffer(buffer);
-				//server.handleCommand(server, server.getClientInfo()[clientIndex], msg);
-				//need to also deal with a situation if password is "empty string"
 			}
 		}
 	}

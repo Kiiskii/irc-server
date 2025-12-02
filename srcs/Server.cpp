@@ -49,11 +49,7 @@ we would get an error of failing to bind a server socket.*/
 void Server::setupServerDetails(Server &server, int argc, char *argv[])
 {
 	size_t pos;
-	if (argc != 3)
-	{
-		std::cerr << INPUT_FORMAT << std::endl;
-		exit (1);
-	}
+
 	_name = argv[0];
 	_name.erase(0, _name.find_last_of("/") + 1);
 	try
@@ -84,19 +80,19 @@ void Server::setupSocket()
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd == -1) //happens when you hit ulimit -n or too many connections (open fds)
 	{
-		std::cerr << "Failed to create a socket" << std::endl;
+		std::cerr << ERR_SOCKET << std::endl;
 		exit (1);
 	}
 	int opt = 1;
 	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
 	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1) //fails when port already in use (try port under 1024?)
 	{
-		std::cerr << "Failed to bind server socket" << std::endl;
+		std::cerr << ERR_BIND << std::endl;
 		exit (1);
 	}
 	if (listen(_serverFd, 1) == -1) //not so likely to fail
 	{
-		std::cerr << "Failed to listen on server socket" << std::endl;
+		std::cerr << ERR_LISTEN << std::endl;
 		exit (1);
 	}
 }
@@ -106,14 +102,14 @@ void Server::setupEpoll()
 	_epollFd = epoll_create1(0);
 	if (_epollFd == -1) //again, too many epoll fds open, system limits, mem, try ulimit -n
 	{
-		std::cerr << "Failed to create epoll instance" << std::endl;
+		std::cerr << ERR_EPOLL << std::endl;
 		exit (1);
 	}
 	_event.events = EPOLLIN;
 	_event.data.fd = _serverFd;
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
 	{
-		std::cerr << "Failed to add file descriptor to epoll" << std::endl;
+		std::cerr << ERR_EPOLLCTL << std::endl;
 		exit (1);
 	}
 }
@@ -134,7 +130,7 @@ void Server::handleNewClient()
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
 	if (newClient->getClientFd() == -1) //clients disconnect too quickly, fd exhaustion, race condition, try to connect and instantly close with ctrl C
 	{
-		std::cerr << "Failed to accept new client" << std::endl;
+		std::cerr << ERR_ACCEPT << std::endl;
 		exit (1);
 	}
 	char *clientIP = inet_ntoa(clientAddress.sin_addr);
@@ -146,14 +142,13 @@ void Server::handleNewClient()
 	ev.data.fd = newClient->getClientFd();
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
 	{
-		std::cerr << "Failed to add file descriptor to epoll" << std::endl;
+		std::cerr << ERR_EPOLLCTL << std::endl;
 		exit (1);		
 	}
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }
 
 /*
-- Missing message of the day
 - Additional info to put here, at least Trang added the channel length!*/
 void Server::attemptRegister(Client &client)
 {
