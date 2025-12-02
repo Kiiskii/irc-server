@@ -143,7 +143,7 @@ void Server::attemptRegister(Client &client)
 	"LINELEN=" + std::to_string(MSG_SIZE),
 	"USERLEN=" + std::to_string(USERLEN),
 	"NICKLEN=" + std::to_string(NICKLEN),
-	"CHANLIMIT=" + std::to_string(MAX_CHANNELS_PER_CLIENT),
+	"CHANLIMIT=" + std::to_string(CHANLIMIT),
 	"CHANMODES=" + std::string(CHANMODES)
 	};
 	std::string infoPack;

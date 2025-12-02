@@ -68,7 +68,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		return ALREADY_ON_CHAN;
 	}
 
-	if (client.getJoinedChannels().size() >= MAX_CHANNELS_PER_CLIENT)
+	if (client.getJoinedChannels().size() >= CHANLIMIT)
 	{
 		server.sendClientErr(ERR_TOOMANYCHANNELS, client, this, {} );
 		return NO_MSG;
@@ -81,16 +81,26 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		return NO_MSG;
 	}
 
-	std::string	chanLimit;
-	if (this->isModeActive(L_MODE, chanLimit))
+	// check again the stored limit for channel, if internal corruption then just let the client joins, ignore +l
+	std::string	clientLimit;
+	if (this->isModeActive(L_MODE, clientLimit))
 	{
-		int limit = std::stoi(chanLimit);
-		std::cout << "mode L active and limit set for channel is " << limit << std::endl;
-		if (this->_userList.size() >= limit && !this->hasInvitedClient(&client))
+		try
 		{
-			server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
-			return NO_MSG;
+			int limit = std::stoi(clientLimit);
+			std::cout << "mode L active and limit set for channel is " << limit << std::endl;
+			if (this->_userList.size() >= limit && !this->hasInvitedClient(&client))
+			{
+				server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
+				return NO_MSG;
+			}
 		}
+		catch(const std::exception& e)
+		{
+			std::cerr << "Invalid stored limit for channel: " << this->getChannelName() << ": [" << clientLimit << "]\n";
+		}
+		
+		
 	}
 
 	if (this->isModeActive(I_MODE))

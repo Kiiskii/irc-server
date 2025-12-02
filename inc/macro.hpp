@@ -4,7 +4,10 @@
 #define NICKLEN 15
 #define USERLEN 15
 #define CHANMODES "itkol"
-#define MAX_CHANNELS_PER_CLIENT 5 //recheck CHANLIMIT IN RP_SUPPORT
+#define CHANLIMIT 50 //the number of channels a client may join.
+#define CHANNELLEN 50
+#define TOPICLEN 390
+#define CASEMAPPING "ascii"
 
 #define L_MODE 'l'
 #define I_MODE 'i'

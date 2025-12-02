@@ -237,7 +237,4 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 
 	if (!channelPtr->setMode(tokens, client))
 		return;
-	// channelPtr->getMode(); //=> to print the mode active, remove later
-	// std::cout << "print mode ok: " << std::endl;
-	// channelPtr->getOps();
 }
