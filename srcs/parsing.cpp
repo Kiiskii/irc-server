@@ -94,13 +94,13 @@ void Server::receive(Client &c)
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break ;
 			std::cout << "Failed to recieve from client: " << c.getClientFd() << std::endl;
-			disconnectClient(c);
+			c.setClientState(DISCONNECTING);
 			break ;
 		}
 		else if (bytes == 0) {
 /*Cleaner way to handle this rather than sending in index*/
 			std::cout << "Client fd " << c.getClientFd() << " disconnected" << std::endl;
-			disconnectClient(c);
+			c.setClientState(DISCONNECTING);
 			break ;
 		}
 		// Buffer recieved data

@@ -54,7 +54,7 @@ public:
 	void handleNewClient();
 	void handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens);
 	void attemptRegister(Client &client);
-	void disconnectClient(Client &client);
+	void disconnectClient(Client *client);
 
 	void receive(Client &c);
 	void parseMessage(Client &c, const std::string &line);

@@ -30,10 +30,10 @@ void Server::printChannelList() const
 	}
 }
 
-void Server::disconnectClient(Client &client)
+void Server::disconnectClient(Client *client)
 {
 	//this should remove the client from the channel as well
-	auto it = iterateClients(*this, client);
+	auto it = std::find(_clientInfo.begin(), _clientInfo.end(), client);
 	if (it == _clientInfo.end())
 		return ;
 	Client* ptr = *it;

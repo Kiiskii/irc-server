@@ -40,5 +40,13 @@ int main(int argc, char *argv[])
 				server.receive(c);
 			}
 		}
+		for (size_t i = 0; i < server.getClientInfo().size(); i++)
+		{
+			if (server.getClientInfo()[i]->getClientState() == DISCONNECTING)
+			{
+				server.disconnectClient(server.getClientInfo()[i]);
+				break;
+			}
+		}
 	}
 }
