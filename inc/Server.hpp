@@ -92,6 +92,7 @@ public:
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
 	void		sendKickMsg(std::string oper, std::string client, std::vector<std::string>& params, Channel& channel);
+	void		sendPartMsg(Client& client, std::vector<std::string>& params, Channel& channel);
 
 };
 
