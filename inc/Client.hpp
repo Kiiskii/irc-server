@@ -17,7 +17,8 @@ enum ClientState
 {
  NONE,
  REGISTERING,
- REGISTERED
+ REGISTERED,
+ DISCONNECTING
 };
 
 class Client

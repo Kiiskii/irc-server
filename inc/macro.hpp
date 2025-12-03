@@ -39,16 +39,14 @@
 
 #define ERR_USERNOTINCHANNEL 441
 
-//#define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
-// RPL_MOTDSTART (375) 
-//   "<client> :- <server> Message of the day - "
-// RPL_MOTD (372) 
-//   "<client> :<line of the motd>"
-// RPL_ENDOFMOTD (376) 
-//   "<client> :End of /MOTD command."
-
 #define INPUT_FORMAT "Expected format: <./ircserv> <port number> <password>"
-#define ERR_PORT "Port number expected to be of numeric value"
+#define ERR_PORT "Port number expected to be of numeric value between numbers 1024 and 65535"
+#define ERR_SOCKET "Failed to create a socket"
+#define ERR_BIND "Failed to bind server socket"
+#define ERR_LISTEN "Failed to listen on server socket"
+#define ERR_EPOLL "Failed to create epoll instance"
+#define ERR_EPOLLCTL "Failed to add file descriptor to epoll"
+#define ERR_ACCEPT "Failed to accept new client"
 
 #define RPL_WELCOME(servername, nickname) ":" + servername + " 001 " + nickname + " :Welcome to the " + servername + " Network, " + nickname + "\r\n"
 #define RPL_YOURHOST(servername, nickname, version) ":" + servername + " 002 " + nickname + " :Your host is " + servername + ", running version " + version + "\r\n"
