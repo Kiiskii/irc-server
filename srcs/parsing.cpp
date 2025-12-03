@@ -182,9 +182,9 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 		server.handlePrivmsg(client, tokens);
 	}
 	else if (command == "KICK")
-	{
 		client.kickClient(server, tokens);
-	}
+	else if (command == "PART")
+		client.partChannel(server, tokens);
 	else
 	{
 		std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);

@@ -78,8 +78,7 @@ class Client
 
 		// KICK & PART
 		void		kickClient(Server &server, std::vector<std::string>& params);
-		//void		kickClient(std::string &line, Server &server);
-		//bool		removeClient(Server& server, std::string& clientString, std::string& channelString);
+		void		partChannel(Server& server, std::vector<std::string>& params);
 		void		removeChannel(Channel* chann);
 	
 

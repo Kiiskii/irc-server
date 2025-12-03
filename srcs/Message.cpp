@@ -83,12 +83,32 @@ void	Server::sendNameReply(Client& client, Channel& channel)
 	this->sendClientErr(RPL_ENDOFNAMES, client, &channel, {});
 }
 
-void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::string>& params, Channel& channel)
+void Server::sendPartMsg(Client& client, std::vector<std::string>& params, Channel& channel)
 {
 	//check if a reason for kicking exists
+	std::string reason;
 	for (auto it : params)
 		std::cout << " / " << it;
 	std::cout << std::endl;
+	if (params.size() > 0) {
+		for (int i = 1; i < params.size(); ++i) {
+			reason += params[i];
+			if (i + 1 != params.size())
+				reason += " ";
+		}
+	}
+	else
+		reason = "";
+	
+	std::string	user = client.makeUser();
+
+	std::string msg = user + " PART #" + channel.getChannelName() + " " + reason + "\r\n";
+	broadcastChannelMsg(msg, channel);
+}
+
+void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::string>& params, Channel& channel)
+{
+	//check if a reason for kicking exists
 	std::string reason;
 	if (params[2].length() > 1) {
 		for (int i = 2; i < params.size(); ++i) {
@@ -99,7 +119,6 @@ void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::
 	}
 	else
 		reason = oper;
-	std::cout << reason << std::endl;
 	std::string msg =	":" + oper + "!" + oper + "@localhost"
 						+ " KICK " + "#" + channel.getChannelName()
 						+ " " + client + " " + reason + "\r\n";

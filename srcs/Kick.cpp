@@ -71,56 +71,42 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 	}
 }
 
-/*
-bool Client::removeClient(Server& server, std::string& clientString, std::string& channelString)
+void Client::partChannel(Server& server, std::vector<std::string>& params)
 {
-	Client* c = nullptr;
+	std::string error;
+
+	// check that there is correct amount of params
+	if (params.size() == 0) {
+		error = ERR_NEEDMOREPARAMS(server.getServerName(), getNick(), "KICK");
+		server.sendMsg(*this, error);
+		return ;
+	}
+
+	std::string channelString = params[0];
+
+	// check that channel exists
 	Channel* chann = server.setActiveChannel(channelString);
 	if (!chann) {
-		std::cout << "Channel does not exist." << std::endl;
-		return false;
+		server.sendClientErr(ERR_NOSUCHCHANNEL, *this, chann, {channelString});
+		return ;
 	}
-	for (auto it:chann->getUserList()) {
-		if ((*it).getNick() == clientString) {
-			c = it;
-			break ;
-		}
-	}
-	if (!c) {
-		std::cout << "User not found in channel." << std::endl;
-		return false;
-	}
-	chann->removeUser(clientString);
-	c->removeChannel(chann);
-	server.printChannelList();
-	if (chann.empty())
-		server.removeChannel(chann);
-	server.printChannelList();
-	std::cout << "JOINED CHANNELS AFTER: ";
-	for (auto ite:c->getJoinedChannels()) {
-		std::cout << (*ite).getChannelName() << " / ";
-	}
-	std::cout << std::endl;
-	return true;
-}
-*/
 
-/*
-void Client::kickClient(std::vector<std::string> &msg, Server &server)
-{
-	std::vector<std::string> msgParts;
-	msgParts = splitString(line, ' ');
-	std::string currChannel = msgParts[1];
-	std::string kickedUser = msgParts[2];
-	std::string kickMsg;
-	for (size_t i = 3; i < msgParts.size(); i++) {
-		kickMsg.append(msgParts[i]);
-		if (i + 1 != msgParts.size())
-			kickMsg.append(" ");
+	// check if client kicking is on channel
+	if (!chann->isClientOnChannel(*this)) {
+		server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
+		return ;
 	}
-	removeClient(server, kickedUser, currChannel);
-	std::cout << "KICK MSG: " << currChannel << ", ";
-	std::cout << kickedUser << ", ";
-	std::cout << kickMsg << std::endl;
+
+	server.sendPartMsg(*this, params, *chann);
+
+	// remove user from channelList and channel from client channelList
+	chann->removeUser(this->getNick());
+	this->removeChannel(chann);
+
+	// if channel is empty after this, remove it from servers list of channels
+	auto ite = chann->getUserList();
+	if (ite.empty()) {
+		server.removeChannel(chann);
+	}
+
 }
-*/
