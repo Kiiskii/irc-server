@@ -28,6 +28,8 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		send(client.getClientFd(), message.c_str(), message.size(), 0);	
 		return ;
 	}
+	if (tokens[0] == client.getNick()) //we should not inform that nickname is alrdy in use if you are trying to change your nick to nick you currently have
+		return ;
 	for (size_t i = 0; i < getClientInfo().size(); i++) //if my nickname is already X and I try to change my nick to X again, I should not get a warning in that case
 	{
 		if (transformToLowercase(getClientInfo()[i]->getNick()) == transformToLowercase(tokens[0]))
