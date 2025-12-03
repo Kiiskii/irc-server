@@ -19,9 +19,11 @@
 #define RPL_TOPICWHOTIME 333
 #define RPL_ENDOFNAMES 366
 #define RPL_INVITING 341
+#define RPL_CHANNELMODEIS 324
 
 /* ERRORS */
 #define ERR_NOSUCHCHANNEL 403
+#define ERR_NOSUCHNICK 401
 #define ERR_TOOMANYCHANNELS 405
 #define ERR_UNKNOWNMODE 472
 #define ERR_BADCHANNELKEY 475
@@ -29,14 +31,13 @@
 #define ERR_CHANOPRIVSNEEDED 482
 #define ERR_CHANNELISFULL 471
 #define ERR_INVITEONLYCHAN 473
-#define ERR_NOSUCHNICK 401
 #define ERR_USERONCHANNEL 443
 #define ERR_CANNOTSENDTOCHAN 404
 #define ERR_NORECIPIENT 411
 #define ERR_NOTEXTTOSEND 412
+#define RPL_CREATIONTIME 329
 
-
-// #define ERR_NEEDMOREPARAMS 461 //duplicate, commnt out if needed
+#define ERR_USERNOTINCHANNEL 441
 
 #define INPUT_FORMAT "Expected format: <./ircserv> <port number> <password>"
 #define ERR_PORT "Port number expected to be of numeric value between numbers 1024 and 65535"

@@ -4,6 +4,15 @@
 
 using namespace utils;
 
+std::string utils::ft_stringToLower(std::string str)
+{
+	for (size_t i = 0; i < str.length(); i++)
+	{
+		str[i] = static_cast<char>(std::tolower(static_cast<char>(str[i])));
+	}
+	return str;
+}
+
 std::string utils::ft_trimString(std::string msg)
 {
     std::string leadingTrim = msg.substr(msg.find_first_not_of(" \a\b\t\n\\v\f\r"), msg.length() - msg.find_first_not_of(" \a\b\t\n\\v\f\r"));
@@ -12,7 +21,7 @@ std::string utils::ft_trimString(std::string msg)
 }
 
 /** @brief split string into tokens using delimiter */
-std::vector<std::string> utils::splitString(std::string buffer, char delimiter)
+std::vector<std::string> utils::ft_splitString(std::string buffer, char delimiter)
 {
 	std::cout << "buffer :[" << buffer << "]" << std::endl;
 
@@ -39,7 +48,7 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 		+ (p.empty() ? " " : " " + p)
 		+ (trailing.empty() ? "" : ":" + trailing)
 		+ "\r\n";
-	// std::cout << ": " << s << std::endl;
+	//std::cout << ": " << s << std::endl;
 	return s;
 }
 
@@ -97,4 +106,44 @@ void	utils::printOps(Channel& channel)
 		}
 		std::cout << "\n";
 	}
+}
+
+std::string utils::extractChannelName(std::string buffer)
+{
+	std::string	channelName;
+	
+	size_t hashPos = buffer.find("#");
+	if (hashPos == std::string::npos)
+		return nullptr;
+	
+	size_t chanEndPos = buffer.find(' ', hashPos);
+	if (chanEndPos == std::string::npos)
+		chanEndPos = buffer.length();
+
+	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
+	// std::cout << "channelName: [" << channelName << "]" << std::endl;
+	return channelName;
+
+}
+
+std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
+{
+	std::string params;
+
+	params = tokens.front();
+	tokens.erase(tokens.begin());
+	return params;
+}
+
+Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
+{
+	Client* c = nullptr;
+
+	for (auto it:list) {
+		if ((*it).getNick() == nick) {
+			c = it;
+			break ;
+		}
+	}
+	return c;
 }

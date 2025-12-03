@@ -50,9 +50,9 @@ bool Channel::setTopic(std::string tokens, Client& client)
 	_topic = newTopic;
 	
 	this->setTopicSetter(client);
-	time_t timestamp;
-	time(&timestamp);
-	this->setTopicTimestamp(timestamp);
+	// time_t timestamp;
+	// time(&timestamp);
+	this->setTopicTimestamp();
 	return true;
 }
 
@@ -107,7 +107,7 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 				return ;
 			// this->channelMessage(CHANGE_TOPIC_MSG, &client, channelPtr);
 			std::string	returnMsg = client.makeUser() + " TOPIC #" + 
-			channelPtr->getChannelName() +" :" + channelPtr->getTopic() + "\r\n";
+				channelPtr->getChannelName() +" :" + channelPtr->getTopic() + "\r\n";
 			this->broadcastChannelMsg(returnMsg, *channelPtr);
 		}
 	}

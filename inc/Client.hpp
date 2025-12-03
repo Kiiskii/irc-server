@@ -66,11 +66,22 @@ class Client
 
 		// message parsing
 
-
 		// other
 		bool		isOps(Channel& channel);
 		std::string makeUser();
 		
+		// TOPIC
+		//Channel*	setActiveChannel(std::string buffer);
+		void		askTopic(std::string buffer);
+
+		// MODE
+		void		changeMode(std::string buffer, Server& server);
+
+		// KICK & PART
+		void		kickClient(Server &server, std::vector<std::string>& params);
+		void		partChannel(Server& server, std::vector<std::string>& params);
+		void		removeChannel(Channel* chann);
+	
 
 };
 
