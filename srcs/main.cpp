@@ -3,6 +3,13 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
+extern bool activeserver = true;
+
+void signalHandler(int sig)
+{
+	activeserver = false;
+}
+
 int main(int argc, char *argv[])
 {
 	Server server;
@@ -14,8 +21,9 @@ int main(int argc, char *argv[])
 	server.setupServerDetails(server, argc, argv);
 	server.setupSocket();
 	server.setupEpoll();
-	while (true)
+	while (activeserver == true)
 	{
+		signal(SIGINT, signalHandler);
 		int eventCount = epoll_wait(server.getEpollfd(), server.getEpollEvents(), MAX_EVENTS, -1);
 		for (int i = 0; i < eventCount; ++i)
 		{
