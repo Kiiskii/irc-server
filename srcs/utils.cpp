@@ -134,3 +134,8 @@ std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
 	tokens.erase(tokens.begin());
 	return params;
 }
+
+bool	utils::compareCasemappingStr(std::string s1, std::string s2)
+{
+	
+}

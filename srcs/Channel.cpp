@@ -182,7 +182,7 @@ bool Channel::isClientOnChannel( Client& client)
 {
 	for (auto chan : client.getJoinedChannels())
 	{
-		if (this->getChannelName() == (*chan).getChannelName())
+		if (utils::ft_stringToLower(this->getChannelName()) == utils::ft_stringToLower((*chan).getChannelName()))
 			return true;
 	}
 	return false;
