@@ -25,13 +25,6 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 		return ;
 	}
 
-	// do we need to check if client is on the server?
-	//Client* cli = checkClientExistence(server.getClientInfo(), this->getNick());
-	//if (!cli) {
-	//	server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
-	//	return ;
-	//}
-
 	// check if client kicking is on channel
 	if (!chann->isClientOnChannel(*this)) {
 		server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
@@ -44,25 +37,35 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 		return ;
 	}
 
-	// check that client getting kicked is on the server
-	Client* cliServer = checkClientExistence(server.getClientInfo(), clientString);
-	if (!cliServer) {
-		server.sendClientErr(ERR_NOSUCHNICK, *this, chann, {clientString});
-		return ;
+	// check for multiple clients and put them into a vector
+	std::vector<std::string> clientList;
+	if (clientString.find(",") != std::string::npos)
+		clientList = utils::ft_splitString(clientString, ',');
+	else
+		clientList.push_back(clientString);
+
+	for (size_t i = 0; i < clientList.size(); ++i) {
+
+		// check that client getting kicked is on the server
+		Client* cliServer = checkClientExistence(server.getClientInfo(), clientList[i]);
+		if (!cliServer) {
+			server.sendClientErr(ERR_NOSUCHNICK, *this, chann, {clientList[i]});
+			return ;
+		}
+
+		// check that client getting kicked is on the channel
+		Client* cliChannel = checkClientExistence(chann->getUserList(), clientList[i]);
+		if (!cliChannel) {
+			server.sendClientErr(ERR_USERNOTINCHANNEL, *this, chann, {clientList[i]});
+			return ;
+		}
+
+		server.sendKickMsg(this->getNick(), clientList[i], params, *chann);
+
+		// remove user from channelList and channel from client channelList
+		chann->removeUser(clientList[i]);
+		cliChannel->removeChannel(chann);
 	}
-
-	// check that client getting kicked is on the channel
-	Client* cliChannel = checkClientExistence(chann->getUserList(), clientString);
-	if (!cliChannel) {
-		server.sendClientErr(ERR_USERNOTINCHANNEL, *this, chann, {clientString});
-		return ;
-	}
-
-	server.sendKickMsg(this->getNick(), clientString, params, *chann);
-
-	// remove user from channelList and channel from client channelList
-	chann->removeUser(clientString);
-	cliChannel->removeChannel(chann);
 
 	// if channel is empty after this, remove it from servers list of channels
 	auto ite = chann->getUserList();
