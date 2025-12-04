@@ -83,6 +83,48 @@ void	Server::sendNameReply(Client& client, Channel& channel)
 	this->sendClientErr(RPL_ENDOFNAMES, client, &channel, {});
 }
 
+void Server::sendPartMsg(Client& client, std::vector<std::string>& params, Channel& channel)
+{
+	//check if a reason for kicking exists
+	std::string reason;
+	for (auto it : params)
+		std::cout << " / " << it;
+	std::cout << std::endl;
+	if (params.size() > 0) {
+		for (int i = 1; i < params.size(); ++i) {
+			reason += params[i];
+			if (i + 1 != params.size())
+				reason += " ";
+		}
+	}
+	else
+		reason = "";
+	
+	std::string	user = client.makeUser();
+
+	std::string msg = user + " PART #" + channel.getChannelName() + " " + reason + "\r\n";
+	broadcastChannelMsg(msg, channel);
+}
+
+void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::string>& params, Channel& channel)
+{
+	//check if a reason for kicking exists
+	std::string reason;
+	if (params[2].length() > 1) {
+		for (int i = 2; i < params.size(); ++i) {
+			reason += params[i];
+			if (i + 1 != params.size())
+				reason += " ";
+		}
+	}
+	else
+		reason = oper;
+	std::string msg =	":" + oper + "!" + oper + "@localhost"
+						+ " KICK " + "#" + channel.getChannelName()
+						+ " " + client + " " + reason + "\r\n";
+	broadcastChannelMsg(msg, channel);
+}
+
 void Server::sendClientErr(int num, Client& client, Channel* channel, std::vector<std::string> otherArgs)
 {
 	std::string server = this->getServerName(),
@@ -127,22 +169,26 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "You're not channel operator");
 		break;
 
+	case ERR_USERNOTINCHANNEL:
+	{
+		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
+		msg = makeNumericReply(server, num, nick, {arg,"#" + chanName}, "They aren't on that channel");
+		break ;
+	}
+
+	case ERR_NOSUCHNICK:
+	{
+		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
+		msg = makeNumericReply(server, num, nick, {arg}, "No such nick/channel");
+		break ;
+	}
+
 	case ERR_NOSUCHCHANNEL:
 	{
 		if (otherArgs.size() == 1) 
 		{
 			chanName = otherArgs[0]; 
-			msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "No such channel");
-		};
-		break;
-	}
-
-	case ERR_NOSUCHNICK:
-	{
-		if (otherArgs.size() == 1) 
-		{ 
-			arg = otherArgs[0];
-			msg = makeNumericReply(server, num,	nick, {arg}, "No such nick/channel");
+			msg = makeNumericReply(server, num,	nick, {chanName}, "No such channel");
 		};
 		break;
 	}

@@ -48,7 +48,7 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 		+ (p.empty() ? " " : " " + p)
 		+ (trailing.empty() ? "" : ":" + trailing)
 		+ "\r\n";
-	// std::cout << ": " << s << std::endl;
+	//std::cout << ": " << s << std::endl;
 	return s;
 }
 
@@ -138,4 +138,16 @@ std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
 bool	utils::compareCasemappingStr(std::string s1, std::string s2)
 {
 	
+}
+Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
+{
+	Client* c = nullptr;
+
+	for (auto it:list) {
+		if ((*it).getNick() == nick) {
+			c = it;
+			break ;
+		}
+	}
+	return c;
 }
