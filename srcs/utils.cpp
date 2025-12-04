@@ -137,8 +137,14 @@ std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
 
 bool	utils::compareCasemappingStr(std::string s1, std::string s2)
 {
-	
+	if (!s1.empty() && !s2.empty())
+	{
+		if (utils::ft_stringToLower(s1) == utils::ft_stringToLower(s2))
+			return true;	
+	}
+	return false;
 }
+
 Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 {
 	Client* c = nullptr;
@@ -151,3 +157,4 @@ Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 	}
 	return c;
 }
+

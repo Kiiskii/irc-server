@@ -18,7 +18,7 @@ Channel* Server::findChannel(std::string newChannel)
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end(); ++it)
 	{
-		if (utils::ft_stringToLower((*it)->getChannelName()) == utils::ft_stringToLower(newChannel))
+		if (utils::compareCasemappingStr((*it)->getChannelName(), newChannel))
 			return *it;
 	}
 	return nullptr;

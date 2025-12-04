@@ -1,15 +1,8 @@
 #include "Channel.hpp"
 #include "Client.hpp"
+#include "utils.hpp"
 
-/// mode is set to +nt for now: n - no external message, t - topic restriction
-// Channel::Channel() : _channelName(""), _topic("")
-// {
-// 	_modeHandlers['i'] = &Channel::handleInviteOnly;
-// 	_modeHandlers['t'] = &Channel::handleTopicRestriction; // user
-// 	_modeHandlers['k'] = &Channel::handleChannelKey; //channel
-// 	_modeHandlers['o'] = &Channel::handleChannelOperator; // user
-// 	_modeHandlers['l'] = &Channel::handleChannelLimit;
-// }
+using namespace utils;
 
 Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 {
@@ -156,6 +149,8 @@ std::vector<std::string> Channel::getMode() const
 
 void Channel::addUser(Client* newClient)
 {
+	if (std::find(_userList.begin(), _userList.end(), newClient) != _userList.end())
+		return;
 	_userList.push_back(newClient);
 }
 
@@ -182,7 +177,7 @@ bool Channel::isClientOnChannel( Client& client)
 {
 	for (auto chan : client.getJoinedChannels())
 	{
-		if (utils::ft_stringToLower(this->getChannelName()) == utils::ft_stringToLower((*chan).getChannelName()))
+		if (utils::compareCasemappingStr(this->getChannelName(),(*chan).getChannelName()))
 			return true;
 	}
 	return false;

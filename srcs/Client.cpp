@@ -83,8 +83,10 @@ void Client::setClientState(enum ClientState state)
 
 void Client::addJoinedChannel(Channel* chan)
 {
-	// std::cout << "client is added to channel\n";
+	if (std::find(_joinedChannels.begin(), _joinedChannels.end(), chan) != _joinedChannels.end())
+		return ;
 	_joinedChannels.push_back(chan);
+	// std::cout << "client is added to channel\n";
 }
 
 std::string Client::makeUser()

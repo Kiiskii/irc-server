@@ -55,7 +55,7 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 	return true;
 }
 
-/** @brief check if the channel key matches the key that client inputs */
+/** @brief check whether client can join this channel: channel key comparison, channel limit per client, client limit per channel and invitation requirement */
 channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 {
 	Server& server = client.getServer();
@@ -71,7 +71,6 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 
 	if (!this->getChanKey().empty() && this->getChanKey() != clientKey)
 	{
-		std::cout << "bad key: client key : [" << clientKey << "]\n";
 		server.sendClientErr(ERR_BADCHANNELKEY,client, this, {} );
 		return NO_MSG;
 	}
@@ -83,7 +82,6 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		try
 		{
 			int limit = std::stoi(clientLimit);
-			std::cout << "mode L active and limit set for channel is " << limit << std::endl;
 			if (this->_userList.size() >= limit && !this->hasInvitedClient(&client))
 			{
 				server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
@@ -92,15 +90,14 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 		}
 		catch(const std::exception& e)
 		{
-			std::cerr << "Invalid stored limit for channel: " << this->getChannelName() << ": [" << clientLimit << "]\n";
+			std::cerr << "Invalid stored limit for channel: " << this->getChannelName() 
+				<< ": [" << clientLimit << "]\n";
 		}
-		
-		
 	}
 
 	if (this->isModeActive(I_MODE))
 	{
-		std::cout << "Invite-only Mode active " << std::endl;
+		// std::cout << "Invite-only Mode active " << std::endl;
 		if (!this->hasInvitedClient(&client))
 		{
 			server.sendClientErr(ERR_INVITEONLYCHAN, client, this, {});
@@ -111,6 +108,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	return JOIN_OK;
 }
 
+/** @brief return a pointer to a new channel with non-existing channel name */
 Channel* Server::createChannel(std::string chanName)
 {
 	this->getChannelInfo().push_back(new Channel(chanName));
@@ -120,8 +118,7 @@ Channel* Server::createChannel(std::string chanName)
 }
 
 
-/** @brief regular channel: This channel is what’s referred to as a normal channel. Clients can join this channel, and the first client who joins a normal channel is made a channel operator, along with the appropriate channel membership prefix. On most servers, newly-created channels have then protected topic "+t" and no external messages "+n" modes enabled, but exactly what modes new channels are given is up to the server. 
-*/
+/** @brief regular channel: This channel is what’s referred to as a normal channel. Clients can join this channel, and the first client who joins a normal channel is made a channel operator, along with the appropriate channel membership prefix. A new channel created has no pre-set mode. */
 void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 {
 	std::map<std::string, std::string>		channelKeyMap;
@@ -133,7 +130,6 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 	{
 		std::string channelName = chan.first;
 		std::string clientKey = chan.second;
-		// std::cout << "channel name: [" << channelName << "] and key [" << clientKey << "]" << std::endl;
 
 		Channel* channelPtr = this->findChannel(channelName);
 		if (!channelPtr)
@@ -145,8 +141,7 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 			client.addJoinedChannel(channelPtr);
 			channelPtr->addUser(&client);
 			if (channelPtr->getUserList().size() == 1)
-				channelPtr->addChanop(&client); // there is only 1 user ->ops
-			// this->channelMessage(result, &client, channelPtr);
+				channelPtr->addChanop(&client);
 			this->sendJoinSuccessMsg(client, *channelPtr);
 		}
 		else if (result == ALREADY_ON_CHAN)
@@ -154,9 +149,6 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 			this->sendTopic(client, *channelPtr);
 			this->sendNameReply(client, *channelPtr);
 		}
-		
-		// std::cout << "[" << channelPtr->printUser() << "]" << std::endl; //remove
-		// channelPtr->getOps(); //remove
 	}
-
+	return;
 }

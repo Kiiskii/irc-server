@@ -48,7 +48,6 @@ void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 {
 	std::string	user = client.makeUser();
 
-	// send JOIN msg
 	std::string joinMsg = user + " JOIN #" + channel.getChannelName() + " \r\n";
 	this->sendMsg(client, joinMsg);
 	this->sendTopic(client, channel);
