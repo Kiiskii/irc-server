@@ -73,7 +73,6 @@ static void restrictRemoveKeyMode(std::string& executedMode, std::string& execut
 		return;
 	for (size_t i  = 0; i < executedMode.length(); i++)
 	{
-		// std::cout << "value at i : " << executedMode[i] << std::endl;
 		if (executedMode[i] == '+')
 			activeAddMode = true;
 		else if (executedMode[i] == '-')
@@ -88,6 +87,7 @@ static void restrictRemoveKeyMode(std::string& executedMode, std::string& execut
 		executedArgs = "*";
 }
 
+/** @brief  If <modestring> is given, the user MUST have appropriate channel privileges */
 bool Channel::setMode(std::vector<std::string>& tokens, Client& client)
 {
 	Server&		server = client.getServer();
@@ -95,12 +95,12 @@ bool Channel::setMode(std::vector<std::string>& tokens, Client& client)
 	bool		addMode = true;
 	channelMsg	msgEnum;
 
-	// If <modestring> is given, the user MUST have appropriate channel privileges 
 	if (!client.isOps(*this))
 	{
 		client.getServer().sendClientErr(ERR_CHANOPRIVSNEEDED, client, this, {});
 		return false;
 	}
+
 	while (!tokens.empty())
 	{
 		modeStr = tokens[0];
@@ -159,85 +159,74 @@ bool Channel::setMode(std::vector<std::string>& tokens, Client& client)
 			else
 			{
 				std::string unknowMode(1, mode);
-				client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, {unknowMode});
-				continue;
+				client.getServer().sendClientErr(ERR_UNKNOWNMODE, client, this, 
+					{unknowMode});
+				continue; //return and set no mode at all, even the valid one
 			}
 
-			// this only handle the _mode mapping, not action with client yet
 			msgEnum = (this->*(_modeHandlers[mode]))(addMode, params);
 			if (msgEnum == SET_MODE_OK)
 			{
-				std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
+				// std::cout << " set_mode_ok has mode: [" << mode << "] and params: [" << params << "]\n";
 				combineExecutedMode(executedMode, mode, addMode);
 				executedArgs += (params.empty() ? "" : params + " ");
 			}
-			std::cout << " executedMode: [" << executedMode << "] and executedArgs: [" << executedArgs << "]\n";
 		}
 	}
-	
 	restrictRemoveKeyMode(executedMode, executedArgs);
 	if (!executedMode.empty())
+	{
 		server.sendSetModeMsg(client, *this, executedMode, executedArgs);
+	}
 	return true;
 }
 
 void Server::sendSetModeMsg(Client& client, Channel& channel, std::string& executedMode, std::string& executedArgs)
 {
 	std::string modeStr;
+
 	if (!executedMode.empty())
 		modeStr += executedMode;
 	if (!executedArgs.empty())
 		modeStr += " " + executedArgs;
+
 	std::string	modeMsg = client.makeUser() + " MODE #" + 
 			channel.getChannelName() + " " + modeStr + " \r\n";
 	this->broadcastChannelMsg(modeMsg, channel);
 }
 
-/** @brief mode applied: itkol, so only handle mode for channel, not for user
- * /MODE #chan :  return all the mode active
-*/
+/** @brief mode applied: itkol => only handle mode for channel, not for user.
+ * If <modestring> is not given, inform currently-set modes of a channel. */
 void Server::handleMode(Client& client, std::vector<std::string> tokens)
 {
 	Channel*	channelPtr = nullptr;
-	std::string	nameStr;
-	// std::vector<std::string> modeParams;
-	//no enough para retest?? chanop recheck
-
 
 	if (tokens.empty())
 	{
-		sendClientErr(461, client, channelPtr, {"MODE"}); //test this
+		sendClientErr(461, client, channelPtr, {"MODE"});
 		return;
 	}
-	// find exist channel
-	nameStr = tokens[0];
-	if (nameStr.find("#") != std::string::npos)
-	{
-		channelPtr = this->findChannel(utils::extractChannelName(nameStr));
-		if (!channelPtr) 
-		{
-			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, 
-				{utils::extractChannelName(nameStr)});
-			return; 
-		}
-	}
-	else 
-	{
-		// this->sendClientErr(ERR_NOTONCHANNEL, client, nullptr, {});
+
+	std::string	channelName = tokens[0];
+	if (!client.isValidChanName(channelName))
 		return;
+
+	channelPtr = this->findChannel(utils::extractChannelName(channelName));
+	if (!channelPtr) 
+	{
+		this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, 
+			{utils::extractChannelName(channelName)});
+		return; 
 	}
+
 	tokens.erase(tokens.begin(), tokens.begin() + 1);
-	// If <modestring> is not given, inform currently-set modes of a channel  
 	if (tokens.empty())
 	{
 		sendClientErr(RPL_CHANNELMODEIS, client, channelPtr, 
 			{channelPtr->getMode()[0], channelPtr->getMode()[1]});
-		// sendClientErr(RPL_CREATIONTIME, client, channelPtr, {}); //recheck this
+		sendClientErr(RPL_CREATIONTIME, client, channelPtr, {}); //recheck this, irssi send always after join so duplicate??
 		return;
 	}
-
-	std::cout << "name str: " << channelPtr->getChannelName() << "\nparams are: " ; 
-	utils::printVector(tokens);
 
 	if (!channelPtr->setMode(tokens, client))
 		return;

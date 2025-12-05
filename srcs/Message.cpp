@@ -187,8 +187,8 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	{
 		if (otherArgs.size() == 1) 
 		{
-			chanName = otherArgs[0]; 
-			msg = makeNumericReply(server, num,	nick, {chanName}, "No such channel");
+			arg = otherArgs[0]; 
+			msg = makeNumericReply(server, num,	nick, {arg}, "No such channel");
 		};
 		break;
 	}
@@ -270,8 +270,7 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		{
 			std::string modeStr = otherArgs[0];
 			std::string modeArgs = otherArgs[1];
-			msg = makeNumericReply(server, num, nick, {"#" + chanName, modeStr, modeArgs}, 
-				"");
+			msg = makeNumericReply(server, num, nick, {"#" + chanName, modeStr + " " + modeArgs}, "");
 		}
 		break;
 	}
