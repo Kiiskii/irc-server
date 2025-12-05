@@ -52,19 +52,6 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 	return s;
 }
 
-/** @note not consider the case of local channel start with '&' */
-bool	utils::isValidChanName(std::string name)
-{
-	std::regex chanNameRegex("^#[^ \\x07,]+$");
-
-	if (!std::regex_match(name, chanNameRegex))
-	{
-		// std::cout << "Bad channel names\n";
-		return false;
-	}
-	return true;
-}
-
 void	utils::printVector(std::vector<std::string> tokens)
 {
 	std::cout << "vector memebers: " << std::endl;

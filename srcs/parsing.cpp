@@ -167,8 +167,6 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	else if (command == "INVITE")
 	{
-		// std::cout << "[" << command << "]" << std::endl;
-		// printVector(tokens);
 		server.handleInvite(client, tokens);
 	}
 	else if (command == "PRIVMSG")
