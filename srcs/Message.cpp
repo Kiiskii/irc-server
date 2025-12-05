@@ -68,6 +68,8 @@ void	Server::sendTopic(Client& client, Channel& channel)
 		this->sendClientErr(RPL_TOPIC, client, &channel, {});
 		this->sendClientErr(RPL_TOPICWHOTIME, client, &channel, {});
 	}
+	else
+		this->sendClientErr(RPL_NOTOPIC, client, &channel, {});
 }
 
 /** @brief send list of users in channel */
@@ -218,7 +220,7 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		if (otherArgs.size() == 1)
 		{
 			arg = otherArgs[0];
-			msg = makeNumericReply(server, num,	nick, {"#" + arg}, "Illegal channel name");
+			msg = makeNumericReply(server, num,	nick, {arg}, "Illegal channel name");
 		}
 		break;
 	}

@@ -3,6 +3,19 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
+/** @note not consider the case of local channel start with '&' */
+bool	Client::isValidChanName(std::string name)
+{
+	std::regex chanNameRegex("^#[^ \\x07,]+$");
+
+	if (!std::regex_match(name, chanNameRegex))
+	{
+		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name});
+		return false;
+	}
+	return true;
+}
+
 /** @brief validate the channel name and create a map of <channel name - key> 
  *  @note The insert() operation adds a new key-value pair to the map only 
 			if the key is not already present.
@@ -40,17 +53,13 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 	// add to map
 	for (size_t i = 0; i < channelList.size(); ++i)
 	{
-		if (utils::isValidChanName(channelList[i]))
+		if (client.isValidChanName(channelList[i]))
 		{
 			channelList[i].erase(0, 1); // remove the hash
 			channelKeyMap.insert({channelList[i], keyList[i]});
 		}
 		else
-		{
-			this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, 
-				{"#" + channelList[i]});
 			continue;
-		}
 	}
 	return true;
 }
@@ -122,6 +131,12 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 {
 	std::map<std::string, std::string>		channelKeyMap;
 
+	if (tokens.empty())
+	{
+		this->sendClientErr(461, client, nullptr, {"JOIN"});
+		return;
+	}
+
 	if (!mappingChannelKey(tokens, client, channelKeyMap))
 		return;
 
@@ -132,7 +147,7 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 
 		if (channelName.size() > CHANNELLEN)
 		{
-			this->sendClientErr(ERR_BADCHANNAME, client, nullptr, {channelName});
+			this->sendClientErr(ERR_BADCHANNAME, client, nullptr, {"#" + channelName});
 			continue;
 		}
 		// client leave all channels they are currently connected to

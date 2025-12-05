@@ -157,8 +157,8 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	else if (command == "TOPIC")
 	{
-		// std::cout << "[" << command << "]" << std::endl;
-		// printVector(tokens);
+		std::cout << "[" << command << "]" << std::endl;
+		utils::printVector(tokens);
 		server.handleTopic(client, tokens);
 	}
 	else if (command == "MODE")

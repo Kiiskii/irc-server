@@ -6,7 +6,6 @@
 #define CHANMODES "itkol"
 #define CHANLIMIT 50 //the number of channels a client may join.
 #define CHANNELLEN 50
-#define TOPICLEN 390
 #define CASEMAPPING "ascii"
 
 #define L_MODE 'l'

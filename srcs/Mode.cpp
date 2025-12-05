@@ -193,16 +193,20 @@ void Server::sendSetModeMsg(Client& client, Channel& channel, std::string& execu
 	this->broadcastChannelMsg(modeMsg, channel);
 }
 
-/** @brief mode applied: itkol, so only handle mode for channel, not for user*/
+/** @brief mode applied: itkol, so only handle mode for channel, not for user
+ * /MODE #chan :  return all the mode active
+*/
 void Server::handleMode(Client& client, std::vector<std::string> tokens)
 {
 	Channel*	channelPtr = nullptr;
 	std::string	nameStr;
 	// std::vector<std::string> modeParams;
+	//no enough para retest?? chanop recheck
+
 
 	if (tokens.empty())
 	{
-		sendClientErr(461, client, channelPtr, {}); //test this
+		sendClientErr(461, client, channelPtr, {"MODE"}); //test this
 		return;
 	}
 	// find exist channel
