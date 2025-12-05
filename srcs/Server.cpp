@@ -6,10 +6,15 @@
 /* @note rememeber to check all on-heap allocated memory, such as chan, client */
 Server::~Server()
 {
+	std::cout << "We have received a signal or the server simply failed to start!" << std::endl;
 	for (auto chan : _channelInfo)
 		delete chan;
 	for (auto client : _clientInfo)
-		delete client;
+		disconnectClient(client);
+	if (_epollFd != -1)	
+		close(_epollFd);
+	if (_serverFd != -1)
+		close(_serverFd);
 }
 
 /* @def check if the channel exists

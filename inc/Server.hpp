@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <map>
+#include <csignal>
 
 #include "Enum.hpp"
 #include "utils.hpp"
