@@ -39,6 +39,7 @@
 #define ERR_NORECIPIENT 411
 #define ERR_NOTEXTTOSEND 412
 #define RPL_CREATIONTIME 329
+#define ERR_BADCHANNAME 479  // not  in official irc document, Libera/InspIRCd-specific error code, means “Illegal channel name
 
 #define ERR_USERNOTINCHANNEL 441
 

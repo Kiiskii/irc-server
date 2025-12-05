@@ -153,8 +153,6 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	else if (command == "JOIN")
 	{
-		// std::cout << "[" << command << "]" << std::endl;
-		// printVector(tokens);
 		server.handleJoin(client, tokens);
 	}
 	else if (command == "TOPIC")

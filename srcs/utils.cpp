@@ -23,7 +23,7 @@ std::string utils::ft_trimString(std::string msg)
 /** @brief split string into tokens using delimiter */
 std::vector<std::string> utils::ft_splitString(std::string buffer, char delimiter)
 {
-	std::cout << "buffer :[" << buffer << "]" << std::endl;
+	// std::cout << "buffer :[" << buffer << "]" << std::endl;
 
 	std::istringstream	tokenStream(buffer); //save buffer string to an istringstream obj
 	std::string			aToken;

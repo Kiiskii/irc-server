@@ -83,7 +83,7 @@ std::string	Channel::getChanKey() const
 
 	if (this->_mode.find('k') != this->_mode.end()) // k found
 		chanKey = (*this->_mode.find('k')).second;
-	std::cout << "channel key : [" << chanKey << "]\n"; 
+	// std::cout << "channel key : [" << chanKey << "]\n"; 
 	return chanKey;
 }
 

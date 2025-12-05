@@ -8,7 +8,7 @@
 			if the key is not already present.
 			If the key exists, insert() does not update the value and the map unchanged.
 			IF (NUMBER OF KEYS INPUT IS SMALLER THAN NUMBER OF CHANNEL INPUT, 
-			irssi sent key == "x") --> retest when finish??
+			irssi sent key == "x" --> can i set k of 'x' value)
 */
 bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, std::map<std::string, std::string>& channelKeyMap)
 {
@@ -97,7 +97,6 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 
 	if (this->isModeActive(I_MODE))
 	{
-		// std::cout << "Invite-only Mode active " << std::endl;
 		if (!this->hasInvitedClient(&client))
 		{
 			server.sendClientErr(ERR_INVITEONLYCHAN, client, this, {});
@@ -133,7 +132,17 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 
 		if (channelName.size() > CHANNELLEN)
 		{
-			std::cout << "Illegal channel name\n"; //? no code, print message?
+			this->sendClientErr(ERR_BADCHANNAME, client, nullptr, {channelName});
+			continue;
+		}
+		// client leave all channels they are currently connected to
+		if (channelName == "0")
+		{
+			for (auto chan : client.getJoinedChannels())
+			{
+				std::vector<std::string> v{chan->getChannelName()};
+				client.partChannel(*this, v);
+			}
 			return;
 		}
 
