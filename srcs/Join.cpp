@@ -131,6 +131,12 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 		std::string channelName = chan.first;
 		std::string clientKey = chan.second;
 
+		if (channelName.size() > CHANNELLEN)
+		{
+			std::cout << "Illegal channel name\n"; //? no code, print message?
+			return;
+		}
+
 		Channel* channelPtr = this->findChannel(channelName);
 		if (!channelPtr)
 			channelPtr = this->createChannel(channelName);
