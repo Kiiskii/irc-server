@@ -18,13 +18,9 @@ class Server;
 /*
 	@brief The channel is created implicitly when the first client joins it, 
 	and the channel ceases to  exist when the last client leaves it
-	Channels names are strings (beginning with a '&' or '#' character) of
-   length up to 200 characters.
-    
-   Because of IRC's scandanavian origin, the characters {}| are
-   considered to be the lower case equivalents of the characters []\,
-   respectively. This is a critical issue when determining the
-   equivalence of two nicknames.
+	Channels names are strings (beginning with a '&' or '#' character)
+	CHANLIMIT=50  CHANNELLEN=50 TOPICLEN=390 CASEMAPPING=ascii??
+
 	IRC message has 3 parts: 512 characters including /r/n
 	- prefix(optional): :<prefix> <message>
 	- command

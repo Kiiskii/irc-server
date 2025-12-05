@@ -37,37 +37,47 @@ bool	Channel::isModeActive(char mode)
  * TOPIC: Change the channel topic in a mode +t channel */
 channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 {
-	std::string key;
-	bool active = this->isModeActive(O_MODE, key);
+	std::string	key;
+	bool		active = this->isModeActive(O_MODE, key);
 	
 	if (add)
 	{
+		try
+		{
+			int limit = std::stoi(args);
+		}
+		catch(const std::exception& e)
+		{
+			return NO_ACTION;
+		}
+		
 		this->removeMode(O_MODE);
 		this->addMode(O_MODE, args);
 		for (Client* user : _userList)
 		{
-			if (user->getNick() == args)
-				this->addChanop(user); // check duplicate??
+			if (utils::compareCasemappingStr(user->getNick(), args))
+				this->addChanop(user);
 		}
 		return SET_MODE_OK;
 	}
 	else if (!add && active)
 	{
 		this->removeMode(O_MODE);
-		// std::cout << "prepare to remove chanop\n";
-		this->removeChanop(args); // recheck whitespace??
+		this->removeChanop(args);
 		return SET_MODE_OK;
 	}
 	return NO_ACTION;
 }
 
-/** @brief This channel mode controls whether new users may join based on the number of users who already exist in the channel. If this mode is set, its value is an integer and defines the limit of how many clients may be joined to the channel.
-
-If this mode is set on a channel, and the number of users joined to that channel matches or exceeds the value of this mode, new users cannot join that channel. If a client sends a JOIN request for this channel, they will receive an ERR_CHANNELISFULL (471) reply and the command will fail. */
+/** @brief This channel mode controls whether new users may join based on the number of users who already exist in the channel. 
+ * If this mode is set, its value is an integer and defines the limit of how many clients may be joined to the channel. 
+ * If non-interger is passed as params, server ignores and do nothing.
+ * If this mode is set on a channel, and the number of users joined to that channel MATCH? or exceeds the value of this mode, new users cannot join that channel. 
+ * If a client sends a JOIN request for channel, they will receive an ERR_CHANNELISFULL (471) reply and the command will fail. */
 channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 {
-	std::string key;
-	bool active = this->isModeActive(L_MODE, key);
+	std::string	key;
+	bool		active = this->isModeActive(L_MODE, key);
 
 	if (add)
 	{
@@ -81,10 +91,10 @@ channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 		return SET_MODE_OK;
 	}
 	return NO_ACTION;
-
 }
 
-/**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. */
+/**	@brief if this mode is set on a channel, a user must have received an INVITE for this channel before being allowed to join it. 
+ * If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. */
 channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 {
 	std::string key;
@@ -110,7 +120,7 @@ channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 
 
 /** @brief T_MODE controls whether channel privileges are required to set the topic, and does not have any value. 
- * If this mode is enabled, users must have channel privileges such as halfop or operator status in order to change the topic of a channel. In a channel that does not have this mode enabled, anyone may set the topic of the channel using the TOPIC command.
+ * If this mode is enabled, users must have channel privileges such as operator status in order to change the topic of a channel. In a channel that does not have this mode enabled, anyone may set the topic of the channel using the TOPIC command.
 */
 channelMsg	Channel::handleTopicRestriction(bool add, std::string& args)
 {

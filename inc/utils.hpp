@@ -18,7 +18,7 @@ namespace utils {
 	std::string extractChannelName(std::string str);
 	std::string setParamAndRemoveToken(std::vector<std::string>& tokens);
 
-	bool		isValidChanName(std::string name);
+	bool		compareCasemappingStr(std::string s1, std::string s2);
 
 
 	// messaging utils

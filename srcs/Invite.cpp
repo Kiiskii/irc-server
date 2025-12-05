@@ -20,9 +20,9 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client,
 		client.getServer().sendMsg(client, msg);
 		return false;
 	}
-	if (!utils::isValidChanName(tokens[1]))
+	if (!client.isValidChanName(tokens[1]))
 	{
-		std::cout << "invalid channel name\n";
+		// std::cout << "invalid channel name\n";
 		return false;
 	}
 	std::string nickName = tokens[0];
@@ -77,7 +77,7 @@ void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 
 	if (!isValidInvitation(tokens, client, chann, invitedClient))
 	{
-		std::cout << "INVALID invitation\n";
+		// std::cout << "INVALID invitation\n";
 		return;
 	}
 

@@ -50,7 +50,6 @@ class Client
 		std::string 			getUserName();
 		std::string				getRealName();
 		std::string 			getHostName();
-		// std::string 			getServerName();
 		std::vector<Channel*> 	getJoinedChannels();
 		enum ClientState		getClientState();
 		Server&					getServer();
@@ -64,18 +63,11 @@ class Client
 		void		setClientState(enum ClientState state);
 		void		addJoinedChannel(Channel* chan);
 
-		// message parsing
-
 		// other
 		bool		isOps(Channel& channel);
 		std::string makeUser();
-		
-		// TOPIC
+		bool		isValidChanName(std::string name);
 		//Channel*	setActiveChannel(std::string buffer);
-		void		askTopic(std::string buffer);
-
-		// MODE
-		void		changeMode(std::string buffer, Server& server);
 
 		// KICK & PART
 		void		kickClient(Server &server, std::vector<std::string>& params);
@@ -84,24 +76,3 @@ class Client
 	
 
 };
-
-/* 
-
-The server does the following:
-
-Check if the channel exists
-
-If it doesn’t exist, usually the server creates the channel with default modes (and no key unless specified).
-
-Check channel modes
-
-If the channel has mode +k (keyed), the server compares the key provided by the client with the channel’s key.
-
-Decision:
-
-If no key is required (+k not set) → client can join immediately.
-
-If key is required (+k) → client can only join if the key matches exactly.
-
-If the key does not match → the server responds with:
-*/

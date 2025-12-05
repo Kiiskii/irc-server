@@ -23,7 +23,6 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel)
 {
 	for (Client* user : channel.getUserList())
 		this->sendMsg(*user, msg);
-	//recheck does this send to the joining memeber itself
 }
 
 /**
@@ -33,7 +32,7 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
 {
 	for (Client* user : channel.getUserList())
 	{
-		if (user->getNick() != client.getNick())
+		if (!utils::compareCasemappingStr(user->getNick(), client.getNick()))
 			this->sendMsg(*user, msg);
 	}
 }
@@ -48,7 +47,6 @@ void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 {
 	std::string	user = client.makeUser();
 
-	// send JOIN msg
 	std::string joinMsg = user + " JOIN #" + channel.getChannelName() + " \r\n";
 	this->sendMsg(client, joinMsg);
 	this->sendTopic(client, channel);
@@ -70,6 +68,8 @@ void	Server::sendTopic(Client& client, Channel& channel)
 		this->sendClientErr(RPL_TOPIC, client, &channel, {});
 		this->sendClientErr(RPL_TOPICWHOTIME, client, &channel, {});
 	}
+	else
+		this->sendClientErr(RPL_NOTOPIC, client, &channel, {});
 }
 
 /** @brief send list of users in channel */
@@ -187,8 +187,8 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	{
 		if (otherArgs.size() == 1) 
 		{
-			chanName = otherArgs[0]; 
-			msg = makeNumericReply(server, num,	nick, {chanName}, "No such channel");
+			arg = otherArgs[0]; 
+			msg = makeNumericReply(server, num,	nick, {arg}, "No such channel");
 		};
 		break;
 	}
@@ -214,6 +214,16 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	case ERR_NOTEXTTOSEND:
 		msg = makeNumericReply(server, num,	nick, {}, "No text to send");
 		break;
+
+	case ERR_BADCHANNAME:
+	{
+		if (otherArgs.size() == 1)
+		{
+			arg = otherArgs[0];
+			msg = makeNumericReply(server, num,	nick, {arg}, "Illegal channel name");
+		}
+		break;
+	}
 
 	
 	//RPL	
@@ -260,8 +270,7 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		{
 			std::string modeStr = otherArgs[0];
 			std::string modeArgs = otherArgs[1];
-			msg = makeNumericReply(server, num, nick, {"#" + chanName, modeStr, modeArgs}, 
-				"");
+			msg = makeNumericReply(server, num, nick, {"#" + chanName, modeStr + " " + modeArgs}, "");
 		}
 		break;
 	}

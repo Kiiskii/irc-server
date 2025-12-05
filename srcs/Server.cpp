@@ -23,7 +23,7 @@ Channel* Server::findChannel(std::string newChannel)
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end(); ++it)
 	{
-		if (utils::ft_stringToLower((*it)->getChannelName()) == utils::ft_stringToLower(newChannel))
+		if (utils::compareCasemappingStr((*it)->getChannelName(), newChannel))
 			return *it;
 	}
 	return nullptr;
@@ -169,7 +169,7 @@ void Server::attemptRegister(Client &client)
 	"LINELEN=" + std::to_string(MSG_SIZE),
 	"USERLEN=" + std::to_string(USERLEN),
 	"NICKLEN=" + std::to_string(NICKLEN),
-	"CHANLIMIT=" + std::to_string(MAX_CHANNELS_PER_CLIENT),
+	"CHANLIMIT=" + std::to_string(CHANLIMIT),
 	"CHANMODES=" + std::string(CHANMODES)
 	};
 	std::string infoPack;
@@ -248,15 +248,22 @@ Channel* Server::setActiveChannel(std::string buffer)
 {
 	std::string	channelName;
 
-	size_t hashPos = buffer.find("#");
-	if (hashPos == std::string::npos)
-		return nullptr;
+	if (buffer.find("#") != std::string::npos)
+	{
+		size_t hashPos = buffer.find("#");
+		if (hashPos == std::string::npos)
+			return nullptr;
+		
+		size_t chanEndPos = buffer.find(' ', hashPos);
+		if (chanEndPos == std::string::npos)
+			chanEndPos = buffer.length();
 	
-	size_t chanEndPos = buffer.find(' ', hashPos);
-	if (chanEndPos == std::string::npos)
-		chanEndPos = buffer.length();
-
-	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
+		channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
+	}
+	else
+	{
+		channelName = buffer;
+	}
 	// std::cout << "channelName: [" << channelName << "]" << std::endl;
 
 	return this->findChannel(channelName);

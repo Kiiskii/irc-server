@@ -23,7 +23,7 @@ std::string utils::ft_trimString(std::string msg)
 /** @brief split string into tokens using delimiter */
 std::vector<std::string> utils::ft_splitString(std::string buffer, char delimiter)
 {
-	std::cout << "buffer :[" << buffer << "]" << std::endl;
+	// std::cout << "buffer :[" << buffer << "]" << std::endl;
 
 	std::istringstream	tokenStream(buffer); //save buffer string to an istringstream obj
 	std::string			aToken;
@@ -50,21 +50,6 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 		+ "\r\n";
 	//std::cout << ": " << s << std::endl;
 	return s;
-}
-
-/** @note not consider the case of local channel start with '&' ?? 
- * case insensitive ??
-*/
-bool	utils::isValidChanName(std::string name)
-{
-	std::regex chanNameRegex("^#[^ \\x07,]+$");
-
-	if (!std::regex_match(name, chanNameRegex))
-	{
-		std::cout << "Bad channel names\n";
-		return false;
-	}
-	return true;
 }
 
 void	utils::printVector(std::vector<std::string> tokens)
@@ -135,6 +120,16 @@ std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
 	return params;
 }
 
+bool	utils::compareCasemappingStr(std::string s1, std::string s2)
+{
+	if (!s1.empty() && !s2.empty())
+	{
+		if (utils::ft_stringToLower(s1) == utils::ft_stringToLower(s2))
+			return true;	
+	}
+	return false;
+}
+
 Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 {
 	Client* c = nullptr;
@@ -147,3 +142,4 @@ Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 	}
 	return c;
 }
+
