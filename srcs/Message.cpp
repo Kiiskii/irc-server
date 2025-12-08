@@ -87,11 +87,8 @@ void Server::sendPartMsg(Client& client, std::vector<std::string>& params, Chann
 {
 	//check if a reason for kicking exists
 	std::string reason;
-	for (auto it : params)
-		std::cout << " / " << it;
-	std::cout << std::endl;
 	if (params.size() > 0) {
-		for (int i = 1; i < params.size(); ++i) {
+		for (size_t i = 1; i < params.size(); ++i) {
 			reason += params[i];
 			if (i + 1 != params.size())
 				reason += " ";
