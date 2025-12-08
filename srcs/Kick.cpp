@@ -50,14 +50,14 @@ void Client::kickClient(Server& server, std::vector<std::string>& params)
 		Client* cliServer = checkClientExistence(server.getClientInfo(), clientList[i]);
 		if (!cliServer) {
 			server.sendClientErr(ERR_NOSUCHNICK, *this, chann, {clientList[i]});
-			return ;
+			continue ;
 		}
 
 		// check that client getting kicked is on the channel
 		Client* cliChannel = checkClientExistence(chann->getUserList(), clientList[i]);
 		if (!cliChannel) {
 			server.sendClientErr(ERR_USERNOTINCHANNEL, *this, chann, {clientList[i]});
-			return ;
+			continue ;
 		}
 
 		server.sendKickMsg(this->getNick(), clientList[i], params, *chann);
@@ -87,29 +87,40 @@ void Client::partChannel(Server& server, std::vector<std::string>& params)
 
 	std::string channelString = params[0];
 
-	// check that channel exists
-	Channel* chann = server.setActiveChannel(channelString);
-	if (!chann) {
-		server.sendClientErr(ERR_NOSUCHCHANNEL, *this, chann, {channelString});
-		return ;
+	// check for multiple channels and put them into a vector
+	std::vector<std::string> channList;
+	if (params[0][0] == '#' && params[0].find(",") != std::string::npos) {
+		channList = utils::ft_splitString(params[0], ',');
 	}
+	else
+		channList.push_back(channelString);
 
-	// check if client kicking is on channel
-	if (!chann->isClientOnChannel(*this)) {
-		server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
-		return ;
-	}
+	for (size_t i = 0; i < channList.size(); ++i) {
 
-	server.sendPartMsg(*this, params, *chann);
+		// check that channel exists
+		Channel* chann = server.setActiveChannel(channList[i]);
+		if (!chann) {
+			server.sendClientErr(ERR_NOSUCHCHANNEL, *this, chann, {channList[i]});
+			continue ;
+		}
 
-	// remove user from channelList and channel from client channelList
-	chann->removeUser(this->getNick());
-	this->removeChannel(chann);
+		// check if client parting is on channel
+		if (!chann->isClientOnChannel(*this)) {
+			server.sendClientErr(ERR_NOTONCHANNEL, *this, chann, {this->getNick()});
+			continue ;
+		}
 
-	// if channel is empty after this, remove it from servers list of channels
-	auto ite = chann->getUserList();
-	if (ite.empty()) {
-		server.removeChannel(chann);
+		server.sendPartMsg(*this, params, *chann);
+
+		// remove user from channels client list and the channel from users channellist
+		chann->removeUser(this->getNick());
+		this->removeChannel(chann);
+
+		// if channel is empty after this, remove it from servers list of channels
+		auto ite = chann->getUserList();
+		if (ite.empty()) {
+			server.removeChannel(chann);
+		}
 	}
 
 }
