@@ -6,15 +6,29 @@
 
 static bool modeNeedParams(char mode, bool addMode)
 {
-	if (mode == I_MODE || mode == T_MODE) // no need params
+	switch (mode)
+	{
+	case I_MODE:
 		return false;
-	if ( mode == L_MODE && addMode) // add needs param but remove NOT
-		return true;
-	else if (mode == L_MODE && !addMode)
+	
+	case T_MODE:
 		return false;
-	if ( mode == K_MODE || mode == O_MODE) //both add and remove need params
+	
+	case L_MODE:
+		if (addMode)
+			return true;
+		else
+			return false;
+
+	case O_MODE:
 		return true;
-	return false;
+
+	case K_MODE:
+		return true;
+
+	default:
+		return false;
+	}
 }
 
 bool Channel::parsingMode(Client& client, std::vector<std::string> tokens, std::vector<ModeInfo>& parsedModeVec)
@@ -73,6 +87,8 @@ bool Channel::validateModeInstruction(Client& client, std::vector<ModeInfo> pars
 		}
 		if (modeNeedParams(m.mode, m.add) && m.params.empty())
 		{
+			if (m.mode == K_MODE && !m.add)
+				continue;
 			std::string cmd = "MODE ";
 			cmd += m.add ? "+" : "-";
 			cmd += m.mode;
@@ -81,19 +97,31 @@ bool Channel::validateModeInstruction(Client& client, std::vector<ModeInfo> pars
 		}
 		if (m.mode == O_MODE)
 		{
-			if (!server.findClient(m.params))
+			Client* user = server.findClient(m.params);
+			if (!user)
 			{
 				server.sendClientErr(ERR_NOSUCHNICK, client, this, {m.params});
 				return false;
 			}
-			if (!this->isClientOnChannel(client))
+			
+			if (!this->isClientOnChannel(*user))
 			{
 				server.sendClientErr(ERR_USERNOTINCHANNEL, client, this, {m.params});
 				return false;
 			}
 		}
+		if (m.mode == L_MODE && m.add)
+		{
+			try
+			{
+				int limit = std::stoi(m.params);
+			}
+			catch(const std::exception& e)
+			{
+				return false;
+			}
+		}
 	}
-
 	return true;
 }
 
@@ -122,10 +150,8 @@ static void combineExecutedMode(std::string& executedMode, char& mode, bool addM
 			executedMode += mode;
 		else
 		{
-			// std::cout << "mode " << mode << std::endl;
 			executedMode += addMode ? "+" : "-";
 			executedMode += mode;
-			// std::cout << "after adding mode " << executedMode << std::endl;
 		}
 	}
 }
@@ -178,7 +204,7 @@ void Channel::executeModeCmd(Client& client, std::vector<ModeInfo>& parsedModeVe
 		msgEnum = (this->*(_modeHandlers[m.mode]))(m.add, m.params);
 		if (msgEnum == SET_MODE_OK)
 		{
-			std::cout << " set_mode_ok has mode: [" << m.mode << "] and params: [" << m.params << "]\n";
+			// std::cout << " set_mode_ok has mode: [" << m.mode << "] and params: [" << m.params << "]\n";
 			combineExecutedMode(executedMode, m.mode, m.add);
 			executedArgs += (m.params.empty() ? "" : m.params + " ");
 		}
@@ -217,10 +243,10 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	//  If <modestring> is not given, inform currently-set modes of a channel. 
 	if (tokens.empty())
 	{
-		std::cout << "mode str: " << channelPtr->getMode()[0] << " mode arg: " << channelPtr->getMode()[1];
+		std::cout << "mode str: " << channelPtr->getMode().front() << " mode arg: " << channelPtr->getMode().back() << std::endl;
 		sendClientErr(RPL_CHANNELMODEIS, client, channelPtr, 
 			{channelPtr->getMode()[0], channelPtr->getMode()[1]});
-		// sendClientErr(RPL_CREATIONTIME, client, channelPtr, {}); //recheck this, irssi send always after join so duplicate??
+		sendClientErr(RPL_CREATIONTIME, client, channelPtr, {}); //recheck this, irssi send always after join so duplicate??
 		return ;
 	}
 

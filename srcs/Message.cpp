@@ -231,6 +231,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
+	case ERR_INVALIDKEY:
+	{
+		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "Key is not well-formed");
+		break;
+	}
 	
 	//RPL	
 	case RPL_NOTOPIC:

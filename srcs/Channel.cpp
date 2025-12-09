@@ -151,8 +151,9 @@ std::vector<std::string> Channel::getMode() const
 		if (modeArgs.empty())
 			modeArgs += it.second;
 		else
-			modeArgs = " " + it.second;
+			modeArgs += " " + it.second;
 	}
+	std::cout << "mode str: " << modeStr << " mode arg: " << modeArgs << std::endl;
 	return {modeStr, modeArgs};
 }
 
