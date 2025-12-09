@@ -3,7 +3,6 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
-
 Client::Client(Server &server) : _myServer(server)
 {
 
@@ -81,6 +80,7 @@ void Client::setClientState(enum ClientState state)
 	_clientState = state;
 }
 
+// this need review
 void Client::addJoinedChannel(Channel* chan)
 {
 	if (std::find(_joinedChannels.begin(), _joinedChannels.end(), chan) != _joinedChannels.end())
@@ -95,11 +95,13 @@ std::string Client::makeUser()
 		+ this->getUserName() + "@" + this->getHostName();
 }
 
+// this needs review
 bool	Client::isOps(Channel& channel)
 {
 	auto it = channel.getOps().find(this);
 	if (it != channel.getOps().end())
 		return true;
+	
 	return false;
 }
 

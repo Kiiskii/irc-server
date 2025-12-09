@@ -39,8 +39,9 @@
 #define ERR_NOTEXTTOSEND 412
 #define RPL_CREATIONTIME 329
 #define ERR_BADCHANNAME 479  // not  in official irc document, Libera/InspIRCd-specific error code, means “Illegal channel name
-
 #define ERR_USERNOTINCHANNEL 441
+#define ERR_INVALIDKEY 525
+
 
 #define INPUT_FORMAT "Expected format: <./ircserv> <port number> <password>"
 #define ERR_PORT "Port number expected to be of numeric value between numbers 1024 and 65535"

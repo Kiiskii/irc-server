@@ -4,7 +4,7 @@
 #include "utils.hpp"
 
 /**
- * @brief send message to the joining member
+ * @brief send message to the requesting member
  */
 void	Server::sendMsg(Client& client, std::string& msg)
 {
@@ -49,12 +49,15 @@ void	Server::sendJoinSuccessMsg( Client& client, Channel& channel)
 
 	std::string joinMsg = user + " JOIN #" + channel.getChannelName() + " \r\n";
 	this->sendMsg(client, joinMsg);
-	this->sendTopic(client, channel);
+	if (!channel.getTopic().empty())
+	{
+		this->sendClientErr(RPL_TOPIC, client, &channel, {});
+		this->sendClientErr(RPL_TOPICWHOTIME, client, &channel, {});
+	}
 	this->sendNameReply(client, channel);
 	this->sendClientErr(RPL_CREATIONTIME, client, &channel, {});
 	this->broadcastChannelMsg(joinMsg, channel, client);
 }
-
 
 /** @brief send topic or no topic */
 void	Server::sendTopic(Client& client, Channel& channel)
@@ -168,15 +171,21 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case ERR_USERNOTINCHANNEL:
 	{
-		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
-		msg = makeNumericReply(server, num, nick, {arg,"#" + chanName}, "They aren't on that channel");
+		if (otherArgs.size() == 1)
+		{
+			arg = otherArgs[0]; 
+			msg = makeNumericReply(server, num, nick, {arg,"#" + chanName}, "They aren't on that channel");
+		};
 		break ;
 	}
 
 	case ERR_NOSUCHNICK:
 	{
-		if (otherArgs.size() == 1) {arg = otherArgs[0]; };
-		msg = makeNumericReply(server, num, nick, {arg}, "No such nick/channel");
+		if (otherArgs.size() == 1) 
+		{
+			arg = otherArgs[0]; 
+			msg = makeNumericReply(server, num, nick, {arg}, "No such nick/channel");
+		};
 		break ;
 	}
 
@@ -222,6 +231,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
+	case ERR_INVALIDKEY:
+	{
+		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "Key is not well-formed");
+		break;
+	}
 	
 	//RPL	
 	case RPL_NOTOPIC:
@@ -257,9 +271,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	}
 
 	case RPL_CREATIONTIME:
+	{
 		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
 			channel->getChannelCreationTimestamp()}, "");
 		break;
+	}
 
 	case RPL_CHANNELMODEIS:
 	{

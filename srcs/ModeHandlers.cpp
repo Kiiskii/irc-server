@@ -37,43 +37,27 @@ bool	Channel::isModeActive(char mode)
  * TOPIC: Change the channel topic in a mode +t channel */
 channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 {
-	std::string	key;
-	bool		active = this->isModeActive(O_MODE, key);
-	
+	Client* client = this->findClient(args);
+
+	if (!client)
+		return NO_ACTION;
 	if (add)
-	{
-		try
-		{
-			int limit = std::stoi(args);
-		}
-		catch(const std::exception& e)
-		{
-			return NO_ACTION;
-		}
-		
-		this->removeMode(O_MODE);
-		this->addMode(O_MODE, args);
-		for (Client* user : _userList)
-		{
-			if (utils::compareCasemappingStr(user->getNick(), args))
-				this->addChanop(user);
-		}
+	{		
+		this->addChanop(client);
+		this->removeNormal(client->getNick());
 		return SET_MODE_OK;
 	}
-	else if (!add && active)
+	else if (!add && this->isChanop(args))
 	{
-		this->removeMode(O_MODE);
 		this->removeChanop(args);
+		this->addNormal(client);
 		return SET_MODE_OK;
 	}
 	return NO_ACTION;
 }
 
-/** @brief This channel mode controls whether new users may join based on the number of users who already exist in the channel. 
- * If this mode is set, its value is an integer and defines the limit of how many clients may be joined to the channel. 
- * If non-interger is passed as params, server ignores and do nothing.
- * If this mode is set on a channel, and the number of users joined to that channel MATCH? or exceeds the value of this mode, new users cannot join that channel. 
- * If a client sends a JOIN request for channel, they will receive an ERR_CHANNELISFULL (471) reply and the command will fail. */
+/** @brief If this mode is set, its value is an integer and defines the limit of how many clients may be joined to the channel. 
+ * If non-interger is passed as params, server ignores and do nothing.*/
 channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 {
 	std::string	key;
@@ -97,8 +81,7 @@ channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
  * If they have not received an invite, they will receive an ERR_INVITEONLYCHAN (473) reply and the command will fail. */
 channelMsg Channel::handleInviteOnly(bool add, std::string& args)
 {
-	std::string key;
-	bool active = this->isModeActive(I_MODE, key);
+	bool active = this->isModeActive(I_MODE);
 
 	if (add)
 	{
@@ -144,15 +127,7 @@ channelMsg	Channel::handleTopicRestriction(bool add, std::string& args)
 	return NO_ACTION;
 }
 
-/**
- * @brief This mode letter sets a ‘key’ that must be supplied in order to join this channel. If this mode is set, its’ value is the key that is required. Servers may validate the value (eg. to forbid spaces, as they make it harder to use the key in JOIN messages). If the value is invalid, they SHOULD return ERR_INVALIDMODEPARAM. However, clients MUST be able to handle any of the following:
-
-    ERR_INVALIDMODEPARAM
-    ERR_INVALIDKEY
-    MODE echoed with a different key (eg. truncated or stripped of invalid characters)
-    the key changed ignored, and no MODE echoed if no other mode change was valid.
-
-If this mode is set on a channel, and a client sends a JOIN request for that channel, they must supply <key> in order for the command to succeed. If they do not supply a <key>, or the key they supply does not match the value of this mode, they will receive an ERR_BADCHANNELKEY (475) reply and the command will fail. */
+/** @brief This mode letter sets a ‘key’ that must be supplied in order to join this channel. If this mode is set, its’ value is the key that is required.  */
 channelMsg	Channel::handleChannelKey(bool add, std::string& args)
 {
 	std::string key;

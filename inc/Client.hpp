@@ -67,7 +67,6 @@ class Client
 		bool		isOps(Channel& channel);
 		std::string makeUser();
 		bool		isValidChanName(std::string name);
-		//Channel*	setActiveChannel(std::string buffer);
 
 		// KICK & PART
 		void		kickClient(Server &server, std::vector<std::string>& params);
