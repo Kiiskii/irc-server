@@ -13,6 +13,22 @@ Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
 
+Channel::~Channel()
+{
+	for (auto user :_ops)
+		delete user;
+	for (auto user :_voices)
+		delete user;
+	for (auto user :_halfOps)
+		delete user;
+	for (auto user :_invitedUser)
+		delete user;
+	for (auto user :_normals)
+		delete user;
+	for (auto user :_userList)
+		delete user;
+}
+
 std::string Channel::getChannelName() const
 {
 	return _channelName;
@@ -89,7 +105,6 @@ void Channel::addChanop(Client* chanop)
 		if (utils::compareCasemappingStr(op->getNick(), chanop->getNick()))
 			return;
 	}
-	// std::cout << "add op with nick: " << chanop->getNick() << std::endl;
 	_ops.insert(chanop);
 }
 
@@ -153,7 +168,6 @@ std::vector<std::string> Channel::getMode() const
 		else
 			modeArgs += " " + it.second;
 	}
-	std::cout << "mode str: " << modeStr << " mode arg: " << modeArgs << std::endl;
 	return {modeStr, modeArgs};
 }
 

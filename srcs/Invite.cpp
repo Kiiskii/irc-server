@@ -13,7 +13,7 @@ bool	Channel::hasInvitedClient(Client* client)
 static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
 	Channel*& chann, Client*& invitedClient)
 {
-	std::cout << "token size: " << tokens.size() << std::endl;
+	// std::cout << "token size: " << tokens.size() << std::endl;
 	if (tokens.size() < 2)
 	{
 		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");

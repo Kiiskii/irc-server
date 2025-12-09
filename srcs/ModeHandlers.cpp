@@ -56,11 +56,8 @@ channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 	return NO_ACTION;
 }
 
-/** @brief This channel mode controls whether new users may join based on the number of users who already exist in the channel. 
- * If this mode is set, its value is an integer and defines the limit of how many clients may be joined to the channel. 
- * If non-interger is passed as params, server ignores and do nothing.
- * If this mode is set on a channel, and the number of users joined to that channel MATCH? or exceeds the value of this mode, new users cannot join that channel. 
- * If a client sends a JOIN request for channel, they will receive an ERR_CHANNELISFULL (471) reply and the command will fail. */
+/** @brief If this mode is set, its value is an integer and defines the limit of how many clients may be joined to the channel. 
+ * If non-interger is passed as params, server ignores and do nothing.*/
 channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 {
 	std::string	key;

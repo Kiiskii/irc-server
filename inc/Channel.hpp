@@ -37,7 +37,7 @@ class Channel
 private:
 	std::string					_channelName;
 	std::string					_topic;
-	std::unordered_set<Client*>	_ops; //set allows uniqueness, but is it necessar?
+	std::unordered_set<Client*>	_ops; //set allows uniqueness, not this case
 	std::unordered_set<Client*>	_halfOps; 
 	std::unordered_set<Client*>	_voices;
 	std::unordered_set<Client*>	_invitedUser;
@@ -52,7 +52,7 @@ private:
 public:
 
 	Channel() = delete;
-	~Channel() = default;
+	~Channel();
 	Channel(std::string newChannel);
 
 	// getters
@@ -67,7 +67,6 @@ public:
 	Client*						getTopicSetter();
 	std::unordered_set<Client*>&	getOps();
 	Client*						findClient(std::string nickName);
-
 
 
 	// setters
@@ -103,7 +102,6 @@ public:
 	void		addChanop(Client* chanop);
 	void		removeChanop(std::string opNick);
 	bool		hasInvitedClient(Client* client);
-	// bool		isValidModeCmd(std::string modeStr, Client& client);
 	std::string	truncateTopic(std::string name);
 	bool		parsingMode(Client& client, std::vector<std::string> tokens,
 					std::vector<ModeInfo>& parsedModeVec);

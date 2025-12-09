@@ -3,14 +3,19 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
-/** @note not consider the case of local channel start with '&' */
+/** @note not consider the case of local channel start with '&'. A regular channel start with '#', not including forbidden characters and maximum length is CHANNELLEN */
 bool	Client::isValidChanName(std::string name)
 {
-	std::regex chanNameRegex("^#[^ \\x07,]+$");
+	if (name.empty() || name.length() > CHANNELLEN)
+	{
+		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name});
+		return false;
+	}
 
+	std::regex chanNameRegex("^#[^ \\x07,]+$");
 	if (!std::regex_match(name, chanNameRegex))
 	{
-		// this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name}); recheck this one
+		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name});
 		return false;
 	}
 	return true;
@@ -181,7 +186,6 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 			this->sendTopic(client, *channelPtr);
 			this->sendNameReply(client, *channelPtr);
 		}
-		std::cout << "print user: " << channelPtr->printUser() << std::endl;
 	}
 	return;
 }

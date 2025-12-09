@@ -3,7 +3,6 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
-
 Client::Client(Server &server) : _myServer(server)
 {
 

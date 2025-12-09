@@ -204,7 +204,6 @@ void Channel::executeModeCmd(Client& client, std::vector<ModeInfo>& parsedModeVe
 		msgEnum = (this->*(_modeHandlers[m.mode]))(m.add, m.params);
 		if (msgEnum == SET_MODE_OK)
 		{
-			// std::cout << " set_mode_ok has mode: [" << m.mode << "] and params: [" << m.params << "]\n";
 			combineExecutedMode(executedMode, m.mode, m.add);
 			executedArgs += (m.params.empty() ? "" : m.params + " ");
 		}
@@ -226,15 +225,16 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 		return ;
 	}
 
-	std::string	channelName = tokens[0];
-	if (!client.isValidChanName(channelName))
-		return ;
-
-	channelPtr = this->findChannel(utils::extractChannelName(channelName));
+	std::string	channelName = tokens[0]; 
+	//ignore mode for user in channel
+	if (channelName.find("#") == std::string::npos && this->findClient(channelName))
+		return;
+	if (channelName.find("#") != std::string::npos)	
+		channelName = utils::extractChannelName(channelName);
+	channelPtr = this->findChannel(channelName);
 	if (!channelPtr) 
 	{
-		this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, 
-			{utils::extractChannelName(channelName)});
+		this->sendClientErr(ERR_NOSUCHCHANNEL, client, nullptr, {channelName});
 		return ; 
 	}
 
@@ -243,10 +243,11 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	//  If <modestring> is not given, inform currently-set modes of a channel. 
 	if (tokens.empty())
 	{
-		std::cout << "mode str: " << channelPtr->getMode().front() << " mode arg: " << channelPtr->getMode().back() << std::endl;
 		sendClientErr(RPL_CHANNELMODEIS, client, channelPtr, 
 			{channelPtr->getMode()[0], channelPtr->getMode()[1]});
-		sendClientErr(RPL_CREATIONTIME, client, channelPtr, {}); //recheck this, irssi send always after join so duplicate??
+
+		// decide to keep this or not?
+		sendClientErr(RPL_CREATIONTIME, client, channelPtr, {});
 		return ;
 	}
 

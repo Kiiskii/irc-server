@@ -271,9 +271,11 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	}
 
 	case RPL_CREATIONTIME:
+	{
 		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
 			channel->getChannelCreationTimestamp()}, "");
 		break;
+	}
 
 	case RPL_CHANNELMODEIS:
 	{
