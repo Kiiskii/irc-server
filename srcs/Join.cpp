@@ -10,7 +10,7 @@ bool	Client::isValidChanName(std::string name)
 
 	if (!std::regex_match(name, chanNameRegex))
 	{
-		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name});
+		// this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name}); recheck this one
 		return false;
 	}
 	return true;
@@ -172,13 +172,16 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 			channelPtr->addUser(&client);
 			if (channelPtr->getUserList().size() == 1)
 				channelPtr->addChanop(&client);
-			this->sendJoinSuccessMsg(client, *channelPtr);
+			else
+				channelPtr->addNormal(&client);
+			this->sendJoinSuccessMsg(client, *channelPtr);			
 		}
 		else if (result == ALREADY_ON_CHAN)
 		{
 			this->sendTopic(client, *channelPtr);
 			this->sendNameReply(client, *channelPtr);
 		}
+		std::cout << "print user: " << channelPtr->printUser() << std::endl;
 	}
 	return;
 }

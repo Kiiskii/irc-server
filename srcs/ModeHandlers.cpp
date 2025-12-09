@@ -37,33 +37,20 @@ bool	Channel::isModeActive(char mode)
  * TOPIC: Change the channel topic in a mode +t channel */
 channelMsg	Channel::handleChannelOperator(bool add, std::string& args)
 {
-	std::string	key;
-	bool		active = this->isModeActive(O_MODE, key);
-	
+	Client* client = this->findClient(args);
+
+	if (!client)
+		return NO_ACTION;
 	if (add)
-	{
-		try
-		{
-			int limit = std::stoi(args);
-		}
-		catch(const std::exception& e)
-		{
-			return NO_ACTION;
-		}
-		
-		this->removeMode(O_MODE);
-		this->addMode(O_MODE, args);
-		for (Client* user : _userList)
-		{
-			if (utils::compareCasemappingStr(user->getNick(), args))
-				this->addChanop(user);
-		}
+	{		
+		this->addChanop(client);
+		this->removeNormal(client->getNick());
 		return SET_MODE_OK;
 	}
-	else if (!add && active)
+	else if (!add && this->isChanop(args))
 	{
-		this->removeMode(O_MODE);
 		this->removeChanop(args);
+		this->addNormal(client);
 		return SET_MODE_OK;
 	}
 	return NO_ACTION;
@@ -81,6 +68,14 @@ channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 
 	if (add)
 	{
+		try
+		{
+			int limit = std::stoi(args);
+		}
+		catch(const std::exception& e)
+		{
+			return NO_ACTION;
+		}
 		this->removeMode(L_MODE);
 		this->addMode(L_MODE, args);
 		return SET_MODE_OK;
@@ -144,7 +139,7 @@ channelMsg	Channel::handleTopicRestriction(bool add, std::string& args)
 	return NO_ACTION;
 }
 
-/**
+/** recheck??
  * @brief This mode letter sets a ‘key’ that must be supplied in order to join this channel. If this mode is set, its’ value is the key that is required. Servers may validate the value (eg. to forbid spaces, as they make it harder to use the key in JOIN messages). If the value is invalid, they SHOULD return ERR_INVALIDMODEPARAM. However, clients MUST be able to handle any of the following:
 
     ERR_INVALIDMODEPARAM

@@ -273,7 +273,7 @@ Client*	Server::findClient(std::string nickName)
 {
 	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)
 	{
-		if ((*it)->getNick() == nickName)
+		if (utils::compareCasemappingStr((*it)->getNick(), nickName))
 			return *it;
 	}
 	return nullptr;
