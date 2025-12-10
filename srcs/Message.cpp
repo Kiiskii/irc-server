@@ -3,9 +3,7 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
-/**
- * @brief send message to the requesting member
- */
+/** @brief send message to the requesting member */
 void	Server::sendMsg(Client& client, std::string& msg)
 {
 	if (send(client.getClientFd(), msg.c_str(), msg.size(), 0) < 0)

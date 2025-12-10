@@ -74,7 +74,7 @@ public:
 	void 		handleMode(Client& client, std::vector<std::string> tokens);
 	void 		handleInvite(Client& client, std::vector<std::string> tokens);
 	void 		handlePrivmsg(Client& client, std::vector<std::string> tokens);
-	void 		handleQuit(Client& client, std::vector<std::string> tokens);
+	void 		handleQuit(Client& client, std::vector<std::string>& tokens);
 
 // other methods
 	Channel*	findChannel(std::string newChannel);

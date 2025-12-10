@@ -5,7 +5,27 @@
 
 using namespace utils;
 
-void Server::handleQuit(Client& client, std::vector<std::string> tokens)
+void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 {
+	std::string quitMsg = utils::joinTokenVector(tokens);
+	if (quitMsg.find_first_not_of(':') != std::string::npos)
+		quitMsg = quitMsg.substr(quitMsg.find_first_not_of(':'));
+	if (quitMsg == "leaving")
+		quitMsg = "";
+	std::cout << "quitmsg : [" << quitMsg << "]\n";
+
+	std::string serverMsg = client.makeUser() + " QUIT :" 
+		+ (quitMsg.empty() ? ("Client Quit") : "Quit: " + quitMsg) + "\r\n";
+	std::cout << "servermsg : [" << serverMsg << "]\n";
+
+
+	for (auto chan : client.getJoinedChannels())
+	{
+		client.partChannel(*this, tokens);
+		this->broadcastChannelMsg(serverMsg, *chan, client);
+	}
+	// this->disconnectClient(&client); //already called in destructor
+	client.setClientState(DISCONNECTING);
+	return;
 
 }

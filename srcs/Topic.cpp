@@ -86,14 +86,14 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 		this->sendTopic(client, *channelPtr);
 	else // set TOPIC
 	{
-		std::string topicStr;
-		for (size_t i = 0; i < tokens.size(); ++i)
-		{
-			if (i == tokens.size() - 1)
-				topicStr += tokens[i];
-			else
-				topicStr += tokens[i] + " ";
-		}
+		std::string topicStr = utils::joinTokenVector(tokens);
+		// for (size_t i = 0; i < tokens.size(); ++i)
+		// {
+		// 	if (i == tokens.size() - 1)
+		// 		topicStr += tokens[i];
+		// 	else
+		// 		topicStr += tokens[i] + " ";
+		// }
 		if (!channelPtr->setTopic(topicStr, client))
 			return ;
 
