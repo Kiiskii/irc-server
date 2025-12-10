@@ -39,10 +39,10 @@ class Client
 	public:
 		std::string				_input; // this needs to be private
 //		int auth_step = 0;
-		std::string recvBuffer;
-		
+		std::string 			recvBuffer;
+		Client() = delete;
 		Client(Server &server);
-		~Client();
+		~Client() = default;
 
 		// getters
 		int						getClientFd();
@@ -63,7 +63,7 @@ class Client
 		void		setClientState(enum ClientState state);
 		void		addJoinedChannel(Channel* chan);
 
-		// other
+		
 		bool		isOps(Channel& channel);
 		std::string makeUser();
 		bool		isValidChanName(std::string name);

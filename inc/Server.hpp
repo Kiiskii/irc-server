@@ -40,7 +40,9 @@ class Server
 	struct epoll_event _events[MAX_EVENTS];
 
 public:
+	Server() = default;
 	~Server();
+
 //getters
 	int 					getServerfd() const;
 	int 					getEpollfd() const;
@@ -73,6 +75,7 @@ public:
 	void 		handleInvite(Client& client, std::vector<std::string> tokens);
 	void 		handlePrivmsg(Client& client, std::vector<std::string> tokens);
 
+// other methods
 	Channel*	findChannel(std::string newChannel);
 	Client*		findClient(std::string nickName);
 

@@ -24,9 +24,7 @@ struct ModeInfo {
 /*
 	@brief The channel is created implicitly when the first client joins it, 
 	and the channel ceases to  exist when the last client leaves it
-	Channels names are strings (beginning with a '&' or '#' character)
-	CHANLIMIT=50  CHANNELLEN=50 TOPICLEN=390 CASEMAPPING=ascii??
-
+	Channels names are strings (beginning with a '#' character for regular channel)
 	IRC message has 3 parts: 512 characters including /r/n
 	- prefix(optional): :<prefix> <message>
 	- command
@@ -52,7 +50,7 @@ private:
 public:
 
 	Channel() = delete;
-	~Channel();
+	~Channel() = default;
 	Channel(std::string newChannel);
 
 	// getters
@@ -85,7 +83,7 @@ public:
 	void			removeNormal(std::string userNick);
 
 
-	// channel public method
+	
 	bool			isClientOnChannel( Client& client);
 	channelMsg		canClientJoinChannel( Client& client,
 					 std::string clientKey);
@@ -105,8 +103,10 @@ public:
 	std::string	truncateTopic(std::string name);
 	bool		parsingMode(Client& client, std::vector<std::string> tokens,
 					std::vector<ModeInfo>& parsedModeVec);
-	bool		validateModeInstruction(Client& client, std::vector<ModeInfo> parsedModeVec);
-	void		executeModeCmd(Client& client, std::vector<ModeInfo>& parsedModeVec);
+	bool		validateModeInstruction(Client& client, 
+					std::vector<ModeInfo> parsedModeVec);
+	void		executeModeCmd(Client& client, 
+					std::vector<ModeInfo>& parsedModeVec);
 
 };
 

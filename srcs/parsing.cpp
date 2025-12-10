@@ -171,7 +171,7 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	else if (command == "PRIVMSG")
 	{
-		std::cout << "[" << command << "]" << std::endl;
+		// std::cout << "[" << command << "]" << std::endl;
 		// utils::printVector(tokens);
 		server.handlePrivmsg(client, tokens);
 	}

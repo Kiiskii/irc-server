@@ -7,6 +7,11 @@ bool	Channel::hasInvitedClient(Client* client)
 {
 	if (!_invitedUser.empty() && _invitedUser.find(client) != _invitedUser.end())
 		return true;
+	// for (auto user : _invitedUser)
+	// {
+	// 	if (utils::compareCasemappingStr(user->getNick(), client->getNick()))
+	// 		return true;
+	// }
 	return false;
 }
 
@@ -25,9 +30,10 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client,
 		// std::cout << "invalid channel name\n";
 		return false;
 	}
+
 	std::string nickName = tokens[0];
 	std::string chanName = tokens[1].substr(tokens[1].find("#") + 1, tokens[1].length() - 1);
-	std::cout << "AFTER #, channel name: " << chanName << std::endl;
+	// std::cout << "AFTER #, channel name: " << chanName << std::endl;
 
 	chann = client.getServer().findChannel(chanName);
 	if (!chann)
@@ -62,18 +68,14 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client,
 	return true;
 }
 
-/** @brief The INVITE command is used to invite a user to a channel. The parameter 
- * <nickname> is the nickname of the person to be invited to the target channel <channel>.
- * The target channel SHOULD exist (at least one user is on it). Otherwise, the server
- * SHOULD reject the command with the ERR_NOSUCHCHANNEL numeric.
- * Only members of the channel are allowed to invite other users. Otherwise, the server
- *  MUST reject the command with the ERR_NOTONCHANNEL numeric.
+/** @brief The INVITE command is used to invite a user to a channel. The parameter <nickname> is the nickname of the person to be invited to the target channel <channel>. The target channel SHOULD exist (at least one user is on it). Otherwise, the server SHOULD reject the command with the ERR_NOSUCHCHANNEL numeric.
+ * Only members of the channel are allowed to invite other users. Otherwise, the server MUST reject the command with the ERR_NOTONCHANNEL numeric.
  * Servers MAY reject the command with the ERR_CHANOPRIVSNEEDED numeric. In particular, they SHOULD reject it when the channel has invite-only mode set, and the user is not a channel operator.
  */
 void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 {
-	Channel* chann = nullptr;
-	Client* invitedClient = nullptr;
+	Channel*	chann = nullptr;
+	Client*		invitedClient = nullptr;
 
 	if (!isValidInvitation(tokens, client, chann, invitedClient))
 	{
@@ -81,13 +83,13 @@ void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 		return;
 	}
 
-	std::cout << "send invitation\n";
+	// std::cout << "send invitation\n";
 	//if valid invitation then send msg
-	chann->addInvitedUser(invitedClient);
 	if (invitedClient)
 	{
-		std::string	inviteMsg = client.makeUser() + " INVITE " + invitedClient->getNick() 
-				+ " #" + chann->getChannelName() + " \r\n";
+		chann->addInvitedUser(invitedClient);
+		std::string	inviteMsg = client.makeUser() + " INVITE " + 
+			invitedClient->getNick() + " #" + chann->getChannelName() + " \r\n";
 		this->sendMsg(*invitedClient, inviteMsg);
 		this->sendClientErr(RPL_INVITING, client, chann, 
 			{invitedClient->getNick()});

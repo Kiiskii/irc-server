@@ -7,10 +7,11 @@ Client::Client(Server &server) : _myServer(server)
 {
 
 }
-Client::~Client()
-{
-
-}
+// Client::~Client()
+// {
+// 	for (auto chan : _joinedChannels)
+// 		delete chan;
+// }
 
 int	Client::getClientFd()
 {
@@ -80,7 +81,6 @@ void Client::setClientState(enum ClientState state)
 	_clientState = state;
 }
 
-// this need review
 void Client::addJoinedChannel(Channel* chan)
 {
 	if (std::find(_joinedChannels.begin(), _joinedChannels.end(), chan) != _joinedChannels.end())
