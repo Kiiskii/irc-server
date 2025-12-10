@@ -32,7 +32,8 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
 {
 	for (Client* user : channel.getUserList())
 	{
-		if (!utils::compareCasemappingStr(user->getNick(), client.getNick()))
+		// if (!utils::compareCasemappingStr(user->getNick(), client.getNick()))
+		if (&client != user)
 			this->sendMsg(*user, msg);
 	}
 }

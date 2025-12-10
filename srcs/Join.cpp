@@ -175,10 +175,10 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 		{
 			client.addJoinedChannel(channelPtr);
 			channelPtr->addUser(&client);
-			if (channelPtr->getUserList().size() == 1)
-				channelPtr->addChanop(&client);
-			else
-				channelPtr->addNormal(&client);
+			// if (channelPtr->getUserList().size() == 1)
+			// 	channelPtr->addChanop(&client);
+			// else
+			// 	channelPtr->addNormal(&client); //duplicate
 			this->sendJoinSuccessMsg(client, *channelPtr);			
 		}
 		else if (result == ALREADY_ON_CHAN)

@@ -30,19 +30,18 @@ class Client
 		std::string				_realName = "";
 		std::string				_hostName;
 
-		std::vector<Channel*>	_joinedChannels{};
+		std::vector<Channel*>	_joinedChannels; // remove {}, check if works
 		enum ClientState		_clientState = NONE;
 		class Server			&_myServer;	
 //		std::string				_input;
 
-	
 	public:
 		std::string				_input; // this needs to be private
 //		int auth_step = 0;
-		std::string recvBuffer;
-		
+		std::string 			recvBuffer;
+		Client() = delete;
 		Client(Server &server);
-		~Client();
+		~Client() = default;
 
 		// getters
 		int						getClientFd();
@@ -61,17 +60,18 @@ class Client
 		void		setRealName(std::string user);
 		void		setHostName(std::string host);
 		void		setClientState(enum ClientState state);
-		void		addJoinedChannel(Channel* chan);
 
-		// other
+		// other methods
+		void		addJoinedChannel(Channel* chan);
 		bool		isOps(Channel& channel);
 		std::string makeUser();
 		bool		isValidChanName(std::string name);
 
 		// KICK & PART
-		void		kickClient(Server &server, std::vector<std::string>& params);
-		void		partChannel(Server& server, std::vector<std::string>& params);
+		void		kickClient(Server &server, 
+						std::vector<std::string>& params);
+		void		partChannel(Server& server, 
+						std::vector<std::string>& params);
 		void		removeChannel(Channel* chann);
 	
-
 };

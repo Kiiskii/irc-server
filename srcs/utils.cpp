@@ -52,22 +52,6 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 	return s;
 }
 
-void	utils::printVector(std::vector<std::string> tokens)
-{
-	std::cout << "vector memebers: " << std::endl;
-
-	if (tokens.empty())
-	{
-		std::cout << "empty tokens\n";
-		return;
-	}
-	for (auto token : tokens)
-	{
-		std::cout << "[" <<  token << "] ";
-	}
-	std::cout << std::endl;
-}
-
 std::string getTarget(Client &client)
 {
 	std::string target;
@@ -78,19 +62,6 @@ std::string getTarget(Client &client)
 	else
 		target = client.getNick();
 	return target;
-}
-
-void	utils::printOps(Channel& channel)
-{
-	std::cout << "@CHANOPS list: \n";
-	if (!channel.getOps().empty())
-	{
-		for (auto op : channel.getOps())
-		{
-			std::cout << op->getNick() << ", ";
-		}
-		std::cout << "\n";
-	}
 }
 
 std::string utils::extractChannelName(std::string buffer)
@@ -109,15 +80,6 @@ std::string utils::extractChannelName(std::string buffer)
 	// std::cout << "channelName: [" << channelName << "]" << std::endl;
 	return channelName;
 
-}
-
-std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
-{
-	std::string params;
-
-	params = tokens.front();
-	tokens.erase(tokens.begin());
-	return params;
 }
 
 bool	utils::compareCasemappingStr(std::string s1, std::string s2)
@@ -143,3 +105,40 @@ Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 	return c;
 }
 
+// std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
+// {
+// 	std::string params;
+
+// 	params = tokens.front();
+// 	tokens.erase(tokens.begin());
+// 	return params;
+// }
+
+void	utils::printVector(std::vector<std::string> tokens)
+{
+	std::cout << "vector memebers: " << std::endl;
+
+	if (tokens.empty())
+	{
+		std::cout << "empty tokens\n";
+		return;
+	}
+	for (auto token : tokens)
+	{
+		std::cout << "[" <<  token << "] ";
+	}
+	std::cout << std::endl;
+}
+
+// void	utils::printOps(Channel& channel)
+// {
+// 	std::cout << "@CHANOPS list: \n";
+// 	if (!channel.getOps().empty())
+// 	{
+// 		for (auto op : channel.getOps())
+// 		{
+// 			std::cout << op->getNick() << ", ";
+// 		}
+// 		std::cout << "\n";
+// 	}
+// }

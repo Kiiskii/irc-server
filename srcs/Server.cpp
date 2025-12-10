@@ -269,6 +269,7 @@ Channel* Server::setActiveChannel(std::string buffer)
 	return this->findChannel(channelName);
 }
 
+// correct
 Client*	Server::findClient(std::string nickName)
 {
 	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)
