@@ -2,7 +2,7 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
-/** @brief whether the client has been invited to join by chanop */
+/** @brief whether the client has been invited to join the channel */
 bool	Channel::hasInvitedClient(Client* client)
 {
 	if (!_invitedUser.empty() && _invitedUser.find(client) != _invitedUser.end())
@@ -94,11 +94,10 @@ void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 		this->sendClientErr(RPL_INVITING, client, chann, 
 			{invitedClient->getNick()});
 	}
-	else
-	{
-		std::cout << "null invited cient\n";
-	}
-
+	// else
+	// {
+	// 	std::cout << "null invited cient\n";
+	// }
 }
 
 

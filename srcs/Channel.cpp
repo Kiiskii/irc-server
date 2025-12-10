@@ -103,15 +103,15 @@ std::unordered_set<Client*>&	Channel::getOps()
 	return _ops;
 }
 
-void Channel::setChannelName(std::string channelName)
-{
-	_channelName = channelName;
-}
+// void Channel::setChannelName(std::string channelName)
+// {
+// 	_channelName = channelName;
+// }
 
-void Channel::setChanKey(std::string newKey)
-{
-	this->_mode.insert({K_MODE, newKey});
-}
+// void Channel::setChanKey(std::string newKey)
+// {
+// 	this->_mode.insert({K_MODE, newKey});
+// }
 
 void Channel::addMode(char key, std::string param)
 {
@@ -157,8 +157,8 @@ void Channel::addUser(Client* newClient)
 
 void Channel::addChanop(Client* chanop)
 {
-	if (std::find(_ops.begin(), _ops.end(), chanop) != _ops.end())
-		return ;
+	// if (std::find(_ops.begin(), _ops.end(), chanop) != _ops.end())
+	// 	return ;
 	// for (auto op : _ops)
 	// {
 	// 	if (utils::compareCasemappingStr(op->getNick(), chanop->getNick()))
@@ -169,8 +169,8 @@ void Channel::addChanop(Client* chanop)
 
 void Channel::addNormal(Client* client)
 {
-	if (std::find(_normals.begin(), _normals.end(), client) != _normals.end())
-		return ;
+	// if (std::find(_normals.begin(), _normals.end(), client) != _normals.end())
+	// 	return ;
 	// for (auto normal : _normals)
 	// {
 	// 	if (utils::compareCasemappingStr(normal->getNick(), client->getNick()))
@@ -186,8 +186,8 @@ void Channel::addInvitedUser(Client* newClient)
 	// 	if (utils::compareCasemappingStr(user->getNick(), newClient->getNick()))
 	// 		return;
 	// }
-	if (std::find(_invitedUser.begin(), _invitedUser.end(), newClient) != _invitedUser.end())
-		return ;
+	// if (std::find(_invitedUser.begin(), _invitedUser.end(), newClient) != _invitedUser.end())
+		// return ;
 	_invitedUser.insert(newClient);
 }
 

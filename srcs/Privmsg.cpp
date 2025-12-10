@@ -5,6 +5,21 @@
 
 using namespace utils;
 
+/** @brief reject all non-printable ascii characters. However, this is not possible to test, because the \001 for example, sent by '\','0', not as 1 raw byte '\001', so never caught here*/
+static bool hasForbiddenChar(std::string& msg)
+{
+	for (unsigned char c : msg)
+	{
+		// std::cout << "char: " << c << " hex: " << std::hex << (int)c << std::dec << "\n";
+		if (c <= '\x1F' || c == '\x7F')
+		{
+			// std::cout << "here\n";
+			return true;
+		}
+	}
+	return false;
+}
+
 static bool isValidPrivmsg(Client& client, std::vector<std::string>& tokens) 
 {
 	if (tokens.empty())
@@ -25,7 +40,15 @@ static bool isValidPrivmsg(Client& client, std::vector<std::string>& tokens)
 			return false;
 		}
 	}
+
 	if (!tokens[1].empty() && ft_trimString(tokens[1]) == ":" )
+	{
+		client.getServer().sendClientErr(ERR_NOTEXTTOSEND, client, nullptr, {});
+		return false;
+	}
+
+	std::string msg = tokens[1];
+	if (hasForbiddenChar(msg))
 	{
 		client.getServer().sendClientErr(ERR_NOTEXTTOSEND, client, nullptr, {});
 		return false;
@@ -86,8 +109,6 @@ void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
 				continue;
 			}
 			msg = utils::makePrivMsgToClient(tokens[1], client, *partner);
-			// std::cout << "client name: [" << client.getNick() << "]"<< std::endl;
-			// std::cout << "msg: [" << msg << "]" << std::endl;
 			this->sendMsg(*partner, msg);
 		}
 	}
