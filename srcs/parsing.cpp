@@ -170,7 +170,12 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	else if (command == "PART")
 		server.partChannel(client, tokens);
 	else if (command == "QUIT")
+	{
+		std::cout << "[" << command << "]" << std::endl;
+		utils::printVector(tokens);
 		server.handleQuit(client, tokens);
+		return;
+	}
 	else
 	{
 		std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);

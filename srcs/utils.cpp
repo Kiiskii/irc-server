@@ -105,6 +105,23 @@ Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 	return c;
 }
 
+std::string utils::joinTokenVector(const std::vector<std::string>& tokens)
+{
+	std::string str = "";
+	if (tokens.size() == 0)
+		return str;
+
+	for (size_t i = 0; i < tokens.size(); ++i)
+	{
+		if (i == tokens.size() - 1)
+			str += tokens[i];
+		else
+			str += tokens[i] + " ";
+	}
+	return str;
+}
+
+
 // std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
 // {
 // 	std::string params;
