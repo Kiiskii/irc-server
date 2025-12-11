@@ -147,6 +147,16 @@ void Server::handleNewClient()
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }
 
+void Server::handleDisconnects()
+{
+	for (auto it = _clientInfo.begin(); it != _clientInfo.end();)
+	{
+		if ((*it)->getClientState() == DISCONNECTING)
+			disconnectClient(*it);
+		else
+			++it;
+	}
+}
 //review this one completely, maybe break the handleExistingClient and handleDisconnect in their own separate functions
 void Server::handleEvents()
 {
@@ -164,14 +174,15 @@ void Server::handleEvents()
 			receive(*c);
 		}
 	}
-	for (size_t i = 0; i < getClientInfo().size(); i++) //this one doesnt feel too elegant
-	{
-		if (getClientInfo()[i]->getClientState() == DISCONNECTING)
-		{
-			disconnectClient(getClientInfo()[i]);
-			break;
-		}
-	}
+	handleDisconnects();
+	// for (size_t i = 0; i < getClientInfo().size(); i++) //this one doesnt feel too elegant
+	// {
+	// 	if (getClientInfo()[i]->getClientState() == DISCONNECTING)
+	// 	{
+	// 		disconnectClient(getClientInfo()[i]);
+	// 		break;
+	// 	}
+	// }
 }
 
 void Server::attemptRegister(Client &client)
