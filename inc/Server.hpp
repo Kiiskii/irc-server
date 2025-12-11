@@ -53,6 +53,7 @@ public:
 	void		setupServerDetails(Server &server, int argc, char *argv[]);
 	void		setupSocket();
 	void		setupEpoll();
+	void		handleEvents();
 	void		handleNewClient();
 	void		handleCommand(Server &server, Client &client, 
 					std::string command, std::vector<std::string> &tokens);
@@ -79,6 +80,7 @@ public:
 // other methods
 	Channel*	findChannel(std::string newChannel);
 	Client*		findClient(std::string nickName);
+	Client*		findClientByFd(int fd);
 	Channel*	setActiveChannel(std::string buffer);
 	Channel*	createChannel(std::string chanName);
 	bool 		mappingChannelKey(std::vector<std::string> tokens, 
