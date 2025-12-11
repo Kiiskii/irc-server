@@ -13,6 +13,7 @@ void	Server::sendMsg(Client& client, std::string& msg)
 		std::cout << "joinmsg: failed to send\n";
 		return;
 	}
+	logMessages(msg, getServerfd());
 	// std::cout << "msg sent: " << msg << std::endl;
 }
 
