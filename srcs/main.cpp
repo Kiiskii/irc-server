@@ -13,17 +13,23 @@ void signalHandler(int sig)
 int main(int argc, char *argv[])
 {
 	Server server;
-	if (argc != 3)
+	try 
 	{
-		std::cerr << INPUT_FORMAT << std::endl;
-		exit (1);
+		if (argc != 3)
+			throw std::runtime_error(INPUT_FORMAT);
+		server.setupServerDetails(server, argc, argv);
+		server.setupSocket();
+		server.setupEpoll();
+		signal(SIGINT, signalHandler);
+		while (activeserver == true)
+		{
+			server.handleEvents();
+		}
 	}
-	server.setupServerDetails(server, argc, argv);
-	server.setupSocket();
-	server.setupEpoll();
-	signal(SIGINT, signalHandler);
-	while (activeserver == true)
+	catch (const std::exception &e)
 	{
-		server.handleEvents();
+		std::cerr << "Fatal error: " << e.what() << std::endl;
+		return 1;
 	}
+	return 0;
 }

@@ -54,16 +54,12 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 	try
 	{	_port = std::stoi(argv[1], &pos); }
 	catch (const std::exception&) //invalid argument ("abc") or out of range
-	{ 
-		std::cerr << ERR_PORT << std::endl;
-		exit (1);
+	{
+		throw std::runtime_error(ERR_PORT);
 	}
 	std::string s = argv[1];
 	if (pos != s.length() || _port < 1024 || _port > 65535) //trailing invalid characters and if port out of range
-	{
-		std::cerr << ERR_PORT << std::endl;
-		exit(1);
-	}
+		throw std::runtime_error(ERR_PORT);
 	_pass = argv[2];
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
@@ -78,39 +74,24 @@ void Server::setupSocket()
 	_details.sin_addr.s_addr = INADDR_ANY;
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd == -1) //happens when you hit ulimit -n or too many connections (open fds)
-	{
-		std::cerr << ERR_SOCKET << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_SOCKET);
 	int opt = 1;
 	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
 	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1) //fails when port already in use (try port under 1024?)
-	{
-		std::cerr << ERR_BIND << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_BIND);
 	if (listen(_serverFd, 1) == -1) //not so likely to fail
-	{
-		std::cerr << ERR_LISTEN << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_LISTEN);
 }
 
 void Server::setupEpoll()
 {
 	_epollFd = epoll_create1(0);
 	if (_epollFd == -1) //again, too many epoll fds open, system limits, mem, try ulimit -n
-	{
-		std::cerr << ERR_EPOLL << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_EPOLL);
 	_event.events = EPOLLIN;
 	_event.data.fd = _serverFd;
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
-	{
-		std::cerr << ERR_EPOLLCTL << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_EPOLLCTL);
 }
 
 /*Handling a new client
@@ -128,10 +109,7 @@ void Server::handleNewClient()
 	socklen_t addressLength = sizeof(clientAddress);
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
 	if (newClient->getClientFd() == -1) //clients disconnect too quickly, fd exhaustion, race condition, try to connect and instantly close with ctrl C
-	{
-		std::cerr << ERR_ACCEPT << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_ACCEPT);
 	char *clientIP = inet_ntoa(clientAddress.sin_addr);
 	newClient->setHostName(clientIP);
 	_clientInfo.push_back(newClient);
@@ -140,10 +118,7 @@ void Server::handleNewClient()
 	ev.events = EPOLLIN;
 	ev.data.fd = newClient->getClientFd();
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
-	{
-		std::cerr << ERR_EPOLLCTL << std::endl;
-		exit (1);		
-	}
+		throw std::runtime_error(ERR_EPOLLCTL);
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }
 
@@ -152,7 +127,10 @@ void Server::handleDisconnects()
 	for (auto it = _clientInfo.begin(); it != _clientInfo.end();)
 	{
 		if ((*it)->getClientState() == DISCONNECTING)
+		{
 			disconnectClient(*it);
+			it = _clientInfo.begin();
+		}
 		else
 			++it;
 	}
