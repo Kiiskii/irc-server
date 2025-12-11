@@ -82,6 +82,8 @@ public:
 	void 		handleInvite(Client& client, std::vector<std::string> tokens);
 	void 		handlePrivmsg(Client& client, std::vector<std::string> tokens);
 	void 		handleQuit(Client& client, std::vector<std::string> tokens);
+	void		kickClient(Client& client, std::vector<std::string>& params);
+	void		partChannel(Client& client, std::vector<std::string>& params);
 
 // other methods
 	Channel*	findChannel(std::string newChannel);

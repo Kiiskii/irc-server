@@ -229,7 +229,7 @@ void Server::logMessages(std::string command, std::vector<std::string> msg, int 
 		std::cout << C_G << "SERV >> ";
 	else
 	*/
-	std::cout << C_B << "FD " << fd << " >> ";
+	std::cout << C_B << "SERV << " << "fd " << fd << " | ";
 	std::cout << command << " -> ";
 	for (auto it : msg)
 		std:: cout << it << " ";

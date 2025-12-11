@@ -166,9 +166,9 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 		server.handlePrivmsg(client, tokens);
 	}
 	else if (command == "KICK")
-		client.kickClient(server, tokens);
+		server.kickClient(client, tokens);
 	else if (command == "PART")
-		client.partChannel(server, tokens);
+		server.partChannel(client, tokens);
 	else if (command == "QUIT")
 		server.handleQuit(client, tokens);
 	else

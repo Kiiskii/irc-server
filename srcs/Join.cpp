@@ -161,7 +161,7 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 			for (auto chan : client.getJoinedChannels())
 			{
 				std::vector<std::string> v{chan->getChannelName()};
-				client.partChannel(*this, v);
+				partChannel(client, v);
 			}
 			return;
 		}
