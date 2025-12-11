@@ -32,10 +32,7 @@ void Server::parseMessage(Client &c, const std::string &line)
 	if (cmdStart == i)
 		return ;
 
-	//out.command = line.substr(cmdStart, i - cmdStart);
-	//msg.push_back(line.substr(cmdStart, i - cmdStart) + ' ');
 	command = line.substr(cmdStart, i - cmdStart);
-	//msg.push_back(line.substr(cmdStart, i - cmdStart));
 
 	// do we want to normalize to uppercase here?
 	for (char &c : command)
@@ -68,12 +65,7 @@ void Server::parseMessage(Client &c, const std::string &line)
 	}
 	//if (!msg.empty() && msg.back() == ' ')
 	//	msg.pop_back();
-	
-	// std::cout << "" << std::endl;
-	// std::cout << "Command: " << command << ", ";
-	// for (auto it:msg)
-	// 	std::cout << it << " / ";
-	// std::cout << std::endl;
+	logMessages(command, msg, c.getClientFd());
 	handleCommand(*this, c, command, msg);
 }
 
@@ -183,5 +175,6 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	{
 		std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);
 		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		logMessages(message, client.getClientFd());
 	}
 }
