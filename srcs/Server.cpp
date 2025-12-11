@@ -181,14 +181,19 @@ void Server::attemptRegister(Client &client)
 	if (client.getNick().empty() || client.getUserName().empty())
 		return;
 	client.setClientState(REGISTERED);
+	std::string fullMessage;
 	std::string message = RPL_WELCOME(_name, client.getNick());
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	logMessages(message, getServerfd());
 	message = RPL_YOURHOST(_name, client.getNick(), "1.1");
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	logMessages(message, getServerfd());
 	message = RPL_CREATED(_name, client.getNick(), "today");
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	logMessages(message, getServerfd());
 	message = RPL_MYINFO(_name, client.getNick(), "1.1", "o", "itkol");
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	logMessages(message, getServerfd());
 	std::vector<std::string> info = 
 	{
 		"LINELEN=" + std::to_string(MSG_SIZE),
@@ -204,6 +209,7 @@ void Server::attemptRegister(Client &client)
 		infoPack = infoPack + info[i] + " ";
 	message = RPL_ISUPPORT(_name, client.getNick(), infoPack);
 	send(client.getClientFd(), message.c_str(), message.size(), 0);
+	logMessages(message, getServerfd());
 	std::string ft_irc_ascii =
 	":" + getServerName() + " 375 " + client.getNick() + " :- " + getServerName() + " Message of the day -\r\n"
 	":" + getServerName() + " 372 " + client.getNick() + " :" + ".----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. \r\n"
@@ -220,12 +226,40 @@ void Server::attemptRegister(Client &client)
 	":" + getServerName() + " 372 " + client.getNick() + " :Created by Karoliina Hiidenheimo, Trang Pham and Anton Kiiski.\r\n"
 	":" + getServerName() + " 376 " + client.getNick() + " :End of /MOTD command.\r\n";
 	send(client.getClientFd(), ft_irc_ascii.c_str(), ft_irc_ascii.size(), 0);
+	logMessages(ft_irc_ascii, getServerfd());
 	std::cout << "User set: " << client.getUserName() << std::endl;
 	std::cout << "Real name set: " << client.getRealName() << std::endl;
 	std::cout << "Host set: " << client.getHostName() << std::endl;
 	std::cout << "Nick set: " << client.getNick() << std::endl;
 	std::cout << "Server set: " << getServerName() << std::endl;
 	std::cout << "We got all the info!" << std::endl;
+}
+
+void Server::logMessages(std::string msg, int fd)
+{
+	if (fd == 2)
+		std::cout << C_R << "SERV >> ";
+	else if (fd <= 4)
+		std::cout << C_G << "SERV >> ";
+	else
+		std::cout << C_B << msg;
+	std::cout << msg << C_RST;
+}
+
+void Server::logMessages(std::string command, std::vector<std::string> msg, int fd)
+{
+	/*
+	if (fd == 2)
+		std::cout << C_R << "SERV >> ";
+	else if (fd <= 4)
+		std::cout << C_G << "SERV >> ";
+	else
+	*/
+	std::cout << C_B << "SERV << " << "fd " << fd << " | ";
+	std::cout << command << " -> ";
+	for (auto it : msg)
+		std:: cout << it << " ";
+	std::cout << C_RST << std::endl;
 }
 
 int Server::getEpollfd() const
