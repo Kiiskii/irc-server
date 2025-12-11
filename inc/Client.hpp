@@ -68,10 +68,6 @@ class Client
 		bool		isValidChanName(std::string name);
 
 		// KICK & PART
-		void		kickClient(Server &server, 
-						std::vector<std::string>& params);
-		void		partChannel(Server& server, 
-						std::vector<std::string>& params);
 		void		removeChannel(Channel* chann);
 	
 };

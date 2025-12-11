@@ -27,6 +27,7 @@ SRCS = $(SRCS_DIR)main.cpp \
 		$(SRCS_DIR)parsing.cpp \
 		$(SRCS_DIR)Privmsg.cpp \
 		$(SRCS_DIR)Kick.cpp \
+		$(SRCS_DIR)Part.cpp \
 		$(SRCS_DIR)Quit.cpp
 
 OBJS = $(patsubst srcs/%.cpp, $(OBJS_DIR)/%.o, $(SRCS))
