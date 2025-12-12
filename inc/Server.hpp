@@ -105,7 +105,7 @@ public:
 	void		broadcastChannelMsg(std::string& msg, Channel& channel);
 	void 		broadcastChannelMsg(std::string& msg, Channel& channel,
 					Client& client);
-	void		broadcastUsersMsg(std::string& msg, Client& client);
+	void		broadcastUsersMsg(std::string& msg, Client& client, bool sender);
 	void		sendClientErr(int num, Client& client, Channel* channel, 
 					std::vector<std::string> otherArgs);
 	void		sendKickMsg(std::string oper, std::string client, 

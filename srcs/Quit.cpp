@@ -21,7 +21,6 @@ void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 	{
 		for (auto user : chan->getUserList())
 			quitMsgClient.insert(user);
-		chan->removeUser(client.getNick());
 	}
 	for (auto user : quitMsgClient)
 	{
@@ -30,5 +29,4 @@ void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 	}
 	client.setClientState(DISCONNECTING);
 	return;
-
 }
