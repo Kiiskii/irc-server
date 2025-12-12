@@ -131,21 +131,21 @@ std::string utils::joinTokenVector(const std::vector<std::string>& tokens)
 // 	return params;
 // }
 
-void	utils::printVector(std::vector<std::string> tokens)
-{
-	std::cout << "vector memebers: " << std::endl;
+// void	utils::printVector(std::vector<std::string> tokens)
+// {
+// 	std::cout << "vector memebers: " << std::endl;
 
-	if (tokens.empty())
-	{
-		std::cout << "empty tokens\n";
-		return;
-	}
-	for (auto token : tokens)
-	{
-		std::cout << "[" <<  token << "] ";
-	}
-	std::cout << std::endl;
-}
+// 	if (tokens.empty())
+// 	{
+// 		std::cout << "empty tokens\n";
+// 		return;
+// 	}
+// 	for (auto token : tokens)
+// 	{
+// 		std::cout << "[" <<  token << "] ";
+// 	}
+// 	std::cout << std::endl;
+// }
 
 // void	utils::printOps(Channel& channel)
 // {
