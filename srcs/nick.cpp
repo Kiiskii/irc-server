@@ -43,7 +43,7 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 	if (client.getClientState() == REGISTERED)
 	{
 		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());	
-		broadcastUsersMsg(message, client);
+		broadcastUsersMsg(message, client, true);
 	}
 	if (client.getClientState() != REGISTERED)
 	{

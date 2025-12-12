@@ -31,15 +31,15 @@ Channel* Server::findChannel(std::string newChannel)
 
 void Server::disconnectClient(Client *client)
 {
-	//this should remove the client from the channel as well
 	auto it = std::find(_clientInfo.begin(), _clientInfo.end(), client);
 	if (it == _clientInfo.end())
 		return ;
-	Client* ptr = *it;
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, ptr->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
-	close(ptr->getClientFd());
+	for (auto chan : client->getJoinedChannels())
+		chan->removeUser(client->getNick());
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
+	close(client->getClientFd());
 	getClientInfo().erase(it);
-	delete ptr;
+	delete client;
 }
 
 /*Port is a 16-bit unsigned int, meaning valid range is 0-65535.

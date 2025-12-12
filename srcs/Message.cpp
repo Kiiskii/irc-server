@@ -38,9 +38,9 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
 }
 
 /**
- * @brief send message to all members on shared channels (but only once) and also the sender itself
+ * @brief send message to all members on shared channels (but only once) and also the sender itself IF sender is marked as true
  */
-void Server::broadcastUsersMsg(std::string& msg, Client& client)
+void Server::broadcastUsersMsg(std::string& msg, Client& client, bool sender)
 {
 	std::vector<int> uniqueClients;
 	for (Channel* channel : client.getJoinedChannels())
@@ -50,11 +50,12 @@ void Server::broadcastUsersMsg(std::string& msg, Client& client)
 			if (auto it = find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end())
 			{
 				uniqueClients.push_back(user->getClientFd());
-				send(user->getClientFd(), msg.c_str(), msg.size(), 0);
+				if (sender == true || (sender == false && client.getClientFd() != user->getClientFd()))
+					send(user->getClientFd(), msg.c_str(), msg.size(), 0);
 			}
 		}
 	}
-	if (client.getJoinedChannels().size() == 0)
+	if (sender == true && client.getJoinedChannels().size() == 0)
 		send(client.getClientFd(), msg.c_str(), msg.size(), 0);
 }
 
