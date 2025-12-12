@@ -42,23 +42,8 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 	client.setNick(tokens[0]);
 	if (client.getClientState() == REGISTERED)
 	{
-		std::vector<int> uniqueClients;
 		std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());	
-		for (Channel* channel : client.getJoinedChannels())
-		{
-			for (Client* user : channel->getUserList())
-			{
-				if (auto it = find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end())
-				{
-					uniqueClients.push_back(user->getClientFd());
-					send(user->getClientFd(), message.c_str(), message.size(), 0);
-				}
-			}
-		}
-		if (client.getJoinedChannels().size() == 0)
-		{
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
-		}
+		broadcastUsersMsg(message, client);
 	}
 	if (client.getClientState() != REGISTERED)
 	{

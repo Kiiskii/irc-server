@@ -37,6 +37,27 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
 	}
 }
 
+/**
+ * @brief send message to all members on shared channels (but only once) and also the sender itself
+ */
+void Server::broadcastUsersMsg(std::string& msg, Client& client)
+{
+	std::vector<int> uniqueClients;
+	for (Channel* channel : client.getJoinedChannels())
+	{
+		for (Client* user : channel->getUserList())
+		{
+			if (auto it = find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end())
+			{
+				uniqueClients.push_back(user->getClientFd());
+				send(user->getClientFd(), msg.c_str(), msg.size(), 0);
+			}
+		}
+	}
+	if (client.getJoinedChannels().size() == 0)
+		send(client.getClientFd(), msg.c_str(), msg.size(), 0);
+}
+
 /** 
  * @brief if no topic set when client joins the channel, do not send back the topic.
  * otherwise, send the topic RPL_TOPIC & optionally RPL_TOPICWHOTIME, list of users 
