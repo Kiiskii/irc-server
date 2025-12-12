@@ -12,7 +12,7 @@ void	Server::sendMsg(Client& client, std::string& msg)
 		return;
 	}
 	logMessages(msg, getServerfd());
-	// std::cout << "msg sent: " << msg << std::endl;
+	// std::cout << "msg sent to client: " << client.getNick() << std::endl;
 }
 
 /**

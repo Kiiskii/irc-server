@@ -8,23 +8,26 @@ using namespace utils;
 void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 {
 	std::string quitMsg = utils::joinTokenVector(tokens);
-	if (quitMsg.find_first_not_of(':') != std::string::npos)
+	if (quitMsg == ":")
+		quitMsg = "";
+	else if (quitMsg.find_first_not_of(':') != std::string::npos)
 		quitMsg = quitMsg.substr(quitMsg.find_first_not_of(':'));
-	// if (quitMsg == "leaving")
-	// 	quitMsg = "";
-	// std::cout << "quitmsg : [" << quitMsg << "]\n";
 
 	std::string serverMsg = client.makeUser() + " QUIT :" 
-		+ (quitMsg.empty() ? ("Quit: ") : "Quit: " + quitMsg) + "\r\n";
-	std::cout << "servermsg : [" << serverMsg << "]\n";
+		+ (quitMsg.empty() ? ("Quit: Client Quit") : "Quit: " + quitMsg) + "\r\n";
 
-
+	std::unordered_set<Client*> quitMsgClient{};
 	for (auto chan : client.getJoinedChannels())
 	{
-		this->broadcastChannelMsg(serverMsg, *chan, client);
+		for (auto user : chan->getUserList())
+			quitMsgClient.insert(user);
 		chan->removeUser(client.getNick());
 	}
-	// this->disconnectClient(&client); //already called in destructor
+	for (auto user : quitMsgClient)
+	{
+		if (user != &client)
+			sendMsg(*user, serverMsg);
+	}
 	client.setClientState(DISCONNECTING);
 	return;
 
