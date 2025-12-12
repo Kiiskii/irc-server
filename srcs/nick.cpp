@@ -3,15 +3,6 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
-std::string transformToLowercase(std::string string)
-{
-	transform(string.begin(), string.end(), string.begin(), [](char c)
-	{
-		return tolower(c);
-	});
-	return string;
-}
-
 void Server::nick(Client &client, std::vector<std::string> tokens)
 {
 	std::regex pattern(R"(^[A-Za-z\[\]{}\\|_][A-Za-z0-9\[\]{}\\|_]*$)");
@@ -32,7 +23,7 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		return ;
 	for (size_t i = 0; i < getClientInfo().size(); i++) //if my nickname is already X and I try to change my nick to X again, I should not get a warning in that case
 	{
-		if (transformToLowercase(getClientInfo()[i]->getNick()) == transformToLowercase(tokens[0]))
+		if (utils::compareCasemappingStr(getClientInfo()[i]->getNick(), tokens[0]) == true)
 		{
 			std::string message = ERR_NICKNAMEINUSE(getServerName(), getTarget(client), tokens[0]);
 			send(client.getClientFd(), message.c_str(), message.size(), 0);
