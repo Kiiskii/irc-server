@@ -7,7 +7,7 @@ class Client;
 class Channel;
 
 namespace utils {
-	void		printVector(std::vector<std::string> tokens); //to remove
+	// void		printVector(std::vector<std::string> tokens); //to remove
 	// void		printOps(Channel& channel); //to remove
 	// std::string setParamAndRemoveToken(std::vector<std::string>& tokens);
 
