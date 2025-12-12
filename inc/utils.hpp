@@ -7,9 +7,6 @@ class Client;
 class Channel;
 
 namespace utils {
-	// void		printVector(std::vector<std::string> tokens); //to remove
-	// void		printOps(Channel& channel); //to remove
-	// std::string setParamAndRemoveToken(std::vector<std::string>& tokens);
 
 	std::vector<std::string>	ft_splitString(std::string buffer, char delimiter);
 	std::string ft_trimString(std::string msg);

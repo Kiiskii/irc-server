@@ -102,10 +102,9 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 				return NO_MSG;
 			}
 		}
-		catch(const std::exception& e)
+		catch(const std::exception& )
 		{
-			std::cerr << "Invalid stored limit for channel: " << this->getChannelName() 
-				<< ": [" << clientLimit << "]\n";
+			std::cerr << "Invalid stored limit for channel: " << this->getChannelName() << ": [" << clientLimit << "]\n";
 		}
 	}
 
