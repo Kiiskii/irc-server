@@ -103,16 +103,6 @@ std::unordered_set<Client*>&	Channel::getOps()
 	return _ops;
 }
 
-// void Channel::setChannelName(std::string channelName)
-// {
-// 	_channelName = channelName;
-// }
-
-// void Channel::setChanKey(std::string newKey)
-// {
-// 	this->_mode.insert({K_MODE, newKey});
-// }
-
 void Channel::addMode(char key, std::string param)
 {
 	_mode.insert({key, param});

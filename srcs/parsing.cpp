@@ -169,8 +169,6 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 		server.partChannel(client, tokens);
 	else if (command == "QUIT")
 	{
-		// std::cout << "[" << command << "]" << std::endl;
-		// utils::printVector(tokens);
 		server.handleQuit(client, tokens);
 		return;
 	}

@@ -30,7 +30,7 @@ class Client
 		std::string				_realName = "";
 		std::string				_hostName;
 
-		std::vector<Channel*>	_joinedChannels; // remove {}, check if works
+		std::vector<Channel*>	_joinedChannels;
 		enum ClientState		_clientState = NONE;
 		class Server			&_myServer;	
 //		std::string				_input;
@@ -66,8 +66,6 @@ class Client
 		bool		isOps(Channel& channel);
 		std::string makeUser();
 		bool		isValidChanName(std::string name);
-
-		// KICK & PART
 		void		removeChannel(Channel* chann);
 	
 };

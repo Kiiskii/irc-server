@@ -67,9 +67,7 @@ public:
 	Client*						findClient(std::string nickName);
 
 	// setters
-	// void			setChannelName(std::string channelName);
 	bool			setTopic(std::string newTopic, Client& clientset);
-	// void			setChanKey(std::string newKey);
 	void 			addMode(char key, std::string param);
 	void			removeMode(char key);
 	void			setTopicTimestamp();

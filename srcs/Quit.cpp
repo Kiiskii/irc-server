@@ -16,17 +16,8 @@ void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 	std::string serverMsg = client.makeUser() + " QUIT :" 
 		+ (quitMsg.empty() ? ("Quit: Client Quit") : "Quit: " + quitMsg) + "\r\n";
 
-	std::unordered_set<Client*> quitMsgClient{};
-	for (auto chan : client.getJoinedChannels())
-	{
-		for (auto user : chan->getUserList())
-			quitMsgClient.insert(user);
-	}
-	for (auto user : quitMsgClient)
-	{
-		if (user != &client)
-			sendMsg(*user, serverMsg);
-	}
+	this->broadcastUsersMsg(serverMsg, client, false);
 	client.setClientState(DISCONNECTING);
+	
 	return;
 }
