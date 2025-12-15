@@ -7,11 +7,6 @@ bool	Channel::hasInvitedClient(Client* client)
 {
 	if (!_invitedUser.empty() && _invitedUser.find(client) != _invitedUser.end())
 		return true;
-	// for (auto user : _invitedUser)
-	// {
-	// 	if (utils::compareCasemappingStr(user->getNick(), client->getNick()))
-	// 		return true;
-	// }
 	return false;
 }
 
@@ -20,8 +15,9 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client,
 {
 	if (tokens.size() < 2)
 	{
-		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");
-		client.getServer().sendMsg(client, msg);
+		// std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");
+		// client.getServer().sendMsg(client, msg);
+		client.getServer().sendClientErr(461, client, chann, {"INVITE"});
 		return false;
 	}
 	if (!client.isValidChanName(tokens[1]))
@@ -75,9 +71,7 @@ void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 	Client*		invitedClient = nullptr;
 
 	if (!isValidInvitation(tokens, client, chann, invitedClient))
-	{
 		return;
-	}
 
 	//if valid invitation then send msg
 	if (invitedClient)

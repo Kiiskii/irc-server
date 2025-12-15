@@ -7,10 +7,10 @@
 Server::~Server()
 {
 	std::cout << "We have received a signal or the server simply failed to start!" << std::endl;
+	for (auto client : _clientInfo) //delete chan after client because of leak 
+		disconnectClient(client);
 	for (auto chan : _channelInfo)
 		delete chan;
-	for (auto client : _clientInfo)
-		disconnectClient(client);
 	if (_epollFd != -1)	
 		close(_epollFd);
 	if (_serverFd != -1)
@@ -298,12 +298,10 @@ Channel* Server::setActiveChannel(std::string buffer)
 	{
 		channelName = buffer;
 	}
-	// std::cout << "channelName: [" << channelName << "]" << std::endl;
-
 	return this->findChannel(channelName);
 }
 
-// correct
+
 Client*	Server::findClient(std::string nickName)
 {
 	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)

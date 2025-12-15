@@ -23,8 +23,6 @@ std::string utils::ft_trimString(std::string msg)
 /** @brief split string into tokens using delimiter */
 std::vector<std::string> utils::ft_splitString(std::string buffer, char delimiter)
 {
-	// std::cout << "buffer :[" << buffer << "]" << std::endl;
-
 	std::istringstream	tokenStream(buffer); //save buffer string to an istringstream obj
 	std::string			aToken;
 	std::vector<std::string> tokens;
@@ -48,7 +46,6 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 		+ (p.empty() ? " " : " " + p)
 		+ (trailing.empty() ? "" : ":" + trailing)
 		+ "\r\n";
-	//std::cout << ": " << s << std::endl;
 	return s;
 }
 
@@ -77,7 +74,6 @@ std::string utils::extractChannelName(std::string buffer)
 		chanEndPos = buffer.length();
 
 	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
-	// std::cout << "channelName: [" << channelName << "]" << std::endl;
 	return channelName;
 
 }
