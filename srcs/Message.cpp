@@ -12,7 +12,6 @@ void	Server::sendMsg(Client& client, std::string& msg)
 		return;
 	}
 	logMessages(msg, getServerfd());
-	// std::cout << "msg sent to client: " << client.getNick() << std::endl;
 }
 
 /**
@@ -31,7 +30,6 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel, Client& cli
 {
 	for (Client* user : channel.getUserList())
 	{
-		// if (!utils::compareCasemappingStr(user->getNick(), client.getNick()))
 		if (&client != user)
 			this->sendMsg(*user, msg);
 	}
@@ -153,16 +151,16 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 				nick = client.getNick(),
 				chanName, msg, arg;
 	if (channel)
-		chanName = channel->getChannelName();
+		chanName = "#" + channel->getChannelName();
 	
 	switch (num)
 	{
 	case ERR_BADCHANNELKEY:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+k)");
+		msg = makeNumericReply(server, num, nick, {chanName}, "Cannot join channel (+k)");
 		break;
 
 	case ERR_TOOMANYCHANNELS:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "You have joined too many channels");
+		msg = makeNumericReply(server, num, nick, {chanName}, "You have joined too many channels");
 		break;
 
 	case ERR_UNKNOWNMODE:
@@ -176,19 +174,19 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 	}
 
 	case ERR_CHANNELISFULL:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+l)");
+		msg = makeNumericReply(server, num, nick, {chanName}, "Cannot join channel (+l)");
 		break;
 
 	case ERR_INVITEONLYCHAN:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "Cannot join channel (+i)");
+		msg = makeNumericReply(server, num, nick, {chanName}, "Cannot join channel (+i)");
 		break;
 	
 	case ERR_NOTONCHANNEL:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "You're not on that channel");
+		msg = makeNumericReply(server, num, nick, {chanName}, "You're not on that channel");
 		break;
 	
 	case ERR_CHANOPRIVSNEEDED:
-		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "You're not channel operator");
+		msg = makeNumericReply(server, num,	nick, {chanName}, "You're not channel operator");
 		break;
 
 	case ERR_USERNOTINCHANNEL:
@@ -196,7 +194,7 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		if (otherArgs.size() == 1)
 		{
 			arg = otherArgs[0]; 
-			msg = makeNumericReply(server, num, nick, {arg,"#" + chanName}, "They aren't on that channel");
+			msg = makeNumericReply(server, num, nick, {arg, chanName}, "They aren't on that channel");
 		};
 		break ;
 	}
@@ -226,13 +224,13 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		if (otherArgs.size() == 1) 
 		{ 
 			arg = otherArgs[0];
-			msg = makeNumericReply(server, num,	nick, {arg ,"#" + chanName}, "is already on channel");
+			msg = makeNumericReply(server, num,	nick, {arg, chanName}, "is already on channel");
 		};
 		break;
 	}
 
 	case ERR_CANNOTSENDTOCHAN:
-		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "Cannot send to channel");
+		msg = makeNumericReply(server, num,	nick, {chanName}, "Cannot send to channel");
 		break;
 	
 	case ERR_NORECIPIENT:
@@ -255,31 +253,43 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 
 	case ERR_INVALIDKEY:
 	{
-		msg = makeNumericReply(server, num,	nick, {"#" + chanName}, "Key is not well-formed");
+		msg = makeNumericReply(server, num,	nick, {chanName}, "Key is not well-formed");
 		break;
+	}
+
+	case 461:
+	{
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			// msg = ERR_NEEDMOREPARAMS(server, nick, arg);
+			msg = makeNumericReply(server, num, nick, {arg}, "Not enough parameters");
+		};
+		break;	
 	}
 	
 	//RPL	
 	case RPL_NOTOPIC:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, "No topic is set");
+		msg = makeNumericReply(server, num, nick, {chanName}, "No topic is set");
 		break;
 	
 	case RPL_TOPIC:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName}, channel->getTopic());
+		msg = makeNumericReply(server, num, nick, {chanName}, channel->getTopic());
 		break;
 
 	case RPL_TOPICWHOTIME:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
-			channel->getTopicSetter()->getNick(), channel->getTopicTimestamp()}, "");
+		msg = makeNumericReply(server, num, nick, {chanName, 
+			channel->getTopicSetter()->getNick(), 
+			channel->getTopicTimestamp()}, "");
 		break;
 
 	case RPL_NAMREPLY:
-		msg = makeNumericReply(server, num, nick,  {"=", "#"+ chanName}, 
+		msg = makeNumericReply(server, num, nick,  {"=", chanName}, 
 			channel->printUser());
 		break;
 
 	case RPL_ENDOFNAMES:
-		msg = makeNumericReply(server, num, nick, {"#" + chanName},	"End of /NAMES list.");
+		msg = makeNumericReply(server, num, nick, {chanName}, "End of /NAMES list.");
 		break;
 
 	case RPL_INVITING:
@@ -287,14 +297,14 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		if (otherArgs.size() == 1) 
 		{ 
 			arg = otherArgs[0];
-			msg = makeNumericReply(server, num,	nick, {arg ,"#" + chanName}, "");
+			msg = makeNumericReply(server, num,	nick, {arg, chanName}, "");
 		};
 		break;
 	}
 
 	case RPL_CREATIONTIME:
 	{
-		msg = makeNumericReply(server, num, nick, {"#" + chanName, 
+		msg = makeNumericReply(server, num, nick, {chanName, 
 			channel->getChannelCreationTimestamp()}, "");
 		break;
 	}
@@ -305,22 +315,9 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		{
 			std::string modeStr = otherArgs[0];
 			std::string modeArgs = otherArgs[1];
-			msg = makeNumericReply(server, num, nick, {"#" + chanName, modeStr + " " + modeArgs}, "");
+			msg = makeNumericReply(server, num, nick, {chanName, modeStr + " " + modeArgs}, "");
 		}
 		break;
-	}
-
-	// duplicate
-
-	case 461:
-	{
-		if (otherArgs.size() == 1) 
-		{ 
-			arg = otherArgs[0];
-			msg = ERR_NEEDMOREPARAMS(server, nick, arg);
-			// msg = makeNumericReply(server, num, nick, otherArgs, "Not enough parameters");
-		};
-		break;	
 	}
 	
 	default:

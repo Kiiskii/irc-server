@@ -25,15 +25,14 @@ bool	Client::isValidChanName(std::string name)
  *  @note The insert() operation adds a new key-value pair to the map only 
 			if the key is not already present.
 			If the key exists, insert() does not update the value and the map unchanged.
-			IF (NUMBER OF KEYS INPUT IS SMALLER THAN NUMBER OF CHANNEL INPUT, 
-			irssi sent key == "x" --> can i set k of 'x' value)
 */
 bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, std::map<std::string, std::string>& channelKeyMap)
 {
 	if (tokens.empty())
 	{
-		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "JOIN");
-		client.getServer().sendMsg(client, msg);
+		// std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "JOIN");
+		// client.getServer().sendMsg(client, msg);
+		client.getServer().sendClientErr(461, client, nullptr, {"JOIN"});
 		return false;
 	}
 	
@@ -174,10 +173,6 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 		{
 			client.addJoinedChannel(channelPtr);
 			channelPtr->addUser(&client);
-			// if (channelPtr->getUserList().size() == 1)
-			// 	channelPtr->addChanop(&client);
-			// else
-			// 	channelPtr->addNormal(&client); //duplicate
 			this->sendJoinSuccessMsg(client, *channelPtr);			
 		}
 		else if (result == ALREADY_ON_CHAN)

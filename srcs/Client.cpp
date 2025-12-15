@@ -7,11 +7,6 @@ Client::Client(Server &server) : _myServer(server)
 {
 
 }
-// Client::~Client()
-// {
-// 	for (auto chan : _joinedChannels)
-// 		delete chan;
-// }
 
 int	Client::getClientFd()
 {
@@ -94,7 +89,6 @@ std::string Client::makeUser()
 		+ this->getUserName() + "@" + this->getHostName();
 }
 
-// this needs review
 bool	Client::isOps(Channel& channel)
 {
 	auto it = channel.getOps().find(this);
