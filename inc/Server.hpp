@@ -77,7 +77,6 @@ public:
 	void 		nick(Client &client, std::vector<std::string> tokens);
 	void 		user(Client &client, std::vector<std::string> tokens);
 	void 		ping(Client &client, std::vector<std::string> tokens);
-	std::vector<Client*>::iterator 	iterateClients(Server &server, Client &client);
 	void 		handleJoin(Client& client, std::vector<std::string> tokens);
 	void 		handleTopic(Client& client, std::vector<std::string> tokens);
 	void 		handleMode(Client& client, std::vector<std::string> tokens);
@@ -115,6 +114,7 @@ public:
 					std::vector<std::string>& params, Channel& channel);
 	void		sendPartMsg(Client& client, std::vector<std::string>& params, 
 					Channel& channel);
+	void		sendWelcomeMsg(Client& client);
 
 };
 
