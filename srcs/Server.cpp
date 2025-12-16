@@ -7,11 +7,15 @@
 Server::~Server()
 {
 	std::cout << "We have received a signal or the server simply failed to start!" << std::endl;
-	for (auto client : _clientInfo)
-		disconnectClient(client);
+	for (auto client = _clientInfo.begin(); client != _clientInfo.end();) 
+	{
+		Client *ptr = *client;
+		disconnectClient(ptr);
+		client = _clientInfo.begin();
+	}
 	for (auto chan : _channelInfo)
 		delete chan;
-	if (_epollFd != -1)	
+	if (_epollFd != -1)
 		close(_epollFd);
 	if (_serverFd != -1)
 		close(_serverFd);
@@ -121,7 +125,10 @@ void Server::handleNewClient()
 	socklen_t addressLength = sizeof(clientAddress);
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
 	if (newClient->getClientFd() == -1) //clients disconnect too quickly, fd exhaustion, race condition, try to connect and instantly close with ctrl C
+	{
+		delete newClient;
 		throw std::runtime_error(ERR_ACCEPT);
+	}
 	char *clientIP = inet_ntoa(clientAddress.sin_addr);
 	newClient->setHostName(clientIP);
 	_clientInfo.push_back(newClient);
