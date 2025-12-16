@@ -309,17 +309,31 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
-	case 461:
+	case ERR_NEEDMOREPARAMS:
 	{
 		if (otherArgs.size() == 1) 
 		{ 
 			arg = otherArgs[0];
-			// msg = ERR_NEEDMOREPARAMS(server, nick, arg);
 			msg = makeNumericReply(server, num, nick, {arg}, "Not enough parameters");
 		};
 		break;	
 	}
 	
+	case ERR_INPUTTOOLONG:
+		msg = makeNumericReply(server, num, nick, {}, "Input line was too long");
+		break;	
+
+	case ERR_UNKNOWNCOMMAND:
+	{
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			msg = makeNumericReply(server, num, nick, {arg}, "Unknown command");
+		};
+		break;	
+	}
+
+
 	//RPL	
 	case RPL_NOTOPIC:
 		msg = makeNumericReply(server, num, nick, {chanName}, "No topic is set");

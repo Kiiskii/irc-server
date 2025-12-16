@@ -20,7 +20,7 @@ static bool isValidPrivmsg(Client& client, std::vector<std::string>& tokens)
 {
 	if (tokens.empty())
 	{
-		client.getServer().sendClientErr(461, client, nullptr, {"PRIVMSG"});
+		client.getServer().sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"PRIVMSG"});
 		return false;
 	}
 	if (tokens.size() == 1)

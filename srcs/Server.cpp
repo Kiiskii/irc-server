@@ -29,11 +29,21 @@ Channel* Server::findChannel(std::string newChannel)
 	return nullptr;
 }
 
+std::string Client::getQuitMsg()
+{
+	return _quitMsg;
+}
+
+
 void Server::disconnectClient(Client *client)
 {
 	auto it = std::find(_clientInfo.begin(), _clientInfo.end(), client);
 	if (it == _clientInfo.end())
 		return ;
+	
+	std::string serverMsg = client->makeUser() + " QUIT :" + client->getQuitMsg() + "\r\n";
+	this->broadcastUsersMsg(serverMsg, *client, false);
+
 	for (auto chan : client->getJoinedChannels())
 		chan->removeUser(client->getNick());
 	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this

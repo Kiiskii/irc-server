@@ -12,8 +12,9 @@ void Server::parseMessage(Client &c, const std::string &line)
 	const size_t n = line.size();
 	if (n > MSG_SIZE)
 	{
-		std::string message = ERR_INPUTTOOLONG(getServerName(), getTarget(c));
-		sendMsg(c, message);
+		// std::string message = ERR_INPUTTOOLONG(getServerName(), getTarget(c));
+		// sendMsg(c, message);
+		sendClientErr(ERR_INPUTTOOLONG, c, nullptr, {});
 		return ;
 	}
 
@@ -174,7 +175,8 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	else
 	{
-		std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);
-		sendMsg(client, message);
+		// std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);
+		// sendMsg(client, message);
+		sendClientErr(ERR_UNKNOWNCOMMAND, client, nullptr, {command});
 	}
 }

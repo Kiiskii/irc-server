@@ -13,11 +13,20 @@ void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 	else if (quitMsg.find_first_not_of(':') != std::string::npos)
 		quitMsg = quitMsg.substr(quitMsg.find_first_not_of(':'));
 
-	std::string serverMsg = client.makeUser() + " QUIT :" 
-		+ (quitMsg.empty() ? ("Quit: Client Quit") : "Quit: " + quitMsg) + "\r\n";
+	if (quitMsg.empty())
+		quitMsg = "Quit: Client Quit";
+	else
+		quitMsg = "Quit: " + quitMsg;
+	client.setQuitMsg(quitMsg);
+	// std::string serverMsg = client.makeUser() + " QUIT :" 
+	// 	+ (quitMsg.empty() ? ("Quit: Client Quit") : "Quit: " + quitMsg) + "\r\n";
 
-	this->broadcastUsersMsg(serverMsg, client, false);
+	// this->broadcastUsersMsg(serverMsg, client, false);
 	client.setClientState(DISCONNECTING);
 	
 	return;
+}
+void	Client::setQuitMsg(std::string msg)
+{
+	_quitMsg = msg;
 }

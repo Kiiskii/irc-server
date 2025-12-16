@@ -20,8 +20,9 @@ void Server::user(Client &client, std::vector<std::string> tokens)
 	}
 	if (tokens.size() < 4 || tokens[0].empty() || tokens[3].empty())
 	{
-		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "USER");
-		sendMsg(client, message);
+		// std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "USER");
+		// sendMsg(client, message);
+		sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"USER"});
 		return ;			
 	}
 	if (tokens[0].size() > USERLEN)

@@ -58,7 +58,7 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 
 	if (tokens.empty())
 	{
-		this->sendClientErr(461, client, nullptr, {"TOPIC"});
+		this->sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"TOPIC"});
 		return;
 	}
 
