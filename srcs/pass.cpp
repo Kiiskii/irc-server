@@ -5,18 +5,7 @@
 
 /*
 - Double check the issue with possible hanging client
-- Check if we already have iterate clients function
-- Delete client..?
 */
-std::vector<Client*>::iterator Server::iterateClients(Server &server, Client &client)
-{
-	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)
-	{
-		if ((*it)->getClientFd() == client.getClientFd())
-			return it;
-	}
-	return _clientInfo.end();
-}
 
 void Server::pass(Client &client, std::vector<std::string> tokens)
 {
