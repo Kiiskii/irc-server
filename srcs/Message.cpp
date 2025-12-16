@@ -49,12 +49,12 @@ void Server::broadcastUsersMsg(std::string& msg, Client& client, bool sender)
 			{
 				uniqueClients.push_back(user->getClientFd());
 				if (sender == true || (sender == false && client.getClientFd() != user->getClientFd()))
-					send(user->getClientFd(), msg.c_str(), msg.size(), 0);
+					sendMsg(*user, msg);
 			}
 		}
 	}
 	if (sender == true && client.getJoinedChannels().size() == 0)
-		send(client.getClientFd(), msg.c_str(), msg.size(), 0);
+		sendMsg(client, msg);
 }
 
 /** 
