@@ -10,13 +10,13 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 	if (tokens.size() == 0)
 	{
 		std::string message = ERR_NONICKNAMEGIVEN(getServerName(), getTarget(client));
-		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		sendMsg(client, message);
 		return ;			
 	}
 	if (std::regex_match(tokens[0], pattern) == false || tokens[0].length() > NICKLEN)
 	{
 		std::string message = ERR_ERRONEUSNICKNAME(getServerName(), getTarget(client), tokens[0]);
-		send(client.getClientFd(), message.c_str(), message.size(), 0);	
+		sendMsg(client, message);
 		return ;
 	}
 	if (tokens[0] == client.getNick()) //we should not inform that nickname is alrdy in use if you are trying to change your nick to nick you currently have
@@ -26,7 +26,7 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		if (utils::compareCasemappingStr(getClientInfo()[i]->getNick(), tokens[0]) == true)
 		{
 			std::string message = ERR_NICKNAMEINUSE(getServerName(), getTarget(client), tokens[0]);
-			send(client.getClientFd(), message.c_str(), message.size(), 0);
+			sendMsg(client, message);
 			return ;
 		}
 	}

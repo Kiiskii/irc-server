@@ -11,8 +11,8 @@ void Server::user(Client &client, std::vector<std::string> tokens)
 	if (client.getClientState() == REGISTERED)
 	{
 		std::string message = ERR_ALREADYREGISTERED(getServerName(), client.getNick());
-		send(client.getClientFd(), message.c_str(), message.size(), 0);
-		return ;	
+		sendMsg(client, message);
+		return ;
 	}
 	if (tokens.size() == 4 && tokens[3].size() != 0 && tokens[3].find(":") != std::string::npos)
 	{
@@ -21,7 +21,7 @@ void Server::user(Client &client, std::vector<std::string> tokens)
 	if (tokens.size() < 4 || tokens[0].empty() || tokens[3].empty())
 	{
 		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "USER");
-		send(client.getClientFd(), message.c_str(), message.size(), 0);
+		sendMsg(client, message);
 		return ;			
 	}
 	if (tokens[0].size() > USERLEN)
