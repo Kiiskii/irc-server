@@ -19,10 +19,10 @@ SRCS = $(SRCS_DIR)main.cpp \
 		$(SRCS_DIR)ModeHandlers.cpp \
 		$(SRCS_DIR)Channel.cpp \
 		$(SRCS_DIR)Invite.cpp \
-		$(SRCS_DIR)pass.cpp \
-		$(SRCS_DIR)nick.cpp \
-		$(SRCS_DIR)user.cpp \
-		$(SRCS_DIR)ping.cpp \
+		$(SRCS_DIR)Pass.cpp \
+		$(SRCS_DIR)Nick.cpp \
+		$(SRCS_DIR)User.cpp \
+		$(SRCS_DIR)Ping.cpp \
 		$(SRCS_DIR)Message.cpp \
 		$(SRCS_DIR)parsing.cpp \
 		$(SRCS_DIR)Privmsg.cpp \
