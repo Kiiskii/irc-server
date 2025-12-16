@@ -115,6 +115,7 @@ public:
 					std::vector<std::string>& params, Channel& channel);
 	void		sendPartMsg(Client& client, std::vector<std::string>& params, 
 					Channel& channel);
+	void		sendWelcomeMsg(Client& client);
 
 };
 

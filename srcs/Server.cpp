@@ -162,53 +162,7 @@ void Server::attemptRegister(Client &client)
 	if (client.getNick().empty() || client.getUserName().empty())
 		return;
 	client.setClientState(REGISTERED);
-	std::string fullMessage;
-	std::string message = RPL_WELCOME(_name, client.getNick());
-	sendMsg(client, message);
-	message = RPL_YOURHOST(_name, client.getNick(), "1.1");
-	sendMsg(client, message);
-	message = RPL_CREATED(_name, client.getNick(), "today");
-	sendMsg(client, message);
-	message = RPL_MYINFO(_name, client.getNick(), "1.1", "o", "itkol");
-	sendMsg(client, message);
-
-	std::vector<std::string> info = 
-	{
-		"LINELEN=" + std::to_string(MSG_SIZE),
-		"USERLEN=" + std::to_string(USERLEN),
-		"NICKLEN=" + std::to_string(NICKLEN),
-		"CHANLIMIT=" + std::to_string(CHANLIMIT),
-		"CHANNELLEN=" + std::to_string(CHANNELLEN),
-		"CHANMODES=" + std::string(CHANMODES),
-		"CASEMAPPING=" + std::string(CASEMAPPING)
-	};
-	std::string infoPack;
-	for (int i = 0; i < info.size(); i++)
-		infoPack = infoPack + info[i] + " ";
-	message = RPL_ISUPPORT(_name, client.getNick(), infoPack);
-	sendMsg(client, message);
-	message =
-	":" + getServerName() + " 375 " + client.getNick() + " :- " + getServerName() + " Message of the day -\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + ".----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. \r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _________   | || |  _________   | || |              | || |     _____    | || |  _______     | || |     ______   | |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_   ___  |  | || | |  _   _  |  | || |              | || |    |_   _|   | || | |_   __ \\    | || |   .' ___  |  | |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   | |_  \\_|  | || | |_/ | | \\_|  | || |              | || |      | |     | || |   | |__) |   | || |  / .'   \\_|  | |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   |  _|      | || |     | |      | || |              | || |      | |     | || |   |  __ /    | || |  | |         | |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _| |_       | || |    _| |_     | || |              | || |     _| |_    | || |  _| |  \\ \\_  | || |  \\ `.___.'\\  | |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_____|      | || |   |_____|    | || |   _______    | || |    |_____|   | || | |____| |___| | || |   `._____.'  | |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |              | || |              | || |  |_______|   | || |              | || |              | || |              | |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + "| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :" + " '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'\r\n"
-	":" + getServerName() + " 372 " + client.getNick() + " :Created by Karoliina Hiidenheimo, Trang Pham and Anton Kiiski.\r\n"
-	":" + getServerName() + " 376 " + client.getNick() + " :End of /MOTD command.\r\n";
-	sendMsg(client, message);
-	std::cout << "User set: " << client.getUserName() << std::endl;
-	std::cout << "Real name set: " << client.getRealName() << std::endl;
-	std::cout << "Host set: " << client.getHostName() << std::endl;
-	std::cout << "Nick set: " << client.getNick() << std::endl;
-	std::cout << "Server set: " << getServerName() << std::endl;
-	std::cout << "We got all the info!" << std::endl;
+	sendWelcomeMsg(client);
 }
 
 void Server::logMessages(std::string msg, int fd)
@@ -302,7 +256,6 @@ Channel* Server::setActiveChannel(std::string buffer)
 	}
 	return this->findChannel(channelName);
 }
-
 
 Client*	Server::findClient(std::string nickName)
 {
