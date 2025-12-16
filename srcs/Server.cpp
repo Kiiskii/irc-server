@@ -135,32 +135,24 @@ void Server::handleDisconnects()
 			++it;
 	}
 }
-//review this one completely, maybe break the handleExistingClient and handleDisconnect in their own separate functions
+
 void Server::handleEvents()
 {
 	int eventCount = epoll_wait(getEpollfd(), getEpollEvents(), MAX_EVENTS, -1);
 	for (int i = 0; i < eventCount; ++i)
 	{
-		if (getEpollEvents()[i].data.fd == getServerfd())
+		int fd = getEpollEvents()[i].data.fd;
+		if (fd == getServerfd())
 		{
 			handleNewClient();
 		}
 		else
 		{
-			int clientFd = getEpollEvents()[i].data.fd;
-			Client *c = findClientByFd(clientFd);
+			Client *c = findClientByFd(fd);
 			receive(*c);
 		}
 	}
 	handleDisconnects();
-	// for (size_t i = 0; i < getClientInfo().size(); i++) //this one doesnt feel too elegant
-	// {
-	// 	if (getClientInfo()[i]->getClientState() == DISCONNECTING)
-	// 	{
-	// 		disconnectClient(getClientInfo()[i]);
-	// 		break;
-	// 	}
-	// }
 }
 
 void Server::attemptRegister(Client &client)
