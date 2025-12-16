@@ -45,7 +45,6 @@
 #define ERR_CHANOPRIVSNEEDED	482
 #define ERR_INVALIDKEY			525
 
-
 #define INPUT_FORMAT "Expected format: <./ircserv> <port number> <password>"
 #define ERR_PORT "Port number expected to be of numeric value between numbers 1024 and 65535"
 #define ERR_SOCKET "Failed to create a socket"
@@ -63,11 +62,13 @@
 
 #define RPL_PONG(token) "PONG " + token + "\r\n"
 #define NEW_NICK(oldnick, user, host, newnick) ":" + oldnick + "!" + user + "@" + host + " NICK " + newnick + "\r\n"
+
 #define ERR_NONICKNAMEGIVEN(servername, nickname) ":" + servername + " 431 " + nickname + " :No nickname given\r\n"
 #define ERR_ERRONEUSNICKNAME(servername, nickname, badnick) ":" + servername + " 432 " + nickname + " " + badnick + " :Erroneus nickname\r\n"
-#define ERR_NICKNAMEINUSE(servername, nickname, badnick) ":" + servername + " 433 " + nickname + " " + badnick + " :Nickname is already in use\r\n"
 #define ERR_PASSWDMISMATCH(servername, nickname) ":" + servername + " 464 " + nickname + " :Password incorrect\r\n"
 #define ERR_ALREADYREGISTERED(servername, nickname) ":" + servername + " 462 " + nickname + " :You may not register\r\n"
+#define ERR_NICKNAMEINUSE(servername, nickname, badnick) ":" + servername + " 433 " + nickname + " " + badnick + " :Nickname is already in use\r\n"
+
 // #define ERR_NEEDMOREPARAMS(servername, nickname, command) ":" + servername + " 461 " + nickname + " " + command + " :Not enough parameters\r\n"
 // #define ERR_UNKNOWNCOMMAND(servername, nickname, command) ":" + servername + " 421 " + nickname + " " + command + " :Unknown command\r\n"
 // #define ERR_INPUTTOOLONG(servername, nickname) ":" + servername + " 417 " + nickname + " :Input line was too long\r\n"

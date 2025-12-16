@@ -7,7 +7,7 @@
 Server::~Server()
 {
 	std::cout << "We have received a signal or the server simply failed to start!" << std::endl;
-	for (auto client : _clientInfo) //delete chan after client because of leak 
+	for (auto client : _clientInfo)
 		disconnectClient(client);
 	for (auto chan : _channelInfo)
 		delete chan;
@@ -41,6 +41,8 @@ void Server::disconnectClient(Client *client)
 	if (it == _clientInfo.end())
 		return ;
 	
+	if (client->getQuitMsg().empty())
+		client->setQuitMsg("Client is disconnected other than QUIT");
 	std::string serverMsg = client->makeUser() + " QUIT :" + client->getQuitMsg() + "\r\n";
 	this->broadcastUsersMsg(serverMsg, *client, false);
 

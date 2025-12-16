@@ -333,7 +333,6 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;	
 	}
 
-
 	//RPL	
 	case RPL_NOTOPIC:
 		msg = makeNumericReply(server, num, nick, {chanName}, "No topic is set");

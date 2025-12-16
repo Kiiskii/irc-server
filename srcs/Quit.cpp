@@ -26,6 +26,7 @@ void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 	
 	return;
 }
+
 void	Client::setQuitMsg(std::string msg)
 {
 	_quitMsg = msg;
