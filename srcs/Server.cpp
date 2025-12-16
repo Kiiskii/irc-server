@@ -7,10 +7,10 @@
 Server::~Server()
 {
 	std::cout << "We have received a signal or the server simply failed to start!" << std::endl;
+	for (auto client : _clientInfo) //delete chan after client because of leak 
+		disconnectClient(client);
 	for (auto chan : _channelInfo)
 		delete chan;
-	for (auto client : _clientInfo)
-		disconnectClient(client);
 	if (_epollFd != -1)	
 		close(_epollFd);
 	if (_serverFd != -1)
@@ -31,15 +31,15 @@ Channel* Server::findChannel(std::string newChannel)
 
 void Server::disconnectClient(Client *client)
 {
-	//this should remove the client from the channel as well
 	auto it = std::find(_clientInfo.begin(), _clientInfo.end(), client);
 	if (it == _clientInfo.end())
 		return ;
-	Client* ptr = *it;
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, ptr->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
-	close(ptr->getClientFd());
+	for (auto chan : client->getJoinedChannels())
+		chan->removeUser(client->getNick());
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
+	close(client->getClientFd());
 	getClientInfo().erase(it);
-	delete ptr;
+	delete client;
 }
 
 /*Port is a 16-bit unsigned int, meaning valid range is 0-65535.
@@ -313,12 +313,10 @@ Channel* Server::setActiveChannel(std::string buffer)
 	{
 		channelName = buffer;
 	}
-	// std::cout << "channelName: [" << channelName << "]" << std::endl;
-
 	return this->findChannel(channelName);
 }
 
-// correct
+
 Client*	Server::findClient(std::string nickName)
 {
 	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)

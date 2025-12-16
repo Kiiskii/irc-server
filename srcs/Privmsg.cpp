@@ -10,12 +10,8 @@ static bool hasForbiddenChar(std::string& msg)
 {
 	for (unsigned char c : msg)
 	{
-		// std::cout << "char: " << c << " hex: " << std::hex << (int)c << std::dec << "\n";
 		if (c <= '\x1F' || c == '\x7F')
-		{
-			// std::cout << "here\n";
 			return true;
-		}
 	}
 	return false;
 }

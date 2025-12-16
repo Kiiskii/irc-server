@@ -26,10 +26,7 @@ std::string Channel::truncateTopic(std::string tokens)
 
 /** @brief if the t_mode is on, only chanop can set/remove topic.
  * If <topic> is an empty string, the topic for the channel will be cleared. 
- * This can only be checked in 'nc', cause irssi automatically add ':'.
- * If the <topic> param is provided but the same as the previous topic (ie. it is 
- * unchanged), servers MAY notify the author and/or other users anyway.
- */
+ * If the <topic> param is provided but the same as the previous topic (ie. it is unchanged), servers MAY notify the author and/or other users anyway. */
 bool Channel::setTopic(std::string tokens, Client& client)
 {
 	Server& server = client.getServer();
@@ -86,14 +83,7 @@ void Server::handleTopic(Client& client, std::vector<std::string> tokens)
 		this->sendTopic(client, *channelPtr);
 	else // set TOPIC
 	{
-		std::string topicStr;
-		for (size_t i = 0; i < tokens.size(); ++i)
-		{
-			if (i == tokens.size() - 1)
-				topicStr += tokens[i];
-			else
-				topicStr += tokens[i] + " ";
-		}
+		std::string topicStr = utils::joinTokenVector(tokens);
 		if (!channelPtr->setTopic(topicStr, client))
 			return ;
 

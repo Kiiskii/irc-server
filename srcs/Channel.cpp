@@ -13,22 +13,6 @@ Channel::Channel(std::string newChannel) : _channelName(newChannel), _topic("")
 	_modeHandlers['l'] = &Channel::handleChannelLimit;
 }
 
-// Channel::~Channel()
-// {
-// 	for (auto user :_ops)
-// 		delete user;
-// 	for (auto user :_voices)
-// 		delete user;
-// 	for (auto user :_halfOps)
-// 		delete user;
-// 	for (auto user :_invitedUser)
-// 		delete user;
-// 	for (auto user :_normals)
-// 		delete user;
-// 	for (auto user :_userList)
-// 		delete user;
-// }
-
 std::string Channel::getChannelName() const
 {
 	return _channelName;
@@ -103,16 +87,6 @@ std::unordered_set<Client*>&	Channel::getOps()
 	return _ops;
 }
 
-// void Channel::setChannelName(std::string channelName)
-// {
-// 	_channelName = channelName;
-// }
-
-// void Channel::setChanKey(std::string newKey)
-// {
-// 	this->_mode.insert({K_MODE, newKey});
-// }
-
 void Channel::addMode(char key, std::string param)
 {
 	_mode.insert({key, param});
@@ -141,11 +115,6 @@ std::vector<std::string> Channel::getMode() const
 
 void Channel::addUser(Client* newClient)
 {
-	// for (auto user : _userList)
-	// {
-	// 	if (utils::compareCasemappingStr(user->getNick(), newClient->getNick()))
-	// 		return;
-	// }
 	if (std::find(_userList.begin(), _userList.end(), newClient) != _userList.end())
 		return ;
 	_userList.push_back(newClient);
@@ -157,49 +126,21 @@ void Channel::addUser(Client* newClient)
 
 void Channel::addChanop(Client* chanop)
 {
-	// if (std::find(_ops.begin(), _ops.end(), chanop) != _ops.end())
-	// 	return ;
-	// for (auto op : _ops)
-	// {
-	// 	if (utils::compareCasemappingStr(op->getNick(), chanop->getNick()))
-	// 		return;
-	// }
 	_ops.insert(chanop);
 }
 
 void Channel::addNormal(Client* client)
 {
-	// if (std::find(_normals.begin(), _normals.end(), client) != _normals.end())
-	// 	return ;
-	// for (auto normal : _normals)
-	// {
-	// 	if (utils::compareCasemappingStr(normal->getNick(), client->getNick()))
-	// 		return;
-	// }
 	_normals.insert(client);
 }
 
 void Channel::addInvitedUser(Client* newClient)
 {
-	// for (auto user : _invitedUser)
-	// {
-	// 	if (utils::compareCasemappingStr(user->getNick(), newClient->getNick()))
-	// 		return;
-	// }
-	// if (std::find(_invitedUser.begin(), _invitedUser.end(), newClient) != _invitedUser.end())
-		// return ;
 	_invitedUser.insert(newClient);
 }
 
 void	Channel::removeUser(std::string userNick)
 {
-	// for (auto it  = _userList.begin(); it != _userList.end();)
-	// {
-	// 	if ((*it)->getNick() == userNick)
-	// 		it = _userList.erase(it);
-	// 	else
-	// 		++it;
-	// }
 	Client* client = this->findClient(userNick);
 	if (client)
 	{
@@ -213,13 +154,6 @@ void	Channel::removeUser(std::string userNick)
 /** @brief remove the client pointer from chanops list using NICK */
 void	Channel::removeChanop(std::string opNick)
 {
-	// for (auto it  = _ops.begin(); it != _ops.end();)
-	// {
-	// 	if (utils::compareCasemappingStr((*it)->getNick(), opNick))
-	// 		it = _ops.erase(it);
-	// 	else
-	// 		++it;
-	// }
 	Client* client = this->findClient(opNick);
 	if (client)
 		_ops.erase(client);
@@ -227,13 +161,6 @@ void	Channel::removeChanop(std::string opNick)
 
 void	Channel::removeNormal(std::string userNick)
 {
-	// for (auto it  = _normals.begin(); it != _normals.end();)
-	// {
-	// 	if (utils::compareCasemappingStr((*it)->getNick(), userNick))
-	// 		it = _normals.erase(it);
-	// 	else
-	// 		++it;
-	// }
 	Client* client = this->findClient(userNick);
 	if (client)
 		_normals.erase(client);
@@ -245,13 +172,12 @@ bool Channel::isClientOnChannel( Client& client)
 {
 	for (auto chan : client.getJoinedChannels())
 	{
-		// if (utils::compareCasemappingStr(this->getChannelName(),(*chan).getChannelName()))
 		if (this == chan)
 			return true;
 	}
 	return false;
 }
-// correct
+
 bool	Channel::isChanop(std::string nick)
 {
 	for (auto op : _ops)
@@ -261,7 +187,7 @@ bool	Channel::isChanop(std::string nick)
 	}
 	return false;
 }
-// correct
+
 Client*	Channel::findClient(std::string nickName)
 {
 	for (auto it = _userList.begin(); it != _userList.end(); ++it)

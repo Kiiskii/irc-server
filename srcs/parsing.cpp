@@ -153,8 +153,6 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	}
 	else if (command == "MODE")
 	{
-		// std::cout << "[" << command << "]" << std::endl;
-		// utils::printVector(tokens);
 		server.handleMode(client, tokens);
 	}
 	else if (command == "INVITE")
@@ -170,7 +168,10 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	else if (command == "PART")
 		server.partChannel(client, tokens);
 	else if (command == "QUIT")
+	{
 		server.handleQuit(client, tokens);
+		return;
+	}
 	else
 	{
 		std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);

@@ -23,8 +23,6 @@ std::string utils::ft_trimString(std::string msg)
 /** @brief split string into tokens using delimiter */
 std::vector<std::string> utils::ft_splitString(std::string buffer, char delimiter)
 {
-	// std::cout << "buffer :[" << buffer << "]" << std::endl;
-
 	std::istringstream	tokenStream(buffer); //save buffer string to an istringstream obj
 	std::string			aToken;
 	std::vector<std::string> tokens;
@@ -48,7 +46,6 @@ std::string makeNumericReply(std::string prefix, int code, std::string target, s
 		+ (p.empty() ? " " : " " + p)
 		+ (trailing.empty() ? "" : ":" + trailing)
 		+ "\r\n";
-	//std::cout << ": " << s << std::endl;
 	return s;
 }
 
@@ -77,7 +74,6 @@ std::string utils::extractChannelName(std::string buffer)
 		chanEndPos = buffer.length();
 
 	channelName = buffer.substr(hashPos + 1, chanEndPos - hashPos -1);
-	// std::cout << "channelName: [" << channelName << "]" << std::endl;
 	return channelName;
 
 }
@@ -105,40 +101,18 @@ Client* checkClientExistence(std::vector<Client*>& list, std::string nick)
 	return c;
 }
 
-// std::string utils::setParamAndRemoveToken(std::vector<std::string>& tokens)
-// {
-// 	std::string params;
-
-// 	params = tokens.front();
-// 	tokens.erase(tokens.begin());
-// 	return params;
-// }
-
-void	utils::printVector(std::vector<std::string> tokens)
+std::string utils::joinTokenVector(const std::vector<std::string>& tokens)
 {
-	std::cout << "vector memebers: " << std::endl;
+	std::string str = "";
+	if (tokens.size() == 0)
+		return str;
 
-	if (tokens.empty())
+	for (size_t i = 0; i < tokens.size(); ++i)
 	{
-		std::cout << "empty tokens\n";
-		return;
+		if (i == tokens.size() - 1)
+			str += tokens[i];
+		else
+			str += tokens[i] + " ";
 	}
-	for (auto token : tokens)
-	{
-		std::cout << "[" <<  token << "] ";
-	}
-	std::cout << std::endl;
+	return str;
 }
-
-// void	utils::printOps(Channel& channel)
-// {
-// 	std::cout << "@CHANOPS list: \n";
-// 	if (!channel.getOps().empty())
-// 	{
-// 		for (auto op : channel.getOps())
-// 		{
-// 			std::cout << op->getNick() << ", ";
-// 		}
-// 		std::cout << "\n";
-// 	}
-// }

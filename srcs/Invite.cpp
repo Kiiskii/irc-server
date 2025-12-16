@@ -7,33 +7,26 @@ bool	Channel::hasInvitedClient(Client* client)
 {
 	if (!_invitedUser.empty() && _invitedUser.find(client) != _invitedUser.end())
 		return true;
-	// for (auto user : _invitedUser)
-	// {
-	// 	if (utils::compareCasemappingStr(user->getNick(), client->getNick()))
-	// 		return true;
-	// }
 	return false;
 }
 
 static bool isValidInvitation(std::vector<std::string>& tokens, Client& client, 
 	Channel*& chann, Client*& invitedClient)
 {
-	// std::cout << "token size: " << tokens.size() << std::endl;
 	if (tokens.size() < 2)
 	{
-		std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");
-		client.getServer().sendMsg(client, msg);
+		// std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");
+		// client.getServer().sendMsg(client, msg);
+		client.getServer().sendClientErr(461, client, chann, {"INVITE"});
 		return false;
 	}
 	if (!client.isValidChanName(tokens[1]))
 	{
-		// std::cout << "invalid channel name\n";
 		return false;
 	}
 
 	std::string nickName = tokens[0];
 	std::string chanName = tokens[1].substr(tokens[1].find("#") + 1, tokens[1].length() - 1);
-	// std::cout << "AFTER #, channel name: " << chanName << std::endl;
 
 	chann = client.getServer().findChannel(chanName);
 	if (!chann)
@@ -78,12 +71,8 @@ void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 	Client*		invitedClient = nullptr;
 
 	if (!isValidInvitation(tokens, client, chann, invitedClient))
-	{
-		// std::cout << "INVALID invitation\n";
 		return;
-	}
 
-	// std::cout << "send invitation\n";
 	//if valid invitation then send msg
 	if (invitedClient)
 	{
@@ -94,10 +83,6 @@ void Server::handleInvite(Client& client, std::vector<std::string> tokens)
 		this->sendClientErr(RPL_INVITING, client, chann, 
 			{invitedClient->getNick()});
 	}
-	// else
-	// {
-	// 	std::cout << "null invited cient\n";
-	// }
 }
 
 

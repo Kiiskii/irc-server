@@ -7,15 +7,13 @@ class Client;
 class Channel;
 
 namespace utils {
-	void		printVector(std::vector<std::string> tokens); //to remove
-	// void		printOps(Channel& channel); //to remove
-	// std::string setParamAndRemoveToken(std::vector<std::string>& tokens);
 
 	std::vector<std::string>	ft_splitString(std::string buffer, char delimiter);
 	std::string ft_trimString(std::string msg);
 	std::string ft_stringToLower(std::string str);
 	std::string extractChannelName(std::string str);
 	bool		compareCasemappingStr(std::string s1, std::string s2);
+	std::string joinTokenVector(const std::vector<std::string>& tokens);
 
 	// messaging utils
 	std::string makePrivMsgToChan(std::string& token, Client& client, Channel& chan);
