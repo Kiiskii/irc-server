@@ -92,7 +92,7 @@ bool Channel::validateModeInstruction(Client& client, std::vector<ModeInfo> pars
 			std::string cmd = "MODE ";
 			cmd += m.add ? "+" : "-";
 			cmd += m.mode;
-			server.sendClientErr(461, client, this, {cmd});
+			server.sendClientErr(ERR_NEEDMOREPARAMS, client, this, {cmd});
 			return false;
 		}
 		if (m.mode == O_MODE)
@@ -221,7 +221,7 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	Channel*	channelPtr = nullptr;
 	if (tokens.empty())
 	{
-		sendClientErr(461, client, channelPtr, {"MODE"});
+		sendClientErr(ERR_NEEDMOREPARAMS, client, channelPtr, {"MODE"});
 		return ;
 	}
 
@@ -245,7 +245,7 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	{
 		sendClientErr(RPL_CHANNELMODEIS, client, channelPtr, 
 			{channelPtr->getMode()[0], channelPtr->getMode()[1]});
-		sendClientErr(RPL_CREATIONTIME, client, channelPtr, {});
+		// sendClientErr(RPL_CREATIONTIME, client, channelPtr, {});
 		return ;
 	}
 

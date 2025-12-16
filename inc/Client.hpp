@@ -33,7 +33,7 @@ class Client
 		std::vector<Channel*>	_joinedChannels;
 		enum ClientState		_clientState = NONE;
 		class Server			&_myServer;	
-//		std::string				_input;
+		std::string				_quitMsg;
 
 	public:
 		std::string				_input; // this needs to be private
@@ -52,6 +52,7 @@ class Client
 		std::vector<Channel*> 	getJoinedChannels();
 		enum ClientState		getClientState();
 		Server&					getServer();
+		std::string				getQuitMsg();
 
 		// setters
 		void		setClientFd(int num);
@@ -60,6 +61,7 @@ class Client
 		void		setRealName(std::string user);
 		void		setHostName(std::string host);
 		void		setClientState(enum ClientState state);
+		void		setQuitMsg(std::string msg);
 
 		// other methods
 		void		addJoinedChannel(Channel* chan);

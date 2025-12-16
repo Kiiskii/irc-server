@@ -17,8 +17,9 @@ void Server::pass(Client &client, std::vector<std::string> tokens)
 	}
 	else if (tokens.size() == 0)
 	{
-		std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "PASS");
-		sendMsg(client, message);
+		// std::string message = ERR_NEEDMOREPARAMS(getServerName(), getTarget(client), "PASS");
+		// sendMsg(client, message);
+		sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"PASS"});
 		client.setClientState(DISCONNECTING);
 	}
 	else if (tokens[0].compare(_pass) != 0)
