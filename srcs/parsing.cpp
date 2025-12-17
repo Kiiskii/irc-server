@@ -21,9 +21,6 @@ void Server::parseMessage(Client &c, const std::string &line)
 	// skip leading spaces
 	i = line.find_first_not_of(' ', i);
 
-	// possibly deal with empty string?
-	// if (i == n) return false;
-
 	// command
 	size_t cmdStart = i;
 
@@ -48,8 +45,6 @@ void Server::parseMessage(Client &c, const std::string &line)
 			break ;
 
 		if (line[i] == ':') {
-			// handle trailing after ':', trailing should always be last parameter?
-			//++i;
 			std::string trailing = line.substr(i);
 			msg.push_back(trailing);
 			break ;
@@ -59,13 +54,10 @@ void Server::parseMessage(Client &c, const std::string &line)
 			size_t paramStart = i;
 
 			i = line.find(' ', i);
-			//msg.push_back(line.substr(paramStart, i - paramStart) + ' ');
 			msg.push_back(line.substr(paramStart, i - paramStart));
 		}
 		++j;
 	}
-	//if (!msg.empty() && msg.back() == ' ')
-	//	msg.pop_back();
 	logMessages(command, msg, c.getClientFd());
 	handleCommand(*this, c, command, msg);
 }
@@ -76,10 +68,7 @@ void Server::receive(Client &c)
 	// Recieve data from the client
 	char buffer[512];
 	ssize_t bytes = 1;
-
-	//outMsg.clear();
 	
-	// DO WE USE MSG_DONTWAIT OR 0???
 	while (bytes > 0) {
 		bytes = recv(c.getClientFd(), buffer, sizeof(buffer), MSG_DONTWAIT);
 		// Errorhandling
@@ -91,7 +80,6 @@ void Server::receive(Client &c)
 			break ;
 		}
 		else if (bytes == 0) {
-/*Cleaner way to handle this rather than sending in index*/
 			std::cout << "Client fd " << c.getClientFd() << " disconnected" << std::endl;
 			c.setClientState(DISCONNECTING);
 			break ;
@@ -117,62 +105,40 @@ void Server::receive(Client &c)
 - When exactly do we return and when should we disconnect?
 - Right now you can give PASS, NICK and USER in any order but we may want to change it to PASS first, then NICK/USER in any order
 */
-//void Server::handleCommand(Server &server, Client &client, std::string &line)
 void Server::handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens)
 {
 	if (command == "CAP")
-    {
-       std::string reply = ":" + server._name + " CAP * LS :multi-prefix\r\n";
-       send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-       return ;
-    }
+	{
+		std::string reply = ":" + server._name + " CAP * LS :multi-prefix\r\n";
+		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
+		return ;
+	}
 	if (command == "PASS")
-	{
 		pass(client, tokens);
-	}
 	else if (command == "NICK")
-	{
 		nick(client, tokens);
-	}
 	else if (command == "USER")
-	{
 		user(client, tokens);
-	}
 	else if (client.getClientState() != REGISTERED)
 		return;
 	else if (command == "PING")
-	{
 		ping(client, tokens);
-	}
 	else if (command == "JOIN")
-	{
 		server.handleJoin(client, tokens);
-	}
 	else if (command == "TOPIC")
-	{
 		server.handleTopic(client, tokens);
-	}
 	else if (command == "MODE")
-	{
 		server.handleMode(client, tokens);
-	}
 	else if (command == "INVITE")
-	{
 		server.handleInvite(client, tokens);
-	}
 	else if (command == "PRIVMSG")
-	{
 		server.handlePrivmsg(client, tokens);
-	}
 	else if (command == "KICK")
 		server.kickClient(client, tokens);
 	else if (command == "PART")
 		server.partChannel(client, tokens);
 	else if (command == "QUIT")
-	{
 		server.handleQuit(client, tokens);
-		return;
-	}
 	else
 	{
 		// std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);
