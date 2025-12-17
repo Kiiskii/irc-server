@@ -8,14 +8,14 @@ bool	Client::isValidChanName(std::string name)
 {
 	if (name.empty() || name.length() > CHANNELLEN)
 	{
-		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name});
+		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {name});
 		return false;
 	}
 
 	std::regex chanNameRegex("^#[^ \\x07,]+$");
 	if (!std::regex_match(name, chanNameRegex))
 	{
-		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {"#" + name});
+		this->getServer().sendClientErr(ERR_BADCHANNAME, *this, nullptr, {name});
 		return false;
 	}
 	return true;
@@ -32,7 +32,7 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 	{
 		// std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "JOIN");
 		// client.getServer().sendMsg(client, msg);
-		client.getServer().sendClientErr(461, client, nullptr, {"JOIN"});
+		client.getServer().sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"JOIN"});
 		return false;
 	}
 	
@@ -136,7 +136,7 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 
 	if (tokens.empty())
 	{
-		this->sendClientErr(461, client, nullptr, {"JOIN"});
+		this->sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"JOIN"});
 		return;
 	}
 
@@ -150,7 +150,7 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 
 		if (channelName.size() > CHANNELLEN)
 		{
-			this->sendClientErr(ERR_BADCHANNAME, client, nullptr, {"#" + channelName});
+			this->sendClientErr(ERR_BADCHANNAME, client, nullptr, {channelName});
 			continue;
 		}
 		// client leave all channels they are currently connected to

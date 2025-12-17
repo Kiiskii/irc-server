@@ -58,10 +58,12 @@ public:
 	void		setupServerDetails(Server &server, int argc, char *argv[]);
 	void		setupSocket();
 	void		setupEpoll();
+	void		handleEvents();
 	void		handleNewClient();
 	void		handleCommand(Server &server, Client &client, 
 					std::string command, std::vector<std::string> &tokens);
 	void		attemptRegister(Client &client);
+	void		handleDisconnects(); //can be combined with disconnect client?
 	void		disconnectClient(Client *client);
 	void		removeChannel(Channel* chann);
 
@@ -75,7 +77,6 @@ public:
 	void 		nick(Client &client, std::vector<std::string> tokens);
 	void 		user(Client &client, std::vector<std::string> tokens);
 	void 		ping(Client &client, std::vector<std::string> tokens);
-	std::vector<Client*>::iterator 	iterateClients(Server &server, Client &client);
 	void 		handleJoin(Client& client, std::vector<std::string> tokens);
 	void 		handleTopic(Client& client, std::vector<std::string> tokens);
 	void 		handleMode(Client& client, std::vector<std::string> tokens);
@@ -89,6 +90,7 @@ public:
 // other methods
 	Channel*	findChannel(std::string newChannel);
 	Client*		findClient(std::string nickName);
+	Client*		findClientByFd(int fd);
 	Channel*	setActiveChannel(std::string buffer);
 	Channel*	createChannel(std::string chanName);
 	bool 		mappingChannelKey(std::vector<std::string> tokens, 
@@ -112,6 +114,7 @@ public:
 					std::vector<std::string>& params, Channel& channel);
 	void		sendPartMsg(Client& client, std::vector<std::string>& params, 
 					Channel& channel);
+	void		sendWelcomeMsg(Client& client);
 
 };
 

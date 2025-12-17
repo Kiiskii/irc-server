@@ -7,11 +7,15 @@
 Server::~Server()
 {
 	std::cout << "We have received a signal or the server simply failed to start!" << std::endl;
-	for (auto client : _clientInfo) //delete chan after client because of leak 
-		disconnectClient(client);
+	for (auto client = _clientInfo.begin(); client != _clientInfo.end();) 
+	{
+		Client *ptr = *client;
+		disconnectClient(ptr);
+		client = _clientInfo.begin();
+	}
 	for (auto chan : _channelInfo)
 		delete chan;
-	if (_epollFd != -1)	
+	if (_epollFd != -1)
 		close(_epollFd);
 	if (_serverFd != -1)
 		close(_serverFd);
@@ -29,11 +33,23 @@ Channel* Server::findChannel(std::string newChannel)
 	return nullptr;
 }
 
+std::string Client::getQuitMsg()
+{
+	return _quitMsg;
+}
+
+
 void Server::disconnectClient(Client *client)
 {
 	auto it = std::find(_clientInfo.begin(), _clientInfo.end(), client);
 	if (it == _clientInfo.end())
 		return ;
+	
+	if (client->getQuitMsg().empty())
+		client->setQuitMsg("Client is disconnected other than QUIT");
+	std::string serverMsg = client->makeUser() + " QUIT :" + client->getQuitMsg() + "\r\n";
+	this->broadcastUsersMsg(serverMsg, *client, false);
+
 	for (auto chan : client->getJoinedChannels())
 		chan->removeUser(client->getNick());
 	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
@@ -54,16 +70,12 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 	try
 	{	_port = std::stoi(argv[1], &pos); }
 	catch (const std::exception&) //invalid argument ("abc") or out of range
-	{ 
-		std::cerr << ERR_PORT << std::endl;
-		exit (1);
+	{
+		throw std::runtime_error(ERR_PORT);
 	}
 	std::string s = argv[1];
 	if (pos != s.length() || _port < 1024 || _port > 65535) //trailing invalid characters and if port out of range
-	{
-		std::cerr << ERR_PORT << std::endl;
-		exit(1);
-	}
+		throw std::runtime_error(ERR_PORT);
 	_pass = argv[2];
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
@@ -78,39 +90,24 @@ void Server::setupSocket()
 	_details.sin_addr.s_addr = INADDR_ANY;
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd == -1) //happens when you hit ulimit -n or too many connections (open fds)
-	{
-		std::cerr << ERR_SOCKET << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_SOCKET);
 	int opt = 1;
 	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
 	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1) //fails when port already in use (try port under 1024?)
-	{
-		std::cerr << ERR_BIND << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_BIND);
 	if (listen(_serverFd, 1) == -1) //not so likely to fail
-	{
-		std::cerr << ERR_LISTEN << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_LISTEN);
 }
 
 void Server::setupEpoll()
 {
 	_epollFd = epoll_create1(0);
 	if (_epollFd == -1) //again, too many epoll fds open, system limits, mem, try ulimit -n
-	{
-		std::cerr << ERR_EPOLL << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_EPOLL);
 	_event.events = EPOLLIN;
 	_event.data.fd = _serverFd;
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
-	{
-		std::cerr << ERR_EPOLLCTL << std::endl;
-		exit (1);
-	}
+		throw std::runtime_error(ERR_EPOLLCTL);
 }
 
 /*Handling a new client
@@ -129,8 +126,8 @@ void Server::handleNewClient()
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
 	if (newClient->getClientFd() == -1) //clients disconnect too quickly, fd exhaustion, race condition, try to connect and instantly close with ctrl C
 	{
-		std::cerr << ERR_ACCEPT << std::endl;
-		exit (1);
+		delete newClient;
+		throw std::runtime_error(ERR_ACCEPT);
 	}
 	char *clientIP = inet_ntoa(clientAddress.sin_addr);
 	newClient->setHostName(clientIP);
@@ -140,15 +137,43 @@ void Server::handleNewClient()
 	ev.events = EPOLLIN;
 	ev.data.fd = newClient->getClientFd();
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
-	{
-		std::cerr << ERR_EPOLLCTL << std::endl;
-		exit (1);		
-	}
+		throw std::runtime_error(ERR_EPOLLCTL);
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }
 
-/*
-- Additional info to put here, at least Trang added the channel length!*/
+void Server::handleDisconnects()
+{
+	for (auto it = _clientInfo.begin(); it != _clientInfo.end();)
+	{
+		if ((*it)->getClientState() == DISCONNECTING)
+		{
+			disconnectClient(*it);
+			it = _clientInfo.begin();
+		}
+		else
+			++it;
+	}
+}
+
+void Server::handleEvents()
+{
+	int eventCount = epoll_wait(getEpollfd(), getEpollEvents(), MAX_EVENTS, -1);
+	for (int i = 0; i < eventCount; ++i)
+	{
+		int fd = getEpollEvents()[i].data.fd;
+		if (fd == getServerfd())
+		{
+			handleNewClient();
+		}
+		else
+		{
+			Client *c = findClientByFd(fd);
+			receive(*c);
+		}
+	}
+	handleDisconnects();
+}
+
 void Server::attemptRegister(Client &client)
 {
 	if (client.getClientState() != REGISTERING)
@@ -156,57 +181,7 @@ void Server::attemptRegister(Client &client)
 	if (client.getNick().empty() || client.getUserName().empty())
 		return;
 	client.setClientState(REGISTERED);
-	std::string fullMessage;
-	std::string message = RPL_WELCOME(_name, client.getNick());
-	send(client.getClientFd(), message.c_str(), message.size(), 0);
-	logMessages(message, getServerfd());
-	message = RPL_YOURHOST(_name, client.getNick(), "1.1");
-	send(client.getClientFd(), message.c_str(), message.size(), 0);
-	logMessages(message, getServerfd());
-	message = RPL_CREATED(_name, client.getNick(), "today");
-	send(client.getClientFd(), message.c_str(), message.size(), 0);
-	logMessages(message, getServerfd());
-	message = RPL_MYINFO(_name, client.getNick(), "1.1", "o", "itkol");
-	send(client.getClientFd(), message.c_str(), message.size(), 0);
-	logMessages(message, getServerfd());
-	std::vector<std::string> info = 
-	{
-	"LINELEN=" + std::to_string(MSG_SIZE),
-	"USERLEN=" + std::to_string(USERLEN),
-	"NICKLEN=" + std::to_string(NICKLEN),
-	"CHANLIMIT=" + std::to_string(CHANLIMIT),
-	"CHANMODES=" + std::string(CHANMODES)
-	};
-	std::string infoPack;
-	for (int i = 0; i < info.size(); i++)
-		infoPack = infoPack + info[i] + " ";
-	message = RPL_ISUPPORT(_name, client.getNick(), infoPack);
-	send(client.getClientFd(), message.c_str(), message.size(), 0);
-	logMessages(message, getServerfd());
-//needs \r\n both
-std::string ft_irc_ascii = 
-":" + getServerName() + " 375 " + client.getNick() + " :- " + getServerName() + " Message of the day -\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + ".----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. \n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _________   | || |  _________   | || |              | || |     _____    | || |  _______     | || |     ______   | |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_   ___  |  | || | |  _   _  |  | || |              | || |    |_   _|   | || | |_   __ \\    | || |   .' ___  |  | |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   | |_  \\_|  | || | |_/ | | \\_|  | || |              | || |      | |     | || |   | |__) |   | || |  / .'   \\_|  | |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   |  _|      | || |     | |      | || |              | || |      | |     | || |   |  __ /    | || |  | |         | |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _| |_       | || |    _| |_     | || |              | || |     _| |_    | || |  _| |  \\ \\_  | || |  \\ `.___.'\\  | |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_____|      | || |   |_____|    | || |   _______    | || |    |_____|   | || | |____| |___| | || |   `._____.'  | |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| |              | || |              | || |  |_______|   | || |              | || |              | || |              | |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + "| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\n"
-":" + getServerName() + " 372 " + client.getNick() + " :" + " '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'\n"
-":" + getServerName() + " 372 " + client.getNick() + " :Created by Karoliina Hiidenheimo, Trang Pham and Anton Kiiski.\n"
-":" + getServerName() + " 376 " + client.getNick() + " :End of /MOTD command.\n";
-	send(client.getClientFd(), ft_irc_ascii.c_str(), ft_irc_ascii.size(), 0);
-	logMessages(ft_irc_ascii, getServerfd());
-	std::cout << "User set: " << client.getUserName() << std::endl;
-	std::cout << "Real name set: " << client.getRealName() << std::endl;
-	std::cout << "Host set: " << client.getHostName() << std::endl;
-	std::cout << "Nick set: " << client.getNick() << std::endl;
-	std::cout << "Server set: " << getServerName() << std::endl;
-	std::cout << "We got all the info!" << std::endl;
+	sendWelcomeMsg(client);
 }
 
 void Server::logMessages(std::string msg, int fd)
@@ -301,13 +276,22 @@ Channel* Server::setActiveChannel(std::string buffer)
 	return this->findChannel(channelName);
 }
 
-
 Client*	Server::findClient(std::string nickName)
 {
 	for (auto it = _clientInfo.begin(); it != _clientInfo.end(); ++it)
 	{
 		if (utils::compareCasemappingStr((*it)->getNick(), nickName))
 			return *it;
+	}
+	return nullptr;
+}
+
+Client*	Server::findClientByFd(int fd)
+{
+	for (Client *c : _clientInfo)
+	{
+		if (fd == c->getClientFd())
+			return c;
 	}
 	return nullptr;
 }

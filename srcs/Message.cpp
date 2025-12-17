@@ -49,12 +49,12 @@ void Server::broadcastUsersMsg(std::string& msg, Client& client, bool sender)
 			{
 				uniqueClients.push_back(user->getClientFd());
 				if (sender == true || (sender == false && client.getClientFd() != user->getClientFd()))
-					send(user->getClientFd(), msg.c_str(), msg.size(), 0);
+					sendMsg(*user, msg);
 			}
 		}
 	}
 	if (sender == true && client.getJoinedChannels().size() == 0)
-		send(client.getClientFd(), msg.c_str(), msg.size(), 0);
+		sendMsg(client, msg);
 }
 
 /** 
@@ -143,6 +143,58 @@ void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::
 						+ " KICK " + "#" + channel.getChannelName()
 						+ " " + client + " " + reason + "\r\n";
 	broadcastChannelMsg(msg, channel);
+}
+
+void Server::sendWelcomeMsg(Client& client)
+{
+	std::string message = RPL_WELCOME(_name, client.getNick());
+	sendMsg(client, message);
+	message = RPL_YOURHOST(_name, client.getNick(), "1.1");
+	sendMsg(client, message);
+	message = RPL_CREATED(_name, client.getNick(), "today");
+	sendMsg(client, message);
+	message = RPL_MYINFO(_name, client.getNick(), "1.1", "o", "itkol");
+	sendMsg(client, message);
+
+	std::vector<std::string> info = 
+	{
+		"LINELEN=" + std::to_string(MSG_SIZE),
+		"USERLEN=" + std::to_string(USERLEN),
+		"NICKLEN=" + std::to_string(NICKLEN),
+		"CHANLIMIT=" + std::to_string(CHANLIMIT),
+		"CHANNELLEN=" + std::to_string(CHANNELLEN),
+		"CHANMODES=" + std::string(CHANMODES),
+		"CASEMAPPING=" + std::string(CASEMAPPING)
+	};
+	std::string infoPack;
+	for (int i = 0; i < info.size(); i++)
+		infoPack = infoPack + info[i] + " ";
+	message = RPL_ISUPPORT(_name, client.getNick(), infoPack);
+	sendMsg(client, message);
+	message =
+	":" + getServerName() + " 375 " + client.getNick() + " :- " + getServerName() + " Message of the day -\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + ".----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .----------------. \r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _________   | || |  _________   | || |              | || |     _____    | || |  _______     | || |     ______   | |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_   ___  |  | || | |  _   _  |  | || |              | || |    |_   _|   | || | |_   __ \\    | || |   .' ___  |  | |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   | |_  \\_|  | || | |_/ | | \\_|  | || |              | || |      | |     | || |   | |__) |   | || |  / .'   \\_|  | |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |   |  _|      | || |     | |      | || |              | || |      | |     | || |   |  __ /    | || |  | |         | |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |  _| |_       | || |    _| |_     | || |              | || |     _| |_    | || |  _| |  \\ \\_  | || |  \\ `.___.'\\  | |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| | |_____|      | || |   |_____|    | || |   _______    | || |    |_____|   | || | |____| |___| | || |   `._____.'  | |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| |              | || |              | || |  |_______|   | || |              | || |              | || |              | |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + "| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :" + " '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'\r\n"
+	":" + getServerName() + " 372 " + client.getNick() + " :Created by Karoliina Hiidenheimo, Trang Pham and Anton Kiiski.\r\n"
+	":" + getServerName() + " 376 " + client.getNick() + " :End of /MOTD command.\r\n";
+	sendMsg(client, message);
+
+	//THESE ARE DEBUG AND CAN BE REMOVED
+	std::cout << "User set: " << client.getUserName() << std::endl;
+	std::cout << "Real name set: " << client.getRealName() << std::endl;
+	std::cout << "Host set: " << client.getHostName() << std::endl;
+	std::cout << "Nick set: " << client.getNick() << std::endl;
+	std::cout << "Server set: " << getServerName() << std::endl;
+	std::cout << "We got all the info!" << std::endl;	
 }
 
 void Server::sendClientErr(int num, Client& client, Channel* channel, std::vector<std::string> otherArgs)
@@ -257,17 +309,30 @@ void Server::sendClientErr(int num, Client& client, Channel* channel, std::vecto
 		break;
 	}
 
-	case 461:
+	case ERR_NEEDMOREPARAMS:
 	{
 		if (otherArgs.size() == 1) 
 		{ 
 			arg = otherArgs[0];
-			// msg = ERR_NEEDMOREPARAMS(server, nick, arg);
 			msg = makeNumericReply(server, num, nick, {arg}, "Not enough parameters");
 		};
 		break;	
 	}
 	
+	case ERR_INPUTTOOLONG:
+		msg = makeNumericReply(server, num, nick, {}, "Input line was too long");
+		break;	
+
+	case ERR_UNKNOWNCOMMAND:
+	{
+		if (otherArgs.size() == 1) 
+		{ 
+			arg = otherArgs[0];
+			msg = makeNumericReply(server, num, nick, {arg}, "Unknown command");
+		};
+		break;	
+	}
+
 	//RPL	
 	case RPL_NOTOPIC:
 		msg = makeNumericReply(server, num, nick, {chanName}, "No topic is set");
