@@ -15,8 +15,6 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client,
 {
 	if (tokens.size() < 2)
 	{
-		// std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "INVITE");
-		// client.getServer().sendMsg(client, msg);
 		client.getServer().sendClientErr(461, client, chann, {"INVITE"});
 		return false;
 	}
