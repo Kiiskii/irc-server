@@ -40,7 +40,6 @@ class Server
 	std::vector<Channel*>	_channelInfo;
 	int						_port = -1;
 	struct sockaddr_in		_details;
-	struct epoll_event		_event;
 	struct epoll_event		_events[MAX_EVENTS];
 
 public:

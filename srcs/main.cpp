@@ -3,7 +3,7 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
-extern bool activeserver = true;
+bool activeserver = true;
 
 void signalHandler(int sig)
 {
