@@ -245,7 +245,10 @@ void Server::removeChannel(Channel* chann)
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end();) {
 		if ((*it) == chann)
+		{
+			delete *it;
 			it = _channelInfo.erase(it);
+		}
 		else
 			++it;
 	}

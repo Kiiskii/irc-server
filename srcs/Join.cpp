@@ -158,7 +158,8 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 		// client leave all channels they are currently connected to
 		if (channelName == "0")
 		{
-			for (auto chan : client.getJoinedChannels())
+			std::vector<Channel*> joined = client.getJoinedChannels();
+			for (auto chan : joined)
 			{
 				std::vector<std::string> v{chan->getChannelName()};
 				partChannel(client, v);
