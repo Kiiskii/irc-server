@@ -7,7 +7,6 @@ SRCS_DIR = srcs/
 HDRS = -I$(HDRS_DIR)
 
 NAME = ircserv
-# SRCS = $(wildcard $(SRCS_DIR)*.cpp)
 
 SRCS = $(SRCS_DIR)main.cpp \
 		$(SRCS_DIR)Server.cpp \

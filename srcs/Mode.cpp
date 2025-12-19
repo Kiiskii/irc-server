@@ -114,7 +114,7 @@ bool Channel::validateModeInstruction(Client& client, std::vector<ModeInfo> pars
 		{
 			try
 			{
-				int limit = std::stoi(m.params);
+				std::stoi(m.params);
 			}
 			catch(const std::exception& e)
 			{

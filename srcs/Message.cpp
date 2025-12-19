@@ -45,7 +45,7 @@ void Server::broadcastUsersMsg(std::string& msg, Client& client, bool sender)
 	{
 		for (Client* user : channel->getUserList())
 		{
-			if (auto it = find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end())
+			if (find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end())
 			{
 				uniqueClients.push_back(user->getClientFd());
 				if (sender == true || (sender == false && client.getClientFd() != user->getClientFd()))
