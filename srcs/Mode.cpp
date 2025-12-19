@@ -31,7 +31,7 @@ static bool modeNeedParams(char mode, bool addMode)
 	}
 }
 
-bool Channel::parsingMode(Client& client, std::vector<std::string> tokens, std::vector<ModeInfo>& parsedModeVec)
+bool Channel::parsingMode(std::vector<std::string> tokens, std::vector<ModeInfo>& parsedModeVec)
 {
 	std::string modeStr;
 	bool		addMode = true;
@@ -251,7 +251,7 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	}
 
 	std::vector<ModeInfo> parsedModeVec;
-	if (!channelPtr->parsingMode(client, tokens, parsedModeVec))
+	if (!channelPtr->parsingMode(tokens, parsedModeVec))
 		return ;
 
 	if (!channelPtr->validateModeInstruction(client, parsedModeVec))

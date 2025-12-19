@@ -96,7 +96,7 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	{
 		try
 		{
-			int limit = std::stoi(clientLimit);
+			size_t limit = std::stoi(clientLimit);
 			if (this->_userList.size() >= limit && !this->hasInvitedClient(&client))
 			{
 				server.sendClientErr(ERR_CHANNELISFULL, client, this, {});

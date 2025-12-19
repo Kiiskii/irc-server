@@ -53,7 +53,7 @@ public:
 	std::vector<Client*>& 	getClientInfo();
 	std::vector<Channel*>& 	getChannelInfo();
 
-	void		setupServerDetails(Server &server, int argc, char *argv[]);
+	void		setupServerDetails(char *argv[]);
 	void		setupSocket();
 	void		setupEpoll();
 	void		handleEvents();

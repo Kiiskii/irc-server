@@ -1,5 +1,5 @@
 CXX = c++
-FLAGS = -std=c++20
+FLAGS = -std=c++20 -Wall -Wextra -Werror
 
 OBJS_DIR = obj
 HDRS_DIR = inc/
@@ -7,7 +7,6 @@ SRCS_DIR = srcs/
 HDRS = -I$(HDRS_DIR)
 
 NAME = ircserv
-# SRCS = $(wildcard $(SRCS_DIR)*.cpp)
 
 SRCS = $(SRCS_DIR)main.cpp \
 		$(SRCS_DIR)Server.cpp \
