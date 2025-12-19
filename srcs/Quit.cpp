@@ -18,10 +18,6 @@ void Server::handleQuit(Client& client, std::vector<std::string>& tokens)
 	else
 		quitMsg = "Quit: " + quitMsg;
 	client.setQuitMsg(quitMsg);
-	// std::string serverMsg = client.makeUser() + " QUIT :" 
-	// 	+ (quitMsg.empty() ? ("Quit: Client Quit") : "Quit: " + quitMsg) + "\r\n";
-
-	// this->broadcastUsersMsg(serverMsg, client, false);
 	client.setClientState(DISCONNECTING);
 	
 	return;

@@ -212,13 +212,6 @@ void Server::logMessages(std::string msg, int fd)
 
 void Server::logMessages(std::string command, std::vector<std::string> msg, int fd)
 {
-	/*
-	if (fd == 2)
-		std::cout << C_R << "SERV >> ";
-	else if (fd <= 4)
-		std::cout << C_G << "SERV >> ";
-	else
-	*/
 	std::cout << C_B << "SERV << " << "fd " << fd << " | ";
 	std::cout << command << " -> ";
 	for (auto it : msg)
@@ -260,7 +253,10 @@ void Server::removeChannel(Channel* chann)
 {
 	for (auto it = _channelInfo.begin(); it != _channelInfo.end();) {
 		if ((*it) == chann)
+		{
+			delete *it;
 			it = _channelInfo.erase(it);
+		}
 		else
 			++it;
 	}

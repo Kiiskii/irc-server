@@ -30,8 +30,7 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 {
 	if (tokens.empty())
 	{
-		// std::string msg = ERR_NEEDMOREPARAMS(client.getServer().getServerName(), client.getNick(), "JOIN");
-		// client.getServer().sendMsg(client, msg);
+		
 		client.getServer().sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"JOIN"});
 		return false;
 	}
@@ -60,7 +59,10 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 		if (client.isValidChanName(channelList[i]))
 		{
 			channelList[i].erase(0, 1); // remove the hash
-			channelKeyMap.insert({channelList[i], keyList[i]});
+			if (i < keyList.size())
+				channelKeyMap.insert({channelList[i], keyList[i]});
+			else
+				channelKeyMap.insert({channelList[i], ""}); //fix here
 		}
 		else
 			continue;
@@ -156,7 +158,8 @@ void Server::handleJoin(Client& client, std::vector<std::string> tokens)
 		// client leave all channels they are currently connected to
 		if (channelName == "0")
 		{
-			for (auto chan : client.getJoinedChannels())
+			std::vector<Channel*> joined = client.getJoinedChannels();
+			for (auto chan : joined)
 			{
 				std::vector<std::string> v{chan->getChannelName()};
 				partChannel(client, v);

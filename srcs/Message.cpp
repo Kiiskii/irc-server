@@ -130,7 +130,7 @@ void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::
 {
 	//check if a reason for kicking exists
 	std::string reason;
-	if (params[2].length() > 1) {
+	if (params.size() > 2 && params[2].length() > 1) {
 		for (int i = 2; i < params.size(); ++i) {
 			reason += params[i];
 			if (i + 1 != params.size())

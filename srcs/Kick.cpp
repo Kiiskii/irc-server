@@ -10,8 +10,6 @@ void Server::kickClient(Client& client, std::vector<std::string>& params)
 
 	// check that there is correct amount of params
 	if (params.size() < 2) {
-		// error = ERR_NEEDMOREPARAMS(getServerName(), client.getNick(), "KICK");
-		// sendMsg(client, error);
 		sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"KICK"});
 		return ;
 	}

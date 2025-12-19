@@ -140,9 +140,5 @@ void Server::handleCommand(Server &server, Client &client, std::string command, 
 	else if (command == "QUIT")
 		server.handleQuit(client, tokens);
 	else
-	{
-		// std::string message = ERR_UNKNOWNCOMMAND(getServerName(), getTarget(client), command);
-		// sendMsg(client, message);
 		sendClientErr(ERR_UNKNOWNCOMMAND, client, nullptr, {command});
-	}
 }
