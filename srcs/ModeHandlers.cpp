@@ -63,34 +63,8 @@ channelMsg	Channel::handleChannelLimit(bool add, std::string& args)
 	std::string	key;
 	bool		active = this->isModeActive(L_MODE, key);
 	
-	// if (m.mode == L_MODE && m.add)
-	// 	{
-	// 		int limit;
-	// 		try
-	// 		{
-	// 			limit = std::stoi(m.params);
-	// 		}
-	// 		catch(const std::exception& e)
-	// 		{
-	// 			return false;
-	// 		}
-	// 		if (limit <= 0)
-	// 			return false;
-	// 	}
-
 	if (add)
 	{
-		int limit;
-		try
-		{
-			limit = std::stoi(args);
-		}
-		catch(const std::exception& e)
-		{
-			return NO_ACTION;
-		}
-		if (limit <= 0)
-			return NO_ACTION;
 		this->removeMode(L_MODE);
 		this->addMode(L_MODE, args);
 		return SET_MODE_OK;

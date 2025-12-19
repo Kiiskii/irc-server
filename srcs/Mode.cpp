@@ -201,9 +201,20 @@ void Channel::executeModeCmd(Client& client, std::vector<ModeInfo>& parsedModeVe
 {
 	channelMsg	msgEnum;
 	std::string	executedMode, executedArgs;
+	Server& server = client.getServer();
 
 	for (auto& m : parsedModeVec)
 	{
+		// if (modeNeedParams(m.mode, m.add) && m.params.empty())
+		// {
+		// 	if (m.mode == K_MODE && !m.add)
+		// 		continue;
+		// 	std::string cmd = "MODE ";
+		// 	cmd += m.add ? "+" : "-";
+		// 	cmd += m.mode;
+		// 	server.sendClientErr(ERR_NEEDMOREPARAMS, client, this, {cmd});
+		// 	break; //let check
+		// }
 		if (m.mode == O_MODE)
 		{
 			Client* user = client.getServer().findClient(m.params);
@@ -218,6 +229,20 @@ void Channel::executeModeCmd(Client& client, std::vector<ModeInfo>& parsedModeVe
 				client.getServer().sendClientErr(ERR_USERNOTINCHANNEL, client, this, {m.params});
 				continue;
 			}
+		}
+		if (m.mode == L_MODE && m.add)
+		{
+			int limit;
+			try
+			{
+				limit = std::stoi(m.params);
+			}
+			catch(const std::exception& e)
+			{
+				continue;;
+			}
+			if (limit <= 0)
+				continue;;
 		}
 		msgEnum = (this->*(_modeHandlers[m.mode]))(m.add, m.params);
 		if (msgEnum == SET_MODE_OK)
