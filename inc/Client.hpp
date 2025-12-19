@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include <regex> //std::istringstream
+#include <regex>
 #include <functional>
 
 #include "utils.hpp"
@@ -34,11 +34,9 @@ class Client
 		enum ClientState		_clientState = NONE;
 		class Server			&_myServer;	
 		std::string				_quitMsg;
+		std::string				_input;
 
 	public:
-		std::string				_input; // this needs to be private
-//		int auth_step = 0;
-		std::string 			recvBuffer;
 		Client() = delete;
 		Client(Server &server);
 		~Client() = default;
@@ -53,6 +51,7 @@ class Client
 		enum ClientState		getClientState();
 		Server&					getServer();
 		std::string				getQuitMsg();
+		std::string&			getInput();
 
 		// setters
 		void		setClientFd(int num);
@@ -69,5 +68,6 @@ class Client
 		std::string makeUser();
 		bool		isValidChanName(std::string name);
 		void		removeChannel(Channel* chann);
-	
+		void		appendToInput(char* buffer, size_t size);
+		void		eraseFromInput(size_t pos);
 };

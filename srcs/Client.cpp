@@ -76,6 +76,21 @@ void Client::setClientState(enum ClientState state)
 	_clientState = state;
 }
 
+void Client::appendToInput(char* buffer, size_t size)
+{
+	_input.append(buffer, size);
+}
+
+void Client::eraseFromInput(size_t pos)
+{
+	_input.erase(0, pos + 2);
+}
+
+std::string& Client::getInput()
+{
+	return _input;
+}
+
 void Client::addJoinedChannel(Channel* chan)
 {
 	if (std::find(_joinedChannels.begin(), _joinedChannels.end(), chan) != _joinedChannels.end())

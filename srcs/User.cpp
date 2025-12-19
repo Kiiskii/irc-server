@@ -2,10 +2,6 @@
 #include "Client.hpp"
 #include "utils.hpp"
 
-/*
-- Max length for user name? But where do we get user info
-- Right now we are removing the :, does it need to be so?
-*/
 void Server::user(Client &client, std::vector<std::string> tokens)
 {
 	if (client.getClientState() == REGISTERED)

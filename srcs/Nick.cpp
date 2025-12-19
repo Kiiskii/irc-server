@@ -19,9 +19,9 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		sendMsg(client, message);
 		return ;
 	}
-	if (tokens[0] == client.getNick()) //we should not inform that nickname is alrdy in use if you are trying to change your nick to nick you currently have
+	if (tokens[0] == client.getNick())
 		return ;
-	for (size_t i = 0; i < getClientInfo().size(); i++) //if my nickname is already X and I try to change my nick to X again, I should not get a warning in that case
+	for (size_t i = 0; i < getClientInfo().size(); i++)
 	{
 		if (utils::compareCasemappingStr(getClientInfo()[i]->getNick(), tokens[0]) == true)
 		{
@@ -41,18 +41,3 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 		attemptRegister(client);
 	}
 }
-
-//do we want to use unordered map...
-	// 	if (client.getClientState() == REGISTERED)
-	// {
-	// 	std::unordered_map<int, Client*> uniqueClients;
-	// 	std::string message = NEW_NICK(oldnick, client.getUserName(), client.getHostName(), client.getNick());	
-	// 	for (Channel* channel : client.getJoinedChannels())
-	// 	{
-	// 		for (Client* user : channel->getUserList())
-	// 		{
-	// 			if (auto it = find(uniqueClients.begin(), uniqueClients.end(), user->getClientFd()) == uniqueClients.end());
-	// 				uniqueClients.insert({user->getClientFd(), user});
-	// 		}
-	// 	}
-	// }

@@ -52,7 +52,7 @@ void Server::disconnectClient(Client *client)
 
 	for (auto chan : client->getJoinedChannels())
 		chan->removeUser(client->getNick());
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL);
 	close(client->getClientFd());
 	getClientInfo().erase(it);
 	delete client;
@@ -69,44 +69,55 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 	_name.erase(0, _name.find_last_of("/") + 1);
 	try
 	{	_port = std::stoi(argv[1], &pos); }
-	catch (const std::exception&) //invalid argument ("abc") or out of range
+	catch (const std::exception&)
 	{
 		throw std::runtime_error(ERR_PORT);
 	}
 	std::string s = argv[1];
-	if (pos != s.length() || _port < 1024 || _port > 65535) //trailing invalid characters and if port out of range
+	if (pos != s.length() || _port < 1024 || _port > 65535)
 		throw std::runtime_error(ERR_PORT);
 	_pass = argv[2];
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
 
-/*SO_REUSEADDR, allows a socket to bind to an address/port that is still in use. It also
-allows multiple sockets to bind to the same port. So opt here is basically a toggle of whether
-the socket reusing option is enabled or disabled*/
+/* Creating the listening server socket (object representing one endpoint of a network connection)
+- AF_INET uses IPv4 addresses
+- htons converts the port number from host byte order into network byte order (ports could appear swapped or broken without)
+- SOCK_STREAM means TCP, connection-based, reliable communication, guarantees data arrives in order without loss or duplication
+(alternative would be UDP, Datagram Sockets which is connectionless, unreliable communication, faster but does not guarantee delivery or order)
+- INADDR_ANY accepts any IP that is attempting to connect
+- socket creates the socket object and returns a fd
+- setsockopt, allows a socket to bind to an address/port that is still in use. So this allows to close the server and immediately restart.
+- Bind binds these settings for the main listening socket
+- Listen changes the socket into passive mode*/
 void Server::setupSocket()
 {
 	_details.sin_family = AF_INET;
 	_details.sin_port = htons(_port);
 	_details.sin_addr.s_addr = INADDR_ANY;
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (_serverFd == -1) //happens when you hit ulimit -n or too many connections (open fds)
+	if (_serverFd == -1)
 		throw std::runtime_error(ERR_SOCKET);
 	int opt = 1;
 	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
-	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1) //fails when port already in use (try port under 1024?)
+	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1)
 		throw std::runtime_error(ERR_BIND);
-	if (listen(_serverFd, 1) == -1) //not so likely to fail
+	if (listen(_serverFd, 1) == -1)
 		throw std::runtime_error(ERR_LISTEN);
 }
 
+/* Setting an event tracker
+- epoll_create creates an epoll instance
+- EPOLLIN tells to notify when this FD is readable (new client in this scenario)*/
 void Server::setupEpoll()
 {
 	_epollFd = epoll_create1(0);
-	if (_epollFd == -1) //again, too many epoll fds open, system limits, mem, try ulimit -n
+	if (_epollFd == -1)
 		throw std::runtime_error(ERR_EPOLL);
-	_event.events = EPOLLIN;
-	_event.data.fd = _serverFd;
-	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &_event) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
+	struct epoll_event ev;
+	ev.events = EPOLLIN;
+	ev.data.fd = _serverFd;
+	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &ev) == -1)
 		throw std::runtime_error(ERR_EPOLLCTL);
 }
 
@@ -117,14 +128,15 @@ void Server::setupEpoll()
 - Now the struct contains the IPv4 address and inet_ntoa converts it into a string. (previously it was in binary)
 - Then we make the client socket non blocking, which means the program wont pause waiting for data from this socket.
 (means recv() wont pause the program waiting for data. If no data available, it will just return with EAGAIN)
-- Epoll is like event manager, it contains a list of sockets that we want to "track", if they communicate*/
+- Epoll is like event manager, it contains a list of sockets that we want to "track", so now here we are adding
+this socket to the list*/
 void Server::handleNewClient()
 {
 	Client *newClient = new Client(*this);
 	struct sockaddr_in clientAddress;
 	socklen_t addressLength = sizeof(clientAddress);
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
-	if (newClient->getClientFd() == -1) //clients disconnect too quickly, fd exhaustion, race condition, try to connect and instantly close with ctrl C
+	if (newClient->getClientFd() == -1)
 	{
 		delete newClient;
 		throw std::runtime_error(ERR_ACCEPT);
@@ -136,7 +148,7 @@ void Server::handleNewClient()
 	struct epoll_event ev;
 	ev.events = EPOLLIN;
 	ev.data.fd = newClient->getClientFd();
-	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
+	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1)
 		throw std::runtime_error(ERR_EPOLLCTL);
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }
@@ -155,6 +167,9 @@ void Server::handleDisconnects()
 	}
 }
 
+/*Event handling loop
+- epoll_wait waits for notifications from the sockets, then it fills the epollEvents with fds that have communicated something
+- if fd is the server fd, we know a new client connection is waiting, otherwise it is an existing client*/
 void Server::handleEvents()
 {
 	int eventCount = epoll_wait(getEpollfd(), getEpollEvents(), MAX_EVENTS, -1);

@@ -18,7 +18,6 @@
 #include "utils.hpp"
 #include "macro.hpp"
 
-//const char ip[]="127.0.0.1"; // for local host
 #define MAX_EVENTS 200
 
 #define C_G		"\033[0;32m\001"
@@ -40,7 +39,6 @@ class Server
 	std::vector<Channel*>	_channelInfo;
 	int						_port = -1;
 	struct sockaddr_in		_details;
-	struct epoll_event		_event;
 	struct epoll_event		_events[MAX_EVENTS];
 
 public:
@@ -63,7 +61,7 @@ public:
 	void		handleCommand(Server &server, Client &client, 
 					std::string command, std::vector<std::string> &tokens);
 	void		attemptRegister(Client &client);
-	void		handleDisconnects(); //can be combined with disconnect client?
+	void		handleDisconnects();
 	void		disconnectClient(Client *client);
 	void		removeChannel(Channel* chann);
 
@@ -72,7 +70,6 @@ public:
 	void		logMessages(std::string command, std::vector<std::string> msg, int fd);
 	void		logMessages(std::string msg, int fd);
 
-/*Commands such as user, pass nick, might be best to create a separate place for commands*/
 	void		pass(Client &client, std::vector<std::string> tokens);
 	void 		nick(Client &client, std::vector<std::string> tokens);
 	void 		user(Client &client, std::vector<std::string> tokens);
@@ -83,7 +80,6 @@ public:
 	void 		handleInvite(Client& client, std::vector<std::string> tokens);
 	void 		handlePrivmsg(Client& client, std::vector<std::string> tokens);
 	void 		handleQuit(Client& client, std::vector<std::string>& tokens);
-	// void 		handleQuit(Client& client, std::vector<std::string> tokens);
 	void		kickClient(Client& client, std::vector<std::string>& params);
 	void		partChannel(Client& client, std::vector<std::string>& params);
 
