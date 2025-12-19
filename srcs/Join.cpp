@@ -94,18 +94,11 @@ channelMsg Channel::canClientJoinChannel( Client& client, std::string clientKey)
 	std::string	clientLimit;
 	if (this->isModeActive(L_MODE, clientLimit))
 	{
-		try
+		size_t limit = std::stoi(clientLimit);
+		if (this->_userList.size() >= limit && !this->hasInvitedClient(&client))
 		{
-			size_t limit = std::stoi(clientLimit);
-			if (this->_userList.size() >= limit && !this->hasInvitedClient(&client))
-			{
-				server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
-				return NO_MSG;
-			}
-		}
-		catch(const std::exception& )
-		{
-			std::cerr << "Invalid stored limit for channel: " << this->getChannelName() << ": [" << clientLimit << "]\n";
+			server.sendClientErr(ERR_CHANNELISFULL, client, this, {});
+			return NO_MSG;
 		}
 	}
 

@@ -112,14 +112,17 @@ bool Channel::validateModeInstruction(Client& client, std::vector<ModeInfo> pars
 		}
 		if (m.mode == L_MODE && m.add)
 		{
+			int limit;
 			try
 			{
-				int limit = std::stoi(m.params);
+				limit = std::stoi(m.params);
 			}
 			catch(const std::exception& e)
 			{
 				return false;
 			}
+			if (limit <= 0)
+				return false;
 		}
 	}
 	return true;
