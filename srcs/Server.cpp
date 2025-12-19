@@ -52,7 +52,7 @@ void Server::disconnectClient(Client *client)
 
 	for (auto chan : client->getJoinedChannels())
 		chan->removeUser(client->getNick());
-	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL); //this fails if fd is already closed, its alrady removed etc so no need to protect this
+	epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->getClientFd(), NULL);
 	close(client->getClientFd());
 	getClientInfo().erase(it);
 	delete client;
@@ -96,13 +96,13 @@ void Server::setupSocket()
 	_details.sin_port = htons(_port);
 	_details.sin_addr.s_addr = INADDR_ANY;
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (_serverFd == -1) //happens when you hit ulimit -n or too many connections (open fds)
+	if (_serverFd == -1)
 		throw std::runtime_error(ERR_SOCKET);
 	int opt = 1;
 	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
-	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1) //fails when port already in use (try port under 1024?)
+	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1)
 		throw std::runtime_error(ERR_BIND);
-	if (listen(_serverFd, 1) == -1) //not so likely to fail
+	if (listen(_serverFd, 1) == -1)
 		throw std::runtime_error(ERR_LISTEN);
 }
 
@@ -112,12 +112,12 @@ void Server::setupSocket()
 void Server::setupEpoll()
 {
 	_epollFd = epoll_create1(0);
-	if (_epollFd == -1) //again, too many epoll fds open, system limits, mem, try ulimit -n
+	if (_epollFd == -1)
 		throw std::runtime_error(ERR_EPOLL);
 	struct epoll_event ev;
 	ev.events = EPOLLIN;
 	ev.data.fd = _serverFd;
-	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &ev) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
+	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverFd, &ev) == -1)
 		throw std::runtime_error(ERR_EPOLLCTL);
 }
 
@@ -136,7 +136,7 @@ void Server::handleNewClient()
 	struct sockaddr_in clientAddress;
 	socklen_t addressLength = sizeof(clientAddress);
 	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
-	if (newClient->getClientFd() == -1) //clients disconnect too quickly, fd exhaustion, race condition, try to connect and instantly close with ctrl C
+	if (newClient->getClientFd() == -1)
 	{
 		delete newClient;
 		throw std::runtime_error(ERR_ACCEPT);
@@ -148,7 +148,7 @@ void Server::handleNewClient()
 	struct epoll_event ev;
 	ev.events = EPOLLIN;
 	ev.data.fd = newClient->getClientFd();
-	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1) // fd is invalid, adding fd twice, too many, mem, try to call this with invalid fd
+	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1)
 		throw std::runtime_error(ERR_EPOLLCTL);
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }

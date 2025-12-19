@@ -21,21 +21,12 @@ struct ModeInfo {
 	std::string params;
 };
 
-/*
-	@brief The channel is created implicitly when the first client joins it, 
-	and the channel ceases to  exist when the last client leaves it
-	Channels names are strings (beginning with a '#' character for regular channel)
-	IRC message has 3 parts: 512 characters including /r/n
-	- prefix(optional): :<prefix> <message>
-	- command
-	- command parameters(upt to 15)
-*/
 class Channel
 {
 private:
 	std::string					_channelName;
 	std::string					_topic;
-	std::unordered_set<Client*>	_ops; //set ensure unique, won't add duplicates
+	std::unordered_set<Client*>	_ops;
 	std::unordered_set<Client*>	_halfOps; 
 	std::unordered_set<Client*>	_voices;
 	std::unordered_set<Client*>	_invitedUser;

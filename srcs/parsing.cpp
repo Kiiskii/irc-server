@@ -62,7 +62,6 @@ void Server::parseMessage(Client &c, const std::string &line)
 	handleCommand(*this, c, command, msg);
 }
 
-//these should be under Server class
 void Server::receive(Client &c)
 {
 	// Recieve data from the client
@@ -86,25 +85,21 @@ void Server::receive(Client &c)
 		}
 		// Buffer recieved data
 		else {
-			c._input.append(buffer, bytes);
+			c.appendToInput(buffer, bytes);
 			// Check if message if complete
 			while (true) {
-				size_t newline = c._input.find("\r\n");
-				if (newline == c._input.npos)
+				size_t newline = c.getInput().find("\r\n");
+				if (newline == c.getInput().npos)
 					break ;
-				auto begin = c._input.begin();
-				auto end = c._input.begin() + newline;
+				auto begin = c.getInput().begin();
+				auto end = c.getInput().begin() + newline;
 				parseMessage(c, std::string(begin, end));
-				c._input.erase(0, newline + 2);
+				c.eraseFromInput(newline);
 			}
 		}
 	}
 }
 
-/*
-- When exactly do we return and when should we disconnect?
-- Right now you can give PASS, NICK and USER in any order but we may want to change it to PASS first, then NICK/USER in any order
-*/
 void Server::handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens)
 {
 	if (command == "CAP")
