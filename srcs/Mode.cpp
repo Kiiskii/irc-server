@@ -95,35 +95,35 @@ bool Channel::validateModeInstruction(Client& client, std::vector<ModeInfo> pars
 			server.sendClientErr(ERR_NEEDMOREPARAMS, client, this, {cmd});
 			return false;
 		}
-		if (m.mode == O_MODE)
-		{
-			Client* user = server.findClient(m.params);
-			if (!user)
-			{
-				server.sendClientErr(ERR_NOSUCHNICK, client, this, {m.params});
-				return false;
-			}
+		// if (m.mode == O_MODE)
+		// {
+		// 	Client* user = server.findClient(m.params);
+		// 	if (!user)
+		// 	{
+		// 		server.sendClientErr(ERR_NOSUCHNICK, client, this, {m.params});
+		// 		return false;
+		// 	}
 			
-			if (!this->isClientOnChannel(*user))
-			{
-				server.sendClientErr(ERR_USERNOTINCHANNEL, client, this, {m.params});
-				return false;
-			}
-		}
-		if (m.mode == L_MODE && m.add)
-		{
-			int limit;
-			try
-			{
-				limit = std::stoi(m.params);
-			}
-			catch(const std::exception& e)
-			{
-				return false;
-			}
-			if (limit <= 0)
-				return false;
-		}
+		// 	if (!this->isClientOnChannel(*user))
+		// 	{
+		// 		server.sendClientErr(ERR_USERNOTINCHANNEL, client, this, {m.params});
+		// 		return false;
+		// 	}
+		// }
+		// if (m.mode == L_MODE && m.add)
+		// {
+		// 	int limit;
+		// 	try
+		// 	{
+		// 		limit = std::stoi(m.params);
+		// 	}
+		// 	catch(const std::exception& e)
+		// 	{
+		// 		return false;
+		// 	}
+		// 	if (limit <= 0)
+		// 		return false;
+		// }
 	}
 	return true;
 }
@@ -201,9 +201,39 @@ void Channel::executeModeCmd(Client& client, std::vector<ModeInfo>& parsedModeVe
 {
 	channelMsg	msgEnum;
 	std::string	executedMode, executedArgs;
+	Server& server = client.getServer();
 
 	for (auto& m : parsedModeVec)
 	{
+		if (m.mode == O_MODE)
+		{
+			Client* user = server.findClient(m.params);
+			if (!user)
+			{
+				server.sendClientErr(ERR_NOSUCHNICK, client, this, {m.params});
+				break;
+			}
+			
+			if (!this->isClientOnChannel(*user))
+			{
+				server.sendClientErr(ERR_USERNOTINCHANNEL, client, this, {m.params});
+				break;
+			}
+		}
+		if (m.mode == L_MODE && m.add)
+		{
+			int limit;
+			try
+			{
+				limit = std::stoi(m.params);
+			}
+			catch(const std::exception& e)
+			{
+				break;
+			}
+			if (limit <= 0)
+				break;
+		}
 		msgEnum = (this->*(_modeHandlers[m.mode]))(m.add, m.params);
 		if (msgEnum == SET_MODE_OK)
 		{
