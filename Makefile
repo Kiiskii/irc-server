@@ -4,6 +4,7 @@ FLAGS = -std=c++20
 OBJS_DIR = obj
 HDRS_DIR = inc/
 SRCS_DIR = srcs/
+CMDS_DIR = srcs/cmds/
 HDRS = -I$(HDRS_DIR)
 
 NAME = ircserv
@@ -12,22 +13,22 @@ SRCS = $(SRCS_DIR)main.cpp \
 		$(SRCS_DIR)Server.cpp \
 		$(SRCS_DIR)Client.cpp \
 		$(SRCS_DIR)utils.cpp \
-		$(SRCS_DIR)Join.cpp \
-		$(SRCS_DIR)Topic.cpp \
-		$(SRCS_DIR)Mode.cpp \
-		$(SRCS_DIR)ModeHandlers.cpp \
+		$(CMDS_DIR)Join.cpp \
+		$(CMDS_DIR)Topic.cpp \
+		$(CMDS_DIR)Mode.cpp \
+		$(CMDS_DIR)ModeHandlers.cpp \
 		$(SRCS_DIR)Channel.cpp \
-		$(SRCS_DIR)Invite.cpp \
-		$(SRCS_DIR)Pass.cpp \
-		$(SRCS_DIR)Nick.cpp \
-		$(SRCS_DIR)User.cpp \
-		$(SRCS_DIR)Ping.cpp \
+		$(CMDS_DIR)Invite.cpp \
+		$(CMDS_DIR)Pass.cpp \
+		$(CMDS_DIR)Nick.cpp \
+		$(CMDS_DIR)User.cpp \
+		$(CMDS_DIR)Ping.cpp \
 		$(SRCS_DIR)Message.cpp \
 		$(SRCS_DIR)parsing.cpp \
-		$(SRCS_DIR)Privmsg.cpp \
-		$(SRCS_DIR)Kick.cpp \
-		$(SRCS_DIR)Part.cpp \
-		$(SRCS_DIR)Quit.cpp
+		$(CMDS_DIR)Privmsg.cpp \
+		$(CMDS_DIR)Kick.cpp \
+		$(CMDS_DIR)Part.cpp \
+		$(CMDS_DIR)Quit.cpp
 
 OBJS = $(patsubst srcs/%.cpp, $(OBJS_DIR)/%.o, $(SRCS))
 

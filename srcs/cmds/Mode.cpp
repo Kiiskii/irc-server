@@ -250,6 +250,7 @@ void Server::handleMode(Client& client, std::vector<std::string> tokens)
 	{
 		sendClientErr(RPL_CHANNELMODEIS, client, channelPtr, 
 			{channelPtr->getMode()[0], channelPtr->getMode()[1]});
+		sendClientErr(RPL_CREATIONTIME, client, channelPtr, {});
 		return ;
 	}
 
