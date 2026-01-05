@@ -199,26 +199,6 @@ void Server::attemptRegister(Client &client)
 	sendWelcomeMsg(client);
 }
 
-void Server::logMessages(std::string msg, int fd)
-{
-	if (fd == 2)
-		std::cout << C_R << "SERV >> ";
-	else if (fd <= 4)
-		std::cout << C_G << "SERV >> ";
-	else
-		std::cout << C_B << msg;
-	std::cout << msg << C_RST;
-}
-
-void Server::logMessages(std::string command, std::vector<std::string> msg, int fd)
-{
-	std::cout << C_B << "SERV << " << "fd " << fd << " | ";
-	std::cout << command << " -> ";
-	for (auto it : msg)
-		std:: cout << it << " ";
-	std::cout << C_RST << std::endl;
-}
-
 int Server::getEpollfd() const
 {
 	return _epollFd;
