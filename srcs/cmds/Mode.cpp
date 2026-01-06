@@ -95,35 +95,6 @@ bool Channel::validateModeInstruction(Client& client, std::vector<ModeInfo> pars
 			server.sendClientErr(ERR_NEEDMOREPARAMS, client, this, {cmd});
 			return false;
 		}
-		// if (m.mode == O_MODE)
-		// {
-		// 	Client* user = server.findClient(m.params);
-		// 	if (!user)
-		// 	{
-		// 		server.sendClientErr(ERR_NOSUCHNICK, client, this, {m.params});
-		// 		return false;
-		// 	}
-			
-		// 	if (!this->isClientOnChannel(*user))
-		// 	{
-		// 		server.sendClientErr(ERR_USERNOTINCHANNEL, client, this, {m.params});
-		// 		return false;
-		// 	}
-		// }
-		// if (m.mode == L_MODE && m.add)
-		// {
-		// 	int limit;
-		// 	try
-		// 	{
-		// 		limit = std::stoi(m.params);
-		// 	}
-		// 	catch(const std::exception& e)
-		// 	{
-		// 		return false;
-		// 	}
-		// 	if (limit <= 0)
-		// 		return false;
-		// }
 	}
 	return true;
 }
