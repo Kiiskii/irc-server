@@ -120,6 +120,7 @@ Channel* Server::createChannel(std::string chanName)
 	this->getChannelInfo().push_back(new Channel(chanName));
 	Channel* newChannel = this->getChannelInfo().back();
 	newChannel->setChannelCreationTimestamp();
+	newChannel->addMode(T_MODE, "");
 	return newChannel;
 }
 

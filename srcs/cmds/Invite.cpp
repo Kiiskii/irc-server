@@ -44,7 +44,7 @@ static bool isValidInvitation(std::vector<std::string>& tokens, Client& client,
 		client.getServer().sendClientErr(ERR_NOTONCHANNEL, client, chann, {});
 		return false;
 	}
-	if (chann->isModeActive(I_MODE) && !client.isOps(*chann))
+	if (!client.isOps(*chann))
 	{
 		client.getServer().sendClientErr(ERR_CHANOPRIVSNEEDED, client, chann, {});
 		return false;
