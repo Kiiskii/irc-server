@@ -45,6 +45,7 @@
 #define ERR_CHANOPRIVSNEEDED	482
 #define ERR_INVALIDKEY			525
 
+#define ERR_PASS "Password cannot contain whitespace characters"
 #define INPUT_FORMAT "Expected format: <./ircserv> <port number> <password>"
 #define ERR_PORT "Port number expected to be of numeric value between numbers 1024 and 65535"
 #define ERR_SOCKET "Failed to create a socket"

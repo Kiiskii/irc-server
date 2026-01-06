@@ -116,3 +116,14 @@ std::string utils::joinTokenVector(const std::vector<std::string>& tokens)
 	}
 	return str;
 }
+
+bool containsSpaces(std::string &str)
+{
+	int N = str.length();
+	for (int i = 0; i < N; i++)
+	{
+		if (isspace(str[i]) != 0)
+			return true;
+	}
+	return false;
+}

@@ -77,6 +77,8 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 	if (pos != s.length() || _port < 1024 || _port > 65535)
 		throw std::runtime_error(ERR_PORT);
 	_pass = argv[2];
+	if ((containsSpaces(_pass) == true))
+		throw std::runtime_error(ERR_PASS);
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
 
@@ -135,7 +137,7 @@ void Server::handleNewClient()
 	Client *newClient = new Client(*this);
 	struct sockaddr_in clientAddress;
 	socklen_t addressLength = sizeof(clientAddress);
-	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
+	newClient->setClientFd(accept(_serverFd, (struct sockaddr *)&clientAddress, &addressLength));
 	if (newClient->getClientFd() == -1)
 	{
 		delete newClient;
@@ -197,26 +199,6 @@ void Server::attemptRegister(Client &client)
 		return;
 	client.setClientState(REGISTERED);
 	sendWelcomeMsg(client);
-}
-
-void Server::logMessages(std::string msg, int fd)
-{
-	if (fd == 2)
-		std::cout << C_R << "SERV >> ";
-	else if (fd <= 4)
-		std::cout << C_G << "SERV >> ";
-	else
-		std::cout << C_B << msg;
-	std::cout << msg << C_RST;
-}
-
-void Server::logMessages(std::string command, std::vector<std::string> msg, int fd)
-{
-	std::cout << C_B << "SERV << " << "fd " << fd << " | ";
-	std::cout << command << " -> ";
-	for (auto it : msg)
-		std:: cout << it << " ";
-	std::cout << C_RST << std::endl;
 }
 
 int Server::getEpollfd() const

@@ -12,8 +12,6 @@ void Server::parseMessage(Client &c, const std::string &line)
 	const size_t n = line.size();
 	if (n > MSG_SIZE)
 	{
-		// std::string message = ERR_INPUTTOOLONG(getServerName(), getTarget(c));
-		// sendMsg(c, message);
 		sendClientErr(ERR_INPUTTOOLONG, c, nullptr, {});
 		return ;
 	}
@@ -102,12 +100,6 @@ void Server::receive(Client &c)
 
 void Server::handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens)
 {
-	if (command == "CAP")
-	{
-		std::string reply = ":" + server._name + " CAP * LS :multi-prefix\r\n";
-		send(client.getClientFd(), reply.c_str(), reply.size(), 0);
-		return ;
-	}
 	if (command == "PASS")
 		pass(client, tokens);
 	else if (command == "NICK")
