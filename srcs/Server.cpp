@@ -137,7 +137,7 @@ void Server::handleNewClient()
 	Client *newClient = new Client(*this);
 	struct sockaddr_in clientAddress;
 	socklen_t addressLength = sizeof(clientAddress);
-	newClient->setClientFd(accept4(_serverFd, (struct sockaddr *)&clientAddress, &addressLength, O_NONBLOCK));
+	newClient->setClientFd(accept(_serverFd, (struct sockaddr *)&clientAddress, &addressLength));
 	if (newClient->getClientFd() == -1)
 	{
 		delete newClient;

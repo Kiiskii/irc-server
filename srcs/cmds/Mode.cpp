@@ -219,7 +219,6 @@ void Channel::executeModeCmd(Client& client, std::vector<ModeInfo>& parsedModeVe
 }
 
 /** @brief mode applied: itkol => only handle mode for channel, not for user.
- * if want timestamp: sendClientErr(RPL_CREATIONTIME, client, channelPtr, {});
 */
 void Server::handleMode(Client& client, std::vector<std::string> tokens)
 {
