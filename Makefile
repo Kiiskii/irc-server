@@ -1,5 +1,5 @@
 CXX = c++
-FLAGS = -std=c++20
+FLAGS = -std=c++20 -Wall -Wextra -Werror
 
 OBJS_DIR = obj
 HDRS_DIR = inc/
@@ -23,7 +23,7 @@ SRCS = $(SRCS_DIR)main.cpp \
 		$(CMDS_DIR)Nick.cpp \
 		$(CMDS_DIR)User.cpp \
 		$(CMDS_DIR)Ping.cpp \
-		$(SRCS_DIR)Message.cpp \
+		$(SRCS_DIR)message.cpp \
 		$(SRCS_DIR)parsing.cpp \
 		$(CMDS_DIR)Privmsg.cpp \
 		$(CMDS_DIR)Kick.cpp \

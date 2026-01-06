@@ -6,7 +6,6 @@
 /* @note rememeber to check all on-heap allocated memory, such as chan, client */
 Server::~Server()
 {
-	std::cout << "We have received a signal or the server simply failed to start!" << std::endl;
 	for (auto client = _clientInfo.begin(); client != _clientInfo.end();) 
 	{
 		Client *ptr = *client;

@@ -207,13 +207,11 @@ void Server::sendWelcomeMsg(Client& client)
 	":" + getServerName() + " 376 " + client.getNick() + " :End of /MOTD command.\r\n";
 	sendMsg(client, message);
 
-	//THESE ARE DEBUG AND CAN BE REMOVED
 	std::cout << "User set: " << client.getUserName() << std::endl;
 	std::cout << "Real name set: " << client.getRealName() << std::endl;
 	std::cout << "Host set: " << client.getHostName() << std::endl;
 	std::cout << "Nick set: " << client.getNick() << std::endl;
 	std::cout << "Server set: " << getServerName() << std::endl;
-	std::cout << "We got all the info!" << std::endl;	
 }
 
 void Server::sendClientErr(int num, Client& client, Channel* channel, std::vector<std::string> otherArgs)

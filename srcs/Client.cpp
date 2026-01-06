@@ -3,10 +3,7 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
-Client::Client(Server &server) : _myServer(server)
-{
-
-}
+Client::Client(Server &server) : _myServer(server) {}
 
 int	Client::getClientFd()
 {
