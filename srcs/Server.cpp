@@ -77,6 +77,8 @@ void Server::setupServerDetails(Server &server, int argc, char *argv[])
 	if (pos != s.length() || _port < 1024 || _port > 65535)
 		throw std::runtime_error(ERR_PORT);
 	_pass = argv[2];
+	if ((containsSpaces(_pass) == true))
+		throw std::runtime_error(ERR_PASS);
 	std::cout << "Server's port is: " << _port << " and password is : " << _pass << std::endl;
 }
 
