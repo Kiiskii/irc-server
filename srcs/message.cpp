@@ -150,7 +150,7 @@ void Server::sendKickMsg(std::string oper, std::string client, std::vector<std::
 	//check if a reason for kicking exists
 	std::string reason;
 	if (params.size() > 2 && params[2].length() > 1) {
-		for (int i = 2; i < params.size(); ++i) {
+		for (size_t i = 2; i < params.size(); ++i) {
 			reason += params[i];
 			if (i + 1 != params.size())
 				reason += " ";
@@ -186,7 +186,7 @@ void Server::sendWelcomeMsg(Client& client)
 		"CASEMAPPING=" + std::string(CASEMAPPING)
 	};
 	std::string infoPack;
-	for (int i = 0; i < info.size(); i++)
+	for (size_t i = 0; i < info.size(); i++)
 		infoPack = infoPack + info[i] + " ";
 	message = RPL_ISUPPORT(_name, client.getNick(), infoPack);
 	sendMsg(client, message);

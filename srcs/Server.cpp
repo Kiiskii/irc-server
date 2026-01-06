@@ -60,7 +60,7 @@ void Server::disconnectClient(Client *client)
 /*Port is a 16-bit unsigned int, meaning valid range is 0-65535.
 However, ports under 1024 are privileged and require root privileges. In our program,
 we would get an error of failing to bind a server socket.*/
-void Server::setupServerDetails(Server &server, int argc, char *argv[])
+void Server::setupServerDetails(char *argv[])
 {
 	size_t pos;
 
