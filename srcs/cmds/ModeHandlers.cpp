@@ -142,7 +142,7 @@ channelMsg	Channel::handleChannelKey(bool add, std::string& args)
 	else if (!add && active)
 	{
 		this->removeMode(K_MODE);
-		return SET_MODE_OK; //recheck, send an empty key or nothing
+		return SET_MODE_OK;
 	}
 	return NO_ACTION;
 }

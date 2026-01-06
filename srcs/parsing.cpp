@@ -30,7 +30,6 @@ void Server::parseMessage(Client &c, const std::string &line)
 
 	command = line.substr(cmdStart, i - cmdStart);
 
-	// do we want to normalize to uppercase here?
 	for (char &c : command)
 		c = std::toupper(static_cast<unsigned char>(c));
 
@@ -72,7 +71,7 @@ void Server::receive(Client &c)
 		if (bytes < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break ;
-			std::cout << "Failed to recieve from client: " << c.getClientFd() << std::endl;
+			std::cout << "Failed to receive from client: " << c.getClientFd() << std::endl;
 			c.setClientState(DISCONNECTING);
 			break ;
 		}

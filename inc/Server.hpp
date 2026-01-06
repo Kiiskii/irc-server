@@ -30,7 +30,7 @@ class Channel;
 
 class Server
 {
-	private:
+private:
 	int						_epollFd = -1;
 	int						_serverFd = -1;
 	std::string				_pass = "";
