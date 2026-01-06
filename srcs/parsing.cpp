@@ -12,8 +12,6 @@ void Server::parseMessage(Client &c, const std::string &line)
 	const size_t n = line.size();
 	if (n > MSG_SIZE)
 	{
-		// std::string message = ERR_INPUTTOOLONG(getServerName(), getTarget(c));
-		// sendMsg(c, message);
 		sendClientErr(ERR_INPUTTOOLONG, c, nullptr, {});
 		return ;
 	}

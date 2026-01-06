@@ -10,6 +10,8 @@ static bool hasForbiddenChar(std::string& msg)
 {
 	for (unsigned char c : msg)
 	{
+		if (c == 0x01)
+			continue ;
 		if (c <= '\x1F' || c == '\x7F')
 			return true;
 	}
@@ -54,12 +56,12 @@ static bool isValidPrivmsg(Client& client, std::vector<std::string>& tokens)
 
 std::string utils::makePrivMsgToChan(std::string& token, Client& client, Channel& chan)
 {
-	return client.makeUser() + " PRIVMSG #" +  chan.getChannelName() + " " + token + " \r\n";
+	return client.makeUser() + " PRIVMSG #" +  chan.getChannelName() + " " + token + "\r\n";
 }
 
 std::string utils::makePrivMsgToClient(std::string& token, Client& client,Client& partner)
 {
-	return client.makeUser() + " PRIVMSG " + partner.getNick() + " " + token + " \r\n";;
+	return client.makeUser() + " PRIVMSG " + partner.getNick() + " " + token + "\r\n";;
 }
 
 void Server::handlePrivmsg(Client& client, std::vector<std::string> tokens)
