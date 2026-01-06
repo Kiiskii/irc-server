@@ -89,7 +89,7 @@ public:
 	channelMsg		handleChannelOperator(bool add, std::string& args);
 	channelMsg		handleChannelLimit(bool add, std::string& args);
 	std::string		truncateTopic(std::string name);
-	bool			parsingMode(Client& client, std::vector<std::string> tokens,
+	bool			parsingMode(std::vector<std::string> tokens,
 						std::vector<ModeInfo>& parsedModeVec);
 	bool			validateModeInstruction(Client& client, 
 						std::vector<ModeInfo> parsedModeVec);
