@@ -7,6 +7,7 @@ bool activeserver = true;
 
 void signalHandler(int sig)
 {
+	(void)sig;
 	activeserver = false;
 }
 
@@ -17,7 +18,7 @@ int main(int argc, char *argv[])
 	{
 		if (argc != 3)
 			throw std::runtime_error(INPUT_FORMAT);
-		server.setupServerDetails(server, argc, argv);
+		server.setupServerDetails(argv);
 		server.setupSocket();
 		server.setupEpoll();
 		signal(SIGINT, signalHandler);

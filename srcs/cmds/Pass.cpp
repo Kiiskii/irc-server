@@ -3,10 +3,6 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
-/*
-- Double check the issue with possible hanging client
-*/
-
 void Server::pass(Client &client, std::vector<std::string> tokens)
 {
 	if (client.getClientState() == REGISTERED)

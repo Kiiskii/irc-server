@@ -62,7 +62,7 @@ bool Server::mappingChannelKey(std::vector<std::string> tokens, Client& client, 
 			if (i < keyList.size())
 				channelKeyMap.insert({channelList[i], keyList[i]});
 			else
-				channelKeyMap.insert({channelList[i], ""}); //fix here
+				channelKeyMap.insert({channelList[i], ""});
 		}
 		else
 			continue;
