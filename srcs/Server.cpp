@@ -147,7 +147,7 @@ void Server::handleNewClient()
 	_clientInfo.push_back(newClient);
 	fcntl(newClient->getClientFd(), F_SETFL, O_NONBLOCK);
 	struct epoll_event ev;
-	ev.events = EPOLLIN;
+	ev.events = EPOLLIN | EPOLLOUT;
 	ev.data.fd = newClient->getClientFd();
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1)
 		throw std::runtime_error(ERR_EPOLLCTL);
@@ -180,12 +180,13 @@ void Server::handleEvents()
 		if (fd == getServerfd())
 		{
 			handleNewClient();
+			continue;
 		}
-		else
-		{
-			Client *c = findClientByFd(fd);
+		Client *c = findClientByFd(fd);
+		if (getEpollEvents()[i].events & EPOLLIN)
 			receive(*c);
-		}
+		if (getEpollEvents()[i].events & EPOLLOUT)
+			reply(*c);
 	}
 	handleDisconnects();
 }

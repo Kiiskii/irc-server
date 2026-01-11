@@ -88,6 +88,20 @@ std::string& Client::getInput()
 	return _input;
 }
 
+void Client::appendToOutput(std::string &message)
+{
+	_output = _output + message; 
+}
+void Client::clearOutput()
+{
+	_output.clear();
+}
+
+std::string& Client::getOutput()
+{
+	return _output;
+}
+
 void Client::addJoinedChannel(Channel* chan)
 {
 	if (std::find(_joinedChannels.begin(), _joinedChannels.end(), chan) != _joinedChannels.end())
