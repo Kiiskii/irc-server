@@ -66,6 +66,7 @@ public:
 	void		removeChannel(Channel* chann);
 
 	void 		receive(Client &c);
+	void 		reply(Client &c);
 	void 		parseMessage(Client &c, const std::string &line);
 	void		logMessages(std::string command, std::vector<std::string> msg, int fd);
 	void		logMessages(std::string msg, int fd);

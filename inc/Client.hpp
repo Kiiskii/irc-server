@@ -35,6 +35,7 @@ class Client
 		class Server			&_myServer;	
 		std::string				_quitMsg;
 		std::string				_input;
+		std::string				_output;
 
 	public:
 		Client() = delete;
@@ -52,6 +53,7 @@ class Client
 		Server&					getServer();
 		std::string				getQuitMsg();
 		std::string&			getInput();
+		std::string&			getOutput();
 
 		// setters
 		void		setClientFd(int num);
@@ -70,4 +72,6 @@ class Client
 		void		removeChannel(Channel* chann);
 		void		appendToInput(char* buffer, size_t size);
 		void		eraseFromInput(size_t pos);
+		void		appendToOutput(std::string &message);
+		void		clearOutput();
 };

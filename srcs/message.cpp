@@ -3,15 +3,23 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
+void	Server::reply(Client &c)
+{
+	if (c.getOutput().empty())
+		return ;
+	if (send(c.getClientFd(), c.getOutput().c_str(), c.getOutput().size(), 0) < 0)
+	{
+		std::cerr << "Error: failed to send" << std::endl;
+		return;
+	}
+	logMessages(c.getOutput(), getServerfd());
+	c.clearOutput();
+}
+
 /** @brief send message to the requesting member */
 void	Server::sendMsg(Client& client, std::string& msg)
 {
-	if (send(client.getClientFd(), msg.c_str(), msg.size(), 0) < 0)
-	{
-		std::cout << "joinmsg: failed to send\n";
-		return;
-	}
-	logMessages(msg, getServerfd());
+	client.appendToOutput(msg);
 }
 
 /**
