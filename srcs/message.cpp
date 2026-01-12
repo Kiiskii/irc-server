@@ -3,17 +3,13 @@
 #include "Channel.hpp"
 #include "utils.hpp"
 
-//I guess the correct way would be to update the EPOLLOUT only when we have output msg
-//so then epollwait wakes up only for those..
-//also cannot reproduce but is there a possibility that if we get partial receives,
-//can there happen partial sends..?
 void	Server::reply(Client &c)
 {
 	if (c.getOutput().empty())
 		return ;
 	if (send(c.getClientFd(), c.getOutput().c_str(), c.getOutput().size(), 0) < 0)
 	{
-		std::cout << "joinmsg: failed to send\n";
+		std::cerr << "Error: failed to send" << std::endl;
 		return;
 	}
 	logMessages(c.getOutput(), getServerfd());
@@ -23,13 +19,6 @@ void	Server::reply(Client &c)
 /** @brief send message to the requesting member */
 void	Server::sendMsg(Client& client, std::string& msg)
 {
-// this is the outdated version...
-//	if (send(client.getClientFd(), msg.c_str(), msg.size(), 0) < 0)
-//	{
-//		std::cout << "joinmsg: failed to send\n";
-//		return;
-//	}
-//	logMessages(msg, getServerfd());
 	client.appendToOutput(msg);
 }
 
