@@ -153,6 +153,8 @@ void Server::handleNewClient()
 	ev.data.fd = newClient->getClientFd();
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1)
 		throw std::runtime_error(ERR_EPOLLCTL);
+	if (_pass.empty())
+		newClient->setClientState(REGISTERING);
 	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
 }
 
