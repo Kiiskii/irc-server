@@ -99,6 +99,7 @@ void Server::setupSocket()
 	_serverFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverFd == -1)
 		throw std::runtime_error(ERR_SOCKET);
+	fcntl(_serverFd, F_SETFL, O_NONBLOCK);
 	int opt = 1;
 	setsockopt(_serverFd, SOL_SOCKET, SO_REUSEADDR, (char*)&opt, sizeof(opt));
 	if (bind(_serverFd, (struct sockaddr *)&_details, sizeof(_details)) == -1)
@@ -109,7 +110,8 @@ void Server::setupSocket()
 
 /* Setting an event tracker
 - epoll_create creates an epoll instance
-- EPOLLIN tells to notify when this FD is readable (new client in this scenario)*/
+- EPOLLIN tells to notify when this FD is readable (new client in this scenario)
+- We do not need to track EPOLLOUT because server socket never sends data*/
 void Server::setupEpoll()
 {
 	_epollFd = epoll_create1(0);
@@ -125,12 +127,12 @@ void Server::setupEpoll()
 /*Handling a new client
 - struct sockaddr_in clientAddrress holds the client's IP address and port.
 - Calling accept fills the struct with the info (previously this was marked as NULL but then we wouldn't have stored IP anywhere)
-- More importantly, accept4 accepts a new connection and returns a new socket fd.
+- More importantly, accept accepts a new connection and returns a new socket fd.
 - Now the struct contains the IPv4 address and inet_ntoa converts it into a string. (previously it was in binary)
 - Then we make the client socket non blocking, which means the program wont pause waiting for data from this socket.
-(means recv() wont pause the program waiting for data. If no data available, it will just return with EAGAIN)
 - Epoll is like event manager, it contains a list of sockets that we want to "track", so now here we are adding
-this socket to the list*/
+this socket to the list with the settings EPOLLIN because we want to know when a socket is is readable (when we have received something)
+and EPOLLOUT because we want to know when a socket is writeable (when we can reply back to the clients)*/
 void Server::handleNewClient()
 {
 	Client *newClient = new Client(*this);
