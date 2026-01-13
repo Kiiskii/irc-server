@@ -150,7 +150,7 @@ void Server::handleNewClient()
 	_clientInfo.push_back(newClient);
 	fcntl(newClient->getClientFd(), F_SETFL, O_NONBLOCK);
 	struct epoll_event ev;
-	ev.events = EPOLLIN | EPOLLOUT;
+	ev.events = EPOLLIN;
 	ev.data.fd = newClient->getClientFd();
 	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, newClient->getClientFd(), &ev) == -1)
 		throw std::runtime_error(ERR_EPOLLCTL);

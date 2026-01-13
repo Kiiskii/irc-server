@@ -14,12 +14,22 @@ void	Server::reply(Client &c)
 	}
 	logMessages(c.getOutput(), getServerfd());
 	c.clearOutput();
+
+	struct epoll_event ev;
+	ev.events = EPOLLIN;
+	ev.data.fd = c.getClientFd();
+	epoll_ctl(_epollFd, EPOLL_CTL_MOD, c.getClientFd(), &ev);
 }
 
 /** @brief send message to the requesting member */
 void	Server::sendMsg(Client& client, std::string& msg)
 {
 	client.appendToOutput(msg);
+
+	struct epoll_event ev;
+	ev.events = EPOLLIN | EPOLLOUT;
+	ev.data.fd = client.getClientFd();
+	epoll_ctl(_epollFd, EPOLL_CTL_MOD, client.getClientFd(), &ev);
 }
 
 /**
