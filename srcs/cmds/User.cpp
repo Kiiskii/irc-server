@@ -4,6 +4,13 @@
 
 void Server::user(Client &client, std::vector<std::string> tokens)
 {
+	if (client.getClientState() == NONE)
+	{
+		std::string message = "PASS needs to come before NICK/USER\r\n";
+		sendMsg(client, message);
+		client.setClientState(DISCONNECTING);
+		return;
+	}
 	if (client.getClientState() == REGISTERED)
 	{
 		std::string message = ERR_ALREADYREGISTERED(getServerName(), client.getNick());

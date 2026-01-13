@@ -71,12 +71,11 @@ void Server::receive(Client &c)
 		if (bytes < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK)
 				break ;
-			std::cout << "Failed to receive from client: " << c.getClientFd() << std::endl;
+			std::cerr << "Failed to receive from client: " << c.getClientFd() << std::endl;
 			c.setClientState(DISCONNECTING);
 			break ;
 		}
 		else if (bytes == 0) {
-			std::cout << "Client fd " << c.getClientFd() << " disconnected" << std::endl;
 			c.setClientState(DISCONNECTING);
 			break ;
 		}
@@ -99,6 +98,8 @@ void Server::receive(Client &c)
 
 void Server::handleCommand(Server &server, Client &client, std::string command, std::vector<std::string> &tokens)
 {
+	if (client.getClientState() == DISCONNECTING)
+		return ;
 	if (command == "PASS")
 		pass(client, tokens);
 	else if (command == "NICK")

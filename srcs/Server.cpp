@@ -40,6 +40,7 @@ std::string Client::getQuitMsg()
 
 void Server::disconnectClient(Client *client)
 {
+	std::cout << "Client fd " << client->getClientFd() << " disconnected" << std::endl;
 	auto it = std::find(_clientInfo.begin(), _clientInfo.end(), client);
 	if (it == _clientInfo.end())
 		return ;
@@ -155,7 +156,9 @@ void Server::handleNewClient()
 		throw std::runtime_error(ERR_EPOLLCTL);
 	if (_pass.empty())
 		newClient->setClientState(REGISTERING);
-	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl; //debug msg
+	else
+		newClient->setClientState(NONE);
+	std::cout << "New connection, fd: " << newClient->getClientFd() << std::endl;
 }
 
 void Server::handleDisconnects()
