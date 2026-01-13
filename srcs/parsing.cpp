@@ -65,33 +65,27 @@ void Server::receive(Client &c)
 	char buffer[512];
 	ssize_t bytes = 1;
 	
-	while (bytes > 0) {
-		bytes = recv(c.getClientFd(), buffer, sizeof(buffer), MSG_DONTWAIT);
-		// Errorhandling
-		if (bytes < 0) {
-			if (errno == EAGAIN || errno == EWOULDBLOCK)
+	bytes = recv(c.getClientFd(), buffer, sizeof(buffer), MSG_DONTWAIT);
+	// Errorhandling
+	if (bytes < 0) {
+		std::cerr << "Failed to receive from client: " << c.getClientFd() << std::endl;
+		c.setClientState(DISCONNECTING);
+	}
+	else if (bytes == 0)
+		c.setClientState(DISCONNECTING);
+
+	// Buffer recieved data
+	else {
+		c.appendToInput(buffer, bytes);
+		// Check if message if complete
+		while (true) {
+			size_t newline = c.getInput().find("\r\n");
+			if (newline == c.getInput().npos)
 				break ;
-			std::cerr << "Failed to receive from client: " << c.getClientFd() << std::endl;
-			c.setClientState(DISCONNECTING);
-			break ;
-		}
-		else if (bytes == 0) {
-			c.setClientState(DISCONNECTING);
-			break ;
-		}
-		// Buffer recieved data
-		else {
-			c.appendToInput(buffer, bytes);
-			// Check if message if complete
-			while (true) {
-				size_t newline = c.getInput().find("\r\n");
-				if (newline == c.getInput().npos)
-					break ;
-				auto begin = c.getInput().begin();
-				auto end = c.getInput().begin() + newline;
-				parseMessage(c, std::string(begin, end));
-				c.eraseFromInput(newline);
-			}
+			auto begin = c.getInput().begin();
+			auto end = c.getInput().begin() + newline;
+			parseMessage(c, std::string(begin, end));
+			c.eraseFromInput(newline);
 		}
 	}
 }
