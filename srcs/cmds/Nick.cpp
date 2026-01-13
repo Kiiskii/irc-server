@@ -5,6 +5,13 @@
 
 void Server::nick(Client &client, std::vector<std::string> tokens)
 {
+	if (client.getClientState() == NONE)
+	{
+		std::string message = "PASS needs to come before NICK/USER\r\n";
+		sendMsg(client, message);
+		client.setClientState(DISCONNECTING);
+		return;
+	}
 	std::regex pattern(R"(^[A-Za-z\[\]{}\\|_][A-Za-z0-9\[\]{}\\|_]*$)");
 	std::string oldnick = client.getNick();
 	if (tokens.size() == 0)

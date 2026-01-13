@@ -34,7 +34,7 @@ void Server::broadcastChannelMsg(std::string& msg, Channel& channel)
 void Server::logMessages(std::string msg, int fd)
 {
 	if (fd == 2)
-		std::cout << C_R << "SERV >> ";
+		std::cerr << C_R << "SERV >> ";
 	else if (fd <= 4)
 		std::cout << C_G << "SERV >> ";
 	else
