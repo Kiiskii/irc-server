@@ -16,13 +16,13 @@ void Server::pass(Client &client, std::vector<std::string> tokens)
 	else if (tokens.size() == 0)
 	{
 		sendClientErr(ERR_NEEDMOREPARAMS, client, nullptr, {"PASS"});
-		client.setClientState(DISCONNECTING);
+		client.setClientState(TOBEDISCONNECTED);
 	}
 	else if (tokens[0].compare(_pass) != 0)
 	{
 		std::string message = ERR_PASSWDMISMATCH(getServerName(), getTarget(client));
 		sendMsg(client, message);
-		client.setClientState(DISCONNECTING);
+		client.setClientState(TOBEDISCONNECTED);
 	}
 	else
 	{

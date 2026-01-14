@@ -9,7 +9,7 @@ void Server::nick(Client &client, std::vector<std::string> tokens)
 	{
 		std::string message = "PASS needs to come before NICK/USER\r\n";
 		sendMsg(client, message);
-		client.setClientState(DISCONNECTING);
+		client.setClientState(TOBEDISCONNECTED);
 		return;
 	}
 	std::regex pattern(R"(^[A-Za-z\[\]{}\\|_][A-Za-z0-9\[\]{}\\|_]*$)");

@@ -8,7 +8,7 @@ void Server::user(Client &client, std::vector<std::string> tokens)
 	{
 		std::string message = "PASS needs to come before NICK/USER\r\n";
 		sendMsg(client, message);
-		client.setClientState(DISCONNECTING);
+		client.setClientState(TOBEDISCONNECTED);
 		return;
 	}
 	if (client.getClientState() == REGISTERED)
