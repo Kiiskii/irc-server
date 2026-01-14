@@ -171,7 +171,11 @@ void Server::handleDisconnects()
 			it = _clientInfo.begin();
 		}
 		else
+		{
+			if ((*it)->getClientState() == TOBEDISCONNECTED)
+				(*it)->setClientState(DISCONNECTING);
 			++it;
+		}
 	}
 }
 
@@ -190,6 +194,11 @@ void Server::handleEvents()
 			continue;
 		}
 		Client *c = findClientByFd(fd);
+		if (getEpollEvents()[i].events & (EPOLLERR | EPOLLHUP))
+		{
+			c->setClientState(DISCONNECTING);
+			continue ;
+		}
 		if (getEpollEvents()[i].events & EPOLLIN)
 			receive(*c);
 		if (getEpollEvents()[i].events & EPOLLOUT)
