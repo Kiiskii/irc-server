@@ -16,14 +16,6 @@ This project was developed in collaboration with
 **irc-server** is part of the 42 / Hive Helsinki curriculum.  
 The goal of the project is to implement a functional IRC server from scratch, without relying on existing IRC libraries.
 
-Key learning objectives include:
-- Network programming with sockets
-- Non-blocking I/O
-- Event-driven architectures
-- Parsing and validating protocol messages
-- Managing concurrent clients and channels
-- Writing robust, maintainable C++ code
-
 ---
 
 ## Features
@@ -41,38 +33,7 @@ Key learning objectives include:
 
 ---
 
-## Technical Highlights
-
-- Written in **C++**
-- Uses **epoll** for efficient event polling
-- Fully non-blocking server
-- Manual parsing of IRC protocol messages
-- Clear separation of responsibilities:
-  - Server
-  - Client
-  - Channel
-- Designed to avoid busy-waiting and blocking calls
-
----
-
-## Project Structure
-
-```text
-.
-├── include/
-│   ├── Server.hpp
-│   ├── Client.hpp
-│   ├── Channel.hpp
-│   └── ...
-├── src/
-│   ├── Server.cpp
-│   ├── Client.cpp
-│   ├── Channel.cpp
-│   └── ...
-├── Makefile
-└── README.md
-```
-## Getting Started
+## Usage
 
 ### 1. Clone the repository
 
@@ -107,17 +68,3 @@ The server has been tested with:
 - Multiple simultaneous clients
 - Invalid and malformed commands
 - Sudden client disconnects
-
-## What I Learned
-
-Through this project, I gained hands-on experience with:
-
-- Low-level network programming
-- Event-driven server design
-- Handling concurrency without threads
-- Designing clean abstractions in C++
-- Debugging protocol-level issues
-
-
-
-
