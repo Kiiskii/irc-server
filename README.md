@@ -11,7 +11,7 @@ This project was developed in collaboration with
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 **irc-server** is part of the 42 / Hive Helsinki curriculum.  
 The goal of the project is to implement a functional IRC server from scratch, without relying on existing IRC libraries.
@@ -26,7 +26,7 @@ Key learning objectives include:
 
 ---
 
-## ⚙️ Features
+## Features
 
 - TCP server using IPv4
 - Non-blocking sockets with `epoll`
@@ -41,7 +41,7 @@ Key learning objectives include:
 
 ---
 
-## 🧠 Technical Highlights
+## Technical Highlights
 
 - Written in **C++**
 - Uses **epoll** for efficient event polling
@@ -55,7 +55,7 @@ Key learning objectives include:
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```text
 .
@@ -72,7 +72,7 @@ Key learning objectives include:
 ├── Makefile
 └── README.md
 ```
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -88,7 +88,7 @@ make
 ```
 This will produce the ircserv executable.
 
-### ▶️ Running the Server
+### Running the Server
 
 ```bash
 ./ircserv <port> <password>
@@ -99,7 +99,7 @@ Example:
 ```
 Then on a new terminal instance you can connect to the server with irssi.
 
-## 🧪 Testing
+## Testing
 
 The server has been tested with:
 
@@ -108,7 +108,7 @@ The server has been tested with:
 - Invalid and malformed commands
 - Sudden client disconnects
 
-## 📚 What I Learned
+## What I Learned
 
 Through this project, I gained hands-on experience with:
 
